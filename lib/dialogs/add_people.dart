@@ -12,10 +12,18 @@ class AddPeopleDialog extends StatefulWidget {
 }
 
 const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"],
-    sports = ["Soccer", "Hockey", "Basketball", "Baseball", "Boxing", "MMA", "Others"],
-activities = ["Running", "Walking", "Travelling"],
-beverages = ["Coffee", "Tea", "Ice Cap"],
-alcohols = ["Vodka", "Scotch", "Beer", "Tequila", "Rum", "Cocktail"];
+    sports = [
+      "Soccer",
+      "Hockey",
+      "Basketball",
+      "Baseball",
+      "Boxing",
+      "MMA",
+      "Others"
+    ],
+    activities = ["Running", "Walking", "Travelling"],
+    beverages = ["Coffee", "Tea", "Ice Cap"],
+    alcohols = ["Vodka", "Scotch", "Beer", "Tequila", "Rum", "Cocktail"];
 
 class _AddPeopleDialogState extends State {
   TextEditingController companyName = TextEditingController();
@@ -70,7 +78,10 @@ class _AddPeopleDialogState extends State {
   var apiClient = RemoteServices();
   bool loading = true;
   int currentStep = 0;
-  List<String> companies = [], cities = Constants.cities, provinces = Constants.provinces, countries = Constants.countries;
+  List<String> companies = [],
+      cities = Constants.cities,
+      provinces = Constants.provinces,
+      countries = Constants.countries;
   Map<String, int> companyMap = {};
 
   @override
@@ -87,12 +98,12 @@ class _AddPeopleDialogState extends State {
 
     dynamic res = await apiClient.getAllCompanyNames();
 
-    if(res?["success"] == true){
-      for(var e in res["res"]){
+    if (res?["success"] == true) {
+      for (var e in res["res"]) {
         companies.add(e["Name"]);
         companyMap[e["Name"]] = e["ID"];
       }
-    }else{
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
     }
 
@@ -105,50 +116,64 @@ class _AddPeopleDialogState extends State {
   }
 
   void postData() async {
-    // setState(() {
-    //   loading = true;
-    // });
-    //
-    // if (validate() == true) {
-    //   dynamic res = await apiClient.addCustomer(
-    //       companyId,
-    //       "njfwe",
-    //       firstName.text,
-    //       lastName.text,
-    //       email.text,
-    //       jobTitle.text,
-    //       businessPhone.text,
-    //       homePhone.text,
-    //       mobilePhone.text,
-    //       faxNumber.text,
-    //       address.text,
-    //       city.text,
-    //       state.text,
-    //       zip.text,
-    //       country.text,
-    //       webpage.text,
-    //       notes.text,
-    //       attachment.text);
-    //
-    //   if (res?['code'] == 409) {
-    //     ScaffoldMessenger.of(context).showSnackBar(snackBar5);
-    //   } else if (res?["success"] == true) {
-    //     Navigator.pop(context);
-    //     ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-    //   } else {
-    //     ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-    //   }
-    // }else{
-    //ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    // }
-    //
-    // await Future.delayed(const Duration(seconds: 2));
-    // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    setState(() {
+      loading = true;
+    });
+
+    if (validate() == true) {
+      dynamic res = await apiClient.addContact(
+          companyId.toString(),
+          salutation.toString(),
+          firstName.text,
+          lastName.text,
+          email.text,
+          email2.text,
+          jobTitle.text,
+          businessPhone.text,
+          mobilePhone.text,
+          address.text,
+          city.text,
+          province.text,
+          zip.text,
+          country.text,
+          notes.text,
+          attachment.text,
+          birthday.text,
+          anniversary.text,
+          sport.toString(),
+          activity.toString(),
+          beverage.toString(),
+          alcohol.toString(),
+          travel.text,
+          spouse.text,
+          children.text,
+          tv.text,
+          movie.text,
+          actor.text,
+          dislikes.text);
+
+      print(res);
+      if (res?["success"] == true) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    }
+
+    setState(() {
+      loading = false;
+    });
+
+
+    await Future.delayed(const Duration(seconds: 2));
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   bool validate() {
-    if (companyName.text == "" ||
-        firstName.text == "") {
+    if (companyName.text == "" || firstName.text == "") {
       return false;
     }
 
@@ -158,79 +183,86 @@ class _AddPeopleDialogState extends State {
   @override
   Widget build(context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          child: const Icon(Icons.close),
-          onTap: () => Navigator.pop(context),
-        ),
-        title: const Text("New Contact"),
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
-        backgroundColor: Colors.black,
-      ),
-      backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
-      body: Visibility(
-        replacement: const Center(
-          child: CircularProgressIndicator(
-            color: Color.fromRGBO(134, 97, 255, 1),
+        appBar: AppBar(
+          leading: GestureDetector(
+            child: const Icon(Icons.close),
+            onTap: () => Navigator.pop(context),
           ),
+          title: const Text("New Contact"),
+          titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
+          backgroundColor: Colors.black,
         ),
-        visible: !loading,
-        child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Theme(
-                data: ThemeData.dark().copyWith(
-                    primaryColor: const Color.fromRGBO(134, 97, 255, 1),
-                    colorScheme: ColorScheme.light().copyWith(
-                      primary: const Color.fromRGBO(134, 97, 255, 1),
-                    )),
-                child: Stepper(
-                  type: StepperType.horizontal,
-                  currentStep: currentStep,
-                  steps: getSteps(),
-                  controlsBuilder: (BuildContext context, _) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        ElevatedButton(
-                          onPressed: () {
-                            currentStep == 0
-                                ? null
-                                : setState(() {
-                              currentStep -= 1;
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                              primary: const Color.fromRGBO(134, 97, 255, 1)),
-                          child: const Text(
-                            "Back",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            bool isLastStep =
-                            (currentStep == getSteps().length - 1);
-                            if (isLastStep) {
-                              postData();
-                            } else {
-                              setState(() {
-                                currentStep += 1;
+        backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
+        body: Visibility(
+          replacement: const Center(
+            child: CircularProgressIndicator(
+              color: Color.fromRGBO(134, 97, 255, 1),
+            ),
+          ),
+          visible: !loading,
+          child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Theme(
+                  data: ThemeData.dark().copyWith(
+                      primaryColor: const Color.fromRGBO(134, 97, 255, 1),
+                      colorScheme: ColorScheme.light().copyWith(
+                        primary: const Color.fromRGBO(134, 97, 255, 1),
+                      )),
+                  child: Stepper(
+                    type: StepperType.horizontal,
+                    currentStep: currentStep,
+                    steps: getSteps(),
+                    controlsBuilder: (BuildContext context, _) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: currentStep==0 ? null : () {
+                              currentStep == 0
+                                  ? null
+                                  : setState(() {
+                                currentStep -= 1;
                               });
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                              primary: const Color.fromRGBO(134, 97, 255, 1)),
-                          child: const Text(
-                            "Next",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
+                            },
+                            style: ElevatedButton.styleFrom(
+                                primary: const Color.fromRGBO(134, 97, 255, 1)),
+                            child: const Text(
+                              "Back",
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 16),
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                ))),
-      )
-    );
+                          ElevatedButton(
+                            onPressed: () {
+                              bool isLastStep =
+                              (currentStep == getSteps().length - 1);
+                              if (isLastStep) {
+                                postData();
+                              } else {
+                                setState(() {
+                                  currentStep += 1;
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                                primary: const Color.fromRGBO(134, 97, 255, 1)),
+                            child: currentStep==1 ?
+                            const Text(
+                              "Submit",
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 16),
+                            )
+                                :const Text(
+                              "Next",
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ))),
+        ));
   }
 
   List<Step> getSteps() {
@@ -274,7 +306,11 @@ class _AddPeopleDialogState extends State {
                       );
                     },
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        const AddCompanyDialog());
+                        const AddCompanyDialog()).then((value){
+                   if(value! == true){
+                     _getData();
+                   }
+                });
               } else {
                 companyName.text = suggestion.toString();
                 companyId = companyMap[companyName.text];
@@ -590,7 +626,7 @@ class _AddPeopleDialogState extends State {
                       borderSide: BorderSide(color: Colors.white)),
                   hintText: "Province",
                   hintStyle:
-                  TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
+                      TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
         ),
         const SizedBox(
           height: 20,
@@ -637,7 +673,7 @@ class _AddPeopleDialogState extends State {
                       borderSide: BorderSide(color: Colors.white)),
                   hintText: "Country",
                   hintStyle:
-                  TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
+                      TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
         ),
         const SizedBox(
           height: 20,
@@ -692,8 +728,7 @@ class _AddPeopleDialogState extends State {
                 initialDate: birthday.text == ""
                     ? DateTime.now()
                     : DateTime.parse(birthday.text),
-                firstDate: DateTime(
-                    1900),
+                firstDate: DateTime(1900),
                 lastDate: DateTime(2101),
                 builder: (context, child) {
                   return Theme(
@@ -705,7 +740,7 @@ class _AddPeopleDialogState extends State {
                         onSurface: Colors.white,
                       ),
                       dialogBackgroundColor:
-                      const Color.fromRGBO(41, 41, 41, 1),
+                          const Color.fromRGBO(41, 41, 41, 1),
                     ),
                     child: child!,
                   );
@@ -724,8 +759,7 @@ class _AddPeopleDialogState extends State {
               focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.white)),
               hintText: "Birthday",
-              hintStyle:
-              TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+              hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
         ),
         const SizedBox(
           height: 20,
@@ -741,8 +775,7 @@ class _AddPeopleDialogState extends State {
                 initialDate: anniversary.text == ""
                     ? DateTime.now()
                     : DateTime.parse(anniversary.text),
-                firstDate: DateTime(
-                    1900),
+                firstDate: DateTime(1900),
                 lastDate: DateTime(2101),
                 builder: (context, child) {
                   return Theme(
@@ -754,7 +787,7 @@ class _AddPeopleDialogState extends State {
                         onSurface: Colors.white,
                       ),
                       dialogBackgroundColor:
-                      const Color.fromRGBO(41, 41, 41, 1),
+                          const Color.fromRGBO(41, 41, 41, 1),
                     ),
                     child: child!,
                   );
@@ -773,8 +806,7 @@ class _AddPeopleDialogState extends State {
               focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.white)),
               hintText: "Anniversary",
-              hintStyle:
-              TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+              hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
         ),
         const SizedBox(
           height: 20,

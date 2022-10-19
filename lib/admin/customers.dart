@@ -35,34 +35,54 @@ class _CustomersState extends State<Customers> {
   }
 
   void _getData() async {
+    setState(() {
+      dataLoaded = false;
+    });
     dynamic res = await apiClient.getAllCustomers();
 
     customers.clear();
+    search.clear();
+    filtered.clear();
 
     if (res?["success"] == true) {
-
       for(var i=0;i<res["res"].length;i++){
         var e = res["res"][i];
         Map<String, dynamic> mp = {};
+
         mp["id"] = e["ID"];
-        mp["category"] = e["Category"];
-        mp["company"] = e["Company"];
-        mp["lastName"] = e["Last_Name"];
+        mp["companyId"] = e["Company_ID"];
+        mp["salutation"] = e["Salutation"] ?? "";
+        mp["lastName"] = e["Last_Name"] ?? "";
         mp["firstName"] = e["First_Name"];
-        mp["email"] = e["Email"];
-        mp["jobTitle"] = e["Job_Title"];
-        mp["business"] = e["Business_Phone"];
-        mp["home"] = e["Home_Phone"];
-        mp["mobile"] = e["Mobile_Phone"];
-        mp["fax"] = e["Fax_Number"];
-        mp["address"] = e["Address"];
-        mp["city"] = e["City"];
-        mp["state"] = e["State"];
-        mp["zip"] = e["ZIP"];
-        mp["country"] = e["Country"];
-        mp["webpage"] = e["Webpage"];
-        mp["notes"] = e["Notes"];
-        mp["attachments"] = e["Attachments"];
+        mp["emailPersonal"] = e["Email_Personal"] ?? "";
+        mp["emailWork"] = e["Email_Work"] ?? "";
+        mp["jobTitle"] = e["Job_Title"] ?? "";
+        mp["business"] = e["Business_Phone"] ?? "";
+        mp["mobile"] = e["Mobile_Phone_Personal"] ?? "";
+        mp["address"] = e["Address"] ?? "";
+        mp["city"] = e["City"] ?? "";
+        mp["province"] = e["Province"] ?? "";
+        mp["zip"] = e["ZIP"] ?? "";
+        mp["country"] = e["Country"] ?? "";
+        mp["notes"] = e["Notes"] ?? "";
+        mp["attachments"] = e["Attachments"] ?? "";
+
+        mp["birthday"] = e["Birthday"] ?? "";
+        mp["anniversary"] = e["Anniversary"] ?? "";
+        mp["sports"] = e["Sports"] ?? "";
+        mp["activities"] = e["Activities"] ?? "";
+        mp["beverage"] = e["Beverage"] ?? "";
+        mp["Alcohol"] = e["Alcohol"] ?? "";
+        mp["travelDestination"] = e["Travel_Destination"] ?? "";
+        mp["spouseName"] = e["Spouse_Name"] ?? "";
+        mp["children"] = e["Children"] ?? "";
+        mp["tvShow"] = e["TV_Show"] ?? "";
+        mp["movies"] = e["Movies"] ?? "";
+        mp["actor"] = e["Actor"] ?? "";
+        mp["dislikes"] = e["Dislikes"] ?? "";
+
+        mp["companyName"] = e["Company_Name"];
+        mp["category"] = e["Category"];
         customers.add(mp);
       }
     } else {
@@ -106,7 +126,7 @@ class _CustomersState extends State<Customers> {
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Customers"),
+          title: Text("Clients"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
@@ -145,7 +165,7 @@ class _CustomersState extends State<Customers> {
                     child: search.isEmpty
                         ? const Center(
                       child: Text(
-                        "No Customers Found",
+                        "No Clients Found",
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -273,14 +293,14 @@ class _CustomersState extends State<Customers> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const Text(
-                        "Customer ID : ",
+                        "Client ID : ",
                         style: TextStyle(
                             color: Color.fromRGBO(134, 97, 255, 1),
                             fontSize: 18,
                             fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        mp["id"]==null ? "" : mp["id"].toString(),
+                        mp["id"].toString(),
                         style: const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ],
@@ -305,10 +325,9 @@ class _CustomersState extends State<Customers> {
                           },
                           pageBuilder: (context, animation, secondaryAnimation) => updateCustomerDialog(mp: mp,)
                       ).then((value) {
-                        _getData();
-                        setState(() {
-                          dataLoaded = true;
-                        });
+                        if(value! == true) {
+                          _getData();
+                        }
                       })
                     ,
                     child: Icon(
@@ -316,7 +335,6 @@ class _CustomersState extends State<Customers> {
                       color: Color.fromRGBO(134, 97, 255, 1),
                     ),
                   )
-
                 ],
               ),
               Row(
@@ -330,32 +348,12 @@ class _CustomersState extends State<Customers> {
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(child: Text(
-                    "${mp["firstName"] ?? ""} ${mp["lastName"] ?? ""}",
+                    "${mp["salutation"]}${mp["firstName"]} ${mp["lastName"]}",
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
                   ),
                   fit: FlexFit.loose,)
-
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Category : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    mp["category"]==null ? "" : mp["category"].toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  ),
                 ],
               ),
               const SizedBox(
@@ -373,13 +371,32 @@ class _CustomersState extends State<Customers> {
                   ),
                   Flexible(
                     fit: FlexFit.loose,
-                      child: Text(
-                        mp["company"]==null ? "" : mp["company"].toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                        softWrap: false,
-                        overflow: TextOverflow.fade,
-                      ),
+                    child: Text(
+                      mp["companyName"],
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                    ),
                   )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Category : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    mp["category"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ],
               ),
               const SizedBox(
@@ -398,12 +415,11 @@ class _CustomersState extends State<Customers> {
                   Flexible(
                     fit: FlexFit.loose,
                     child: Text(
-                    mp["email"]==null ? "" : mp["email"].toString(),
+                    mp["emailPersonal"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                       softWrap: false,
                       overflow: TextOverflow.fade,
                   ),)
-
                 ],
               ),
               const SizedBox(
@@ -422,13 +438,12 @@ class _CustomersState extends State<Customers> {
                   Flexible(
                     fit: FlexFit.loose,
                       child: Text(
-                        mp["jobTitle"]==null ? "" : mp["jobTitle"].toString(),
+                        mp["jobTitle"],
                         style: const TextStyle(color: Colors.white, fontSize: 16),
                         softWrap: false,
                         overflow: TextOverflow.fade,
                       ),
                   )
-
                 ],
               ),
             ],

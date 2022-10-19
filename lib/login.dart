@@ -33,6 +33,10 @@ class _LoginPageState extends State<LoginPage> {
   );
 
   void _login() async {
+    setState(() {
+      isLoading = true;
+    });
+
     if(validate() == true){
       dynamic res = await _apiClient.login(
         nameController.text,
@@ -102,6 +106,10 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(snackBar2);
       }
     }
+
+    setState(() {
+      isLoading = false;
+    });
 
     await Future.delayed(Duration(seconds: 2));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -203,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all(const Color.fromRGBO(134, 97, 255, 1))
         ),
-        onPressed: () async {
+        onPressed: isLoading ? null : () async {
           setState(() {
             state = ButtonState.submitting;
           });

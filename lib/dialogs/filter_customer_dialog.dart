@@ -85,12 +85,12 @@ class _FilterCustomerDialogState extends State<FilterCustomerDialog> {
               children: [
                 Row(
                   children: [
-                    Checkbox(value: cat.contains("Engineer"), onChanged: (value) {
+                    Checkbox(value: cat.contains("Consultant"), onChanged: (value) {
                       setState(() {
                         if(value!){
-                          cat.add("Engineer");
-                        }else if(cat.contains("Engineer")){
-                          cat.remove("Engineer");
+                          cat.add("Consultant");
+                        }else if(cat.contains("Consultant")){
+                          cat.remove("Consultant");
                         }
                       });
                     },
@@ -99,7 +99,27 @@ class _FilterCustomerDialogState extends State<FilterCustomerDialog> {
                           const Color.fromRGBO(134, 97, 255, 1)
                       ),
                     ),
-                    Text("Engineer", style: TextStyle(color: Colors.white),)
+                    Text("Consultant", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Contractor"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Contractor");
+                        }else if(cat.contains("Contractor")){
+                          cat.remove("Contractor");
+                        }
+                      });
+
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Contractor", style: TextStyle(color: Colors.white),)
                   ],
                 ),
                 Row(
@@ -112,7 +132,6 @@ class _FilterCustomerDialogState extends State<FilterCustomerDialog> {
                           cat.remove("Municipal");
                         }
                       });
-
                     },
                       activeColor: const Color.fromRGBO(134, 97, 255, 1),
                       overlayColor: MaterialStateProperty.all<Color>(
@@ -120,6 +139,120 @@ class _FilterCustomerDialogState extends State<FilterCustomerDialog> {
                       ),
                     ),
                     Text("Municipal", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Manufacturer"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Manufacturer");
+                        }else if(cat.contains("Manufacturer")){
+                          cat.remove("Manufacturer");
+                        }
+                      });
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Manufacturer", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Supplier"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Supplier");
+                        }else if(cat.contains("Supplier")){
+                          cat.remove("Supplier");
+                        }
+                      });
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Supplier", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Distributor"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Distributor");
+                        }else if(cat.contains("Distributor")){
+                          cat.remove("Distributor");
+                        }
+                      });
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Distributor", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Shipper"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Shipper");
+                        }else if(cat.contains("Shipper")){
+                          cat.remove("Shipper");
+                        }
+                      });
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Shipper", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Reseller"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Reseller");
+                        }else if(cat.contains("Reseller")){
+                          cat.remove("Reseller");
+                        }
+                      });
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Reseller", style: TextStyle(color: Colors.white),)
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(value: cat.contains("Competitor"), onChanged: (value) {
+                      setState(() {
+                        if(value!){
+                          cat.add("Competitor");
+                        }else if(cat.contains("Competitor")){
+                          cat.remove("Competitor");
+                        }
+                      });
+                    },
+                      activeColor: const Color.fromRGBO(134, 97, 255, 1),
+                      overlayColor: MaterialStateProperty.all<Color>(
+                          const Color.fromRGBO(134, 97, 255, 1)
+                      ),
+                    ),
+                    Text("Competitor", style: TextStyle(color: Colors.white),)
                   ],
                 ),
               ],
