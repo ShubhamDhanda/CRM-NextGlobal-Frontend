@@ -62,79 +62,81 @@ class _AddAssetDialogState extends State<AddAssetDialog> with TickerProviderStat
   }
 
   void _getData() async {
-    setState(() {
-      loading = true;
-    });
-    dynamic res = await apiClient.getAllEmployeeNames();
+    try{
+      dynamic res = await apiClient.getAllEmployeeNames();
 
-    if (res?["success"] == true) {
-      for (var e in res["res"]) {
-        employees.add(e["Full_Name"]);
-        empMap[e["Full_Name"]] = e["Employee_ID"];
+      if (res["success"] == true) {
+        for (var e in res["res"]) {
+          employees.add(e["Full_Name"]);
+          empMap[e["Full_Name"]] = e["Employee_ID"];
+        }
       }
-    } else {
+    } catch(e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void postData() async {
-    setState(() {
-      loading = true;
-    });
+    try{
+      setState(() {
+        loading = true;
+      });
 
-    if(validate()==true){
-      dynamic res = await apiClient.addAsset(empId, category, details.text, acquiredOn.text, purchasePrice.text, shippedOn.text, retiredDate.text, attachments.text, notes.text);
-      print(res);
-      if(res?["success"]==true) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+      if(validate()==true){
+        dynamic res = await apiClient.addAsset(empId, category, details.text, acquiredOn.text, purchasePrice.text, shippedOn.text, retiredDate.text, attachments.text, notes.text);
+
+        if(res["success"]==true) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        }
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
       }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-      }
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void postData2() async {
-    setState(() {
-      loading = true;
-    });
+    try{
+      setState(() {
+        loading = true;
+      });
 
-    if(validate1()==true){
-      dynamic res = await apiClient.addSoftware(software.text, version.text, manufacturer.text, acquiredOn2.text, price.text, retiredDate.text, attachments2.text, notes2.text);
-      if(res?["success"]==true) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+      if(validate1()==true){
+        dynamic res = await apiClient.addSoftware(software.text, version.text, manufacturer.text, acquiredOn2.text, price.text, retiredDate.text, attachments2.text, notes2.text);
+        if(res["success"]==true) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        }
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
       }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-      }
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   bool validate() {
@@ -158,7 +160,7 @@ class _AddAssetDialogState extends State<AddAssetDialog> with TickerProviderStat
       appBar: AppBar(
         leading: GestureDetector(
           child: const Icon(Icons.close),
-          onTap: () => Navigator.pop(context),
+          onTap: () => Navigator.pop(context, false),
         ),
         title: const Text("Add Asset"),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),

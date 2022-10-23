@@ -347,13 +347,12 @@ class _CustomersState extends State<Customers> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
-                    "${mp["salutation"]}${mp["firstName"]} ${mp["lastName"]}",
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    "${mp["salutation"]=="None" ? "" : "${mp["salutation"]} "}${mp["firstName"]}${mp["lastName"]=="" ? "" : " ${mp["lastName"]}"}",
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                  fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(

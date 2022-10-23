@@ -92,84 +92,86 @@ class _AddPeopleDialogState extends State {
   }
 
   void _getData() async {
-    setState(() {
-      loading = true;
-    });
+    try{
+      setState(() {
+        loading = true;
+      });
 
-    dynamic res = await apiClient.getAllCompanyNames();
+      dynamic res = await apiClient.getAllCompanyNames();
 
-    if (res?["success"] == true) {
       for (var e in res["res"]) {
         companies.add(e["Name"]);
         companyMap[e["Name"]] = e["ID"];
       }
-    } else {
+    } catch(e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void postData() async {
-    setState(() {
-      loading = true;
-    });
+    try{
+      setState(() {
+        loading = true;
+      });
 
-    if (validate() == true) {
-      dynamic res = await apiClient.addContact(
-          companyId.toString(),
-          salutation.toString(),
-          firstName.text,
-          lastName.text,
-          email.text,
-          email2.text,
-          jobTitle.text,
-          businessPhone.text,
-          mobilePhone.text,
-          address.text,
-          city.text,
-          province.text,
-          zip.text,
-          country.text,
-          notes.text,
-          attachment.text,
-          birthday.text,
-          anniversary.text,
-          sport.toString(),
-          activity.toString(),
-          beverage.toString(),
-          alcohol.toString(),
-          travel.text,
-          spouse.text,
-          children.text,
-          tv.text,
-          movie.text,
-          actor.text,
-          dislikes.text);
+      if (validate() == true) {
+        dynamic res = await apiClient.addContact(
+            companyId.toString(),
+            salutation.toString(),
+            firstName.text,
+            lastName.text,
+            email.text,
+            email2.text,
+            jobTitle.text,
+            businessPhone.text,
+            mobilePhone.text,
+            address.text,
+            city.text,
+            province.text,
+            zip.text,
+            country.text,
+            notes.text,
+            attachment.text,
+            birthday.text,
+            anniversary.text,
+            sport.toString(),
+            activity.toString(),
+            beverage.toString(),
+            alcohol.toString(),
+            travel.text,
+            spouse.text,
+            children.text,
+            tv.text,
+            movie.text,
+            actor.text,
+            dislikes.text);
 
-      print(res);
-      if (res?["success"] == true) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        if (res?["success"] == true) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } catch(e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   bool validate() {
@@ -186,7 +188,7 @@ class _AddPeopleDialogState extends State {
         appBar: AppBar(
           leading: GestureDetector(
             child: const Icon(Icons.close),
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.pop(context, false),
           ),
           title: const Text("New Contact"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),

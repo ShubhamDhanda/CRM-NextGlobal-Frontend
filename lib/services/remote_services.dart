@@ -4,15 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteServices {
-  final Dio _dio = Dio(BaseOptions(
-      baseUrl: Constants.baseURL,
-      responseType: ResponseType.json
-  ));
+  final Dio _dio = Dio(
+      BaseOptions(baseUrl: Constants.baseURL, responseType: ResponseType.json));
 
-  Future<dynamic> login(String email, String password) async {
+  Future<dynamic> login(String username, String password) async {
     try {
       Response resp = await _dio
-          .post(Constants.login, data: {'email': email, 'password': password});
+          .post(Constants.login, data: {'username': username, 'password': password});
 
       return resp.data;
     } on DioError catch (e) {
@@ -21,14 +19,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllCustomerNames() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllCustomerNames,
+      Response resp = await _dio.get(Constants.getAllCustomerNames,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -37,14 +33,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllDistributors() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-        Constants.getAllDistributors,
+      Response resp = await _dio.get(Constants.getAllDistributors,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -53,15 +47,13 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllTimesheet() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllTimesheet,
+      Response resp = await _dio.get(Constants.getAllTimesheet,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
-            "id" : prefs.getInt("id")
-          })
-      );
+            "id": prefs.getInt("id")
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -70,14 +62,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllCompanies() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllCompanies,
+      Response resp = await _dio.get(Constants.getAllCompanies,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -86,14 +76,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllContractors() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllContractors,
+      Response resp = await _dio.get(Constants.getAllContractors,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -102,14 +90,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllConsultants() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllConsultants,
+      Response resp = await _dio.get(Constants.getAllConsultants,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -118,14 +104,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllEmployeeNames() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllEmployeeNames,
+      Response resp = await _dio.get(Constants.getAllEmployeeNames,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -134,14 +118,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllCompanyNames() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllCompanyNames,
+      Response resp = await _dio.get(Constants.getAllCompanyNames,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -150,14 +132,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllProjects() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllProjects,
+      Response resp = await _dio.get(Constants.getAllProjects,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -166,14 +146,12 @@ class RemoteServices {
   }
 
   Future<dynamic> getAllProjectNames() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.getAllProjectNames,
+      Response resp = await _dio.get(Constants.getAllProjectNames,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -265,38 +243,14 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> addCompany(
-      name,
-      category,
-      address,
-      city,
-      province,
-      country,
-      businessPhone,
-      fax,
-      email,
-      webpage,
-      notes,
-      attachments) async {
+  Future<dynamic> getAllJobTitles(department) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.post(Constants.addCompany,
-          options: Options(
-              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
-          data: {
-            "name" : name,
-            "category" : category,
-            "address" : address,
-            "city" : city,
-            "province" : province,
-            "country" : country,
-            "businessPhone" : businessPhone,
-            "fax" : fax,
-            "email" : email,
-            "webpage" : webpage,
-            "notes" : notes,
-            "attachments" : attachments
-          });
+      Response resp = await _dio.get(Constants.getAllJobTitles,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "department": department
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -304,53 +258,24 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> addEmployee(
-      company,
-      department,
-      firstName,
-      lastName,
-      email,
-      password,
-      joiningDate,
-      resignationDate,
-      jobTitle,
-      business,
-      home,
-      mobile,
-      fax,
-      address,
-      city,
-      state,
-      zip,
-      country,
-      webpage,
-      notes,
-      attachments) async {
+  Future<dynamic> addCompany(name, category, address, city, province, country,
+      businessPhone, fax, email, webpage, notes, attachments) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.post(Constants.addEmployee,
+      Response resp = await _dio.post(Constants.addCompany,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "company": company,
-            "department": department,
-            "firstName": firstName,
-            "lastName": lastName,
-            "email": email,
-            "password": password,
-            "joiningDate": joiningDate,
-            "resignationDate": resignationDate,
-            "jobTitle": jobTitle,
-            "business": business,
-            "home": home,
-            "mobile": mobile,
-            "fax": fax,
+            "name": name,
+            "category": category,
             "address": address,
             "city": city,
-            "state": state,
-            "zip": zip,
+            "province": province,
             "country": country,
-            "webPage": webpage,
+            "businessPhone": businessPhone,
+            "fax": fax,
+            "email": email,
+            "webpage": webpage,
             "notes": notes,
             "attachments": attachments
           });
@@ -361,25 +286,124 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> addEmployee(
+      department,
+      salutation,
+      firstName,
+      lastName,
+      emailWork,
+      emailPersonal,
+      directManagerId,
+      username,
+      password,
+      jobTitleId,
+      joiningDate,
+      business,
+      mobile,
+      address,
+      city,
+      state,
+      zip,
+      country,
+      expertise,
+      resume,
+      softwarePrivilege,
+      webpage,
+      notes,
+      attachments,
+      proficiency,
+      interest,
+      cocurricular,
+      training,
+      birthday,
+      anniversary,
+      sports,
+      activities,
+      beverage,
+      alcohol,
+      travelDestination,
+      spouseName,
+      children,
+      tvShow,
+      movies,
+      actor,
+      dislikes,
+      strengths,
+      weaknesses,
+      socialActiveIndex) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addEmployee,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "department" : department,
+            "salutation" : salutation,
+            "firstName" : firstName,
+            "lastName" : lastName,
+            "emailWork" : emailWork,
+            "emailPersonal" : emailPersonal,
+            "directManagerId" : directManagerId,
+            "username" : username,
+            "password" : password,
+            "jobTitleId" : jobTitleId,
+            "joiningDate" : joiningDate,
+            "business" : business,
+            "mobile" : mobile,
+            "address" : address,
+            "city" : city,
+            "state" : state,
+            "zip" : zip,
+            "country" : country,
+            "expertise" : expertise,
+            "resume" : resume,
+            "softwarePrivilege" : softwarePrivilege,
+            "webpage" : webpage,
+            "notes" : notes,
+            "attachments" : attachments,
+            "proficiency" : proficiency,
+            "interest" : interest,
+            "cocurricular" : cocurricular,
+            "training" : training,
+            "birthday" : birthday,
+            "anniversary" : anniversary,
+            "sports" : sports,
+            "activities" : activities,
+            "beverage" : beverage,
+            "alcohol" : alcohol,
+            "travelDestination" : travelDestination,
+            "spouseName" : spouseName,
+            "children" : children,
+            "tvShow" : tvShow,
+            "movies" : movies,
+            "actor" : actor,
+            "dislikes" : dislikes,
+            "strengths" : strengths,
+            "weaknesses" : weaknesses,
+            "socialActiveIndex" : socialActiveIndex
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> addToTimeSheet(
-      projectId,
-      date,
-      startTime,
-      endTime,
-      comments
-      ) async {
+      projectId, date, startTime, endTime, comments) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addToTimeSheet,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "employeeId" : prefs.getInt("id"),
-            "projectId" : projectId,
-            "date" : date,
-            "startTime" : DateFormat.Hms().format(DateFormat.jm().parse(startTime)),
-            "endTime" : DateFormat.Hms().format(DateFormat.jm().parse(endTime)),
-            "comments" : comments
+            "employeeId": prefs.getInt("id"),
+            "projectId": projectId,
+            "date": date,
+            "startTime":
+                DateFormat.Hms().format(DateFormat.jm().parse(startTime)),
+            "endTime": DateFormat.Hms().format(DateFormat.jm().parse(endTime)),
+            "comments": comments
           });
 
       return resp.data;
@@ -388,32 +412,23 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> addAsset(
-      employeeId,
-      category,
-      hardwareDetails,
-      acquiredOn,
-      purchasePrice,
-      shippedOn,
-      retiredDate,
-      attachments,
-      notes
-      ) async {
+  Future<dynamic> addAsset(employeeId, category, hardwareDetails, acquiredOn,
+      purchasePrice, shippedOn, retiredDate, attachments, notes) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addAsset,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "employeeId" : employeeId,
-            "category" : category,
-            "hardwareDetails" : hardwareDetails,
-            "acquiredOn" : acquiredOn,
-            "purchasePrice" : purchasePrice,
-            "shippedOn" : shippedOn,
-            "retiredDate" : retiredDate,
-            "attachments" : attachments,
-            "notes" : notes
+            "employeeId": employeeId,
+            "category": category,
+            "hardwareDetails": hardwareDetails,
+            "acquiredOn": acquiredOn,
+            "purchasePrice": purchasePrice,
+            "shippedOn": shippedOn,
+            "retiredDate": retiredDate,
+            "attachments": attachments,
+            "notes": notes
           });
 
       return resp.data;
@@ -422,30 +437,22 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> addSoftware(
-      software,
-      version,
-      manufacturer,
-      acquiredOn,
-      price,
-      retiredDate,
-      attachments,
-      notes
-      ) async {
+  Future<dynamic> addSoftware(software, version, manufacturer, acquiredOn,
+      price, retiredDate, attachments, notes) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addSoftware,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "software" : software,
-            "version" : version,
-            "manufacturer" : manufacturer,
-            "acquiredOn" : acquiredOn,
-            "price" : price,
-            "retiredDate" : retiredDate,
-            "attachments" : attachments,
-            "notes" : notes
+            "software": software,
+            "version": version,
+            "manufacturer": manufacturer,
+            "acquiredOn": acquiredOn,
+            "price": price,
+            "retiredDate": retiredDate,
+            "attachments": attachments,
+            "notes": notes
           });
 
       return resp.data;
@@ -490,35 +497,35 @@ class RemoteServices {
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "companyId" : companyId,
-            "salutation" : salutation,
-            "firstName" : firstName,
-            "lastName" : lastName,
-            "emailPersonal" : emailPersonal,
-            "emailWork" : emailWork,
-            "jobTitle" : jobTitle,
-            "businessPhone" : businessPhone,
-            "mobilePhone" : mobilePhone,
-            "address" : address,
-            "city" : city,
-            "province" : province,
-            "zip" : zip,
-            "country" : country,
-            "notes" : notes,
-            "attachment" : attachment,
-            "birthday" : birthday,
-            "anniversary" : anniversary,
-            "sports" : sports,
-            "activities" : activities,
-            "beverage" : beverage,
-            "alcohol" : alcohol,
-            "travelDestination" : travelDestination,
-            "spouseName" : spouseName,
-            "children" : children,
-            "tvShow" : tvShow,
-            "movies" : movies,
-            "actor" : actor,
-            "dislikes" : dislikes
+            "companyId": companyId,
+            "salutation": salutation,
+            "firstName": firstName,
+            "lastName": lastName,
+            "emailPersonal": emailPersonal,
+            "emailWork": emailWork,
+            "jobTitle": jobTitle,
+            "businessPhone": businessPhone,
+            "mobilePhone": mobilePhone,
+            "address": address,
+            "city": city,
+            "province": province,
+            "zip": zip,
+            "country": country,
+            "notes": notes,
+            "attachment": attachment,
+            "birthday": birthday,
+            "anniversary": anniversary,
+            "sports": sports,
+            "activities": activities,
+            "beverage": beverage,
+            "alcohol": alcohol,
+            "travelDestination": travelDestination,
+            "spouseName": spouseName,
+            "children": children,
+            "tvShow": tvShow,
+            "movies": movies,
+            "actor": actor,
+            "dislikes": dislikes
           });
 
       return resp.data;
@@ -648,26 +655,26 @@ class RemoteServices {
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "projectName" : projectName,
-            "dateCreated" : DateFormat("yyyy-MM-dd HH:mm:ss")
+            "projectName": projectName,
+            "dateCreated": DateFormat("yyyy-MM-dd HH:mm:ss")
                 .format(DateTime.now())
                 .toString(),
-            "dueDate" : dueDate,
-            "stage" : stage,
-            "followUpNotes" : followUpNotes,
-            "nextFollowUp" : nextFollowUp,
-            "tentClosing" : tentClosing,
-            "id" : prefs.getInt("id"),
-            "quantity" : quantity,
-            "specified" : specified,
-            "value" : value,
-            "consultant" : consultant,
-            "city" : city,
-            "province" : province,
-            "department" : department,
-            "assignedTo" : assignedTo,
-            "contractor" : contractor,
-            "distributor" : distributor
+            "dueDate": dueDate,
+            "stage": stage,
+            "followUpNotes": followUpNotes,
+            "nextFollowUp": nextFollowUp,
+            "tentClosing": tentClosing,
+            "id": prefs.getInt("id"),
+            "quantity": quantity,
+            "specified": specified,
+            "value": value,
+            "consultant": consultant,
+            "city": city,
+            "province": province,
+            "department": department,
+            "assignedTo": assignedTo,
+            "contractor": contractor,
+            "distributor": distributor
           });
 
       return resp.data;
@@ -719,6 +726,26 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> addJobTitle(
+      jobTitle, department, hourlyRate, multiplier) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addJobTitle,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "jobTitle": jobTitle,
+            "department": department,
+            "hourlyRate": hourlyRate,
+            "multiplier": multiplier
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> updateClient(
       companyId,
       salutation,
@@ -758,11 +785,11 @@ class RemoteServices {
           data: {
             "clientId": clientId,
             "companyId": companyId,
-            "salutation" : salutation,
+            "salutation": salutation,
             "firstName": firstName,
             "lastName": lastName,
             "emailPersonal": emailPersonal,
-            "emailWork" : emailWork,
+            "emailWork": emailWork,
             "jobTitle": jobTitle,
             "businessPhone": businessPhone,
             "mobilePhone": mobilePhone,
@@ -773,19 +800,19 @@ class RemoteServices {
             "country": country,
             "notes": notes,
             "attachment": attachments,
-            "birthday" : birthday,
-            "anniversary" : anniversary,
-            "sports" : sports,
-            "activities" : activities,
-            "beverage" : beverage,
-            "alcohol" : alcohol,
-            "travelDestination" : travelDestination,
-            "spouseName" : spouseName,
-            "children" : children,
-            "tvShow" : tvShow,
-            "movies" : movies,
-            "actor" : actor,
-            "dislikes" : dislikes
+            "birthday": birthday,
+            "anniversary": anniversary,
+            "sports": sports,
+            "activities": activities,
+            "beverage": beverage,
+            "alcohol": alcohol,
+            "travelDestination": travelDestination,
+            "spouseName": spouseName,
+            "children": children,
+            "tvShow": tvShow,
+            "movies": movies,
+            "actor": actor,
+            "dislikes": dislikes
           });
 
       return resp.data;
@@ -818,23 +845,23 @@ class RemoteServices {
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "projectId" : projectId,
-            "projectName" : projectName,
-            "dueDate" : dueDate,
-            "stage" : stage,
-            "followUpNotes" : followUpNotes,
-            "nextFollowUp" : nextFollowUp,
-            "tentClosing" : tentClosing,
-            "quantity" : quantity,
-            "specified" : specified,
-            "value" : value,
-            "consultant" : consultant,
-            "city" : city,
-            "province" : province,
-            "department" : department,
-            "assignedTo" : assignedTo,
-            "contractor" : contractor,
-            "distributor" : distributor
+            "projectId": projectId,
+            "projectName": projectName,
+            "dueDate": dueDate,
+            "stage": stage,
+            "followUpNotes": followUpNotes,
+            "nextFollowUp": nextFollowUp,
+            "tentClosing": tentClosing,
+            "quantity": quantity,
+            "specified": specified,
+            "value": value,
+            "consultant": consultant,
+            "city": city,
+            "province": province,
+            "department": department,
+            "assignedTo": assignedTo,
+            "contractor": contractor,
+            "distributor": distributor
           });
 
       return resp.data;
@@ -845,26 +872,50 @@ class RemoteServices {
 
   Future<dynamic> updateEmployee(
       id,
-      company,
       department,
+      salutation,
       firstName,
       lastName,
-      email,
+      emailWork,
+      emailPersonal,
+      directManagerId,
+      username,
+      password,
+      jobTitleId,
       joiningDate,
-      resignationDate,
-      jobTitle,
       business,
-      home,
       mobile,
-      fax,
       address,
       city,
       state,
       zip,
       country,
+      expertise,
+      resume,
+      softwarePrivilege,
       webpage,
       notes,
-      attachments) async {
+      attachments,
+      proficiency,
+      interest,
+      cocurricular,
+      training,
+      birthday,
+      anniversary,
+      sports,
+      activities,
+      beverage,
+      alcohol,
+      travelDestination,
+      spouseName,
+      children,
+      tvShow,
+      movies,
+      actor,
+      dislikes,
+      strengths,
+      weaknesses,
+      socialActiveIndex) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.updateEmployee,
@@ -872,26 +923,50 @@ class RemoteServices {
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
             "id": id,
-            "company": company,
-            "department": department,
-            "firstName": firstName,
-            "lastName": lastName,
-            "email": email,
-            "joiningDate": joiningDate,
-            "resignationDate": resignationDate,
-            "jobTitle": jobTitle,
-            "business": business,
-            "home": home,
-            "mobile": mobile,
-            "fax": fax,
-            "address": address,
-            "city": city,
-            "state": state,
-            "zip": zip,
-            "country": country,
-            "webPage": webpage,
-            "notes": notes,
-            "attachments": attachments
+            "department" : department,
+            "salutation" : salutation,
+            "firstName" : firstName,
+            "lastName" : lastName,
+            "emailWork" : emailWork,
+            "emailPersonal" : emailPersonal,
+            "directManagerId" : directManagerId,
+            "username" : username,
+            "password" : password,
+            "jobTitleId" : jobTitleId,
+            "joiningDate" : joiningDate,
+            "business" : business,
+            "mobile" : mobile,
+            "address" : address,
+            "city" : city,
+            "state" : state,
+            "zip" : zip,
+            "country" : country,
+            "expertise" : expertise,
+            "resume" : resume,
+            "softwarePrivilege" : softwarePrivilege,
+            "webpage" : webpage,
+            "notes" : notes,
+            "attachments" : attachments,
+            "proficiency" : proficiency,
+            "interest" : interest,
+            "cocurricular" : cocurricular,
+            "training" : training,
+            "birthday" : birthday,
+            "anniversary" : anniversary,
+            "sports" : sports,
+            "activities" : activities,
+            "beverage" : beverage,
+            "alcohol" : alcohol,
+            "travelDestination" : travelDestination,
+            "spouseName" : spouseName,
+            "children" : children,
+            "tvShow" : tvShow,
+            "movies" : movies,
+            "actor" : actor,
+            "dislikes" : dislikes,
+            "strengths" : strengths,
+            "weaknesses" : weaknesses,
+            "socialActiveIndex" : socialActiveIndex
           });
 
       return resp.data;
@@ -900,39 +975,27 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> updateCompany(
-      id,
-      name,
-      category,
-      address,
-      city,
-      province,
-      country,
-      businessPhone,
-      fax,
-      email,
-      webpage,
-      notes,
-      attachments) async {
+  Future<dynamic> updateCompany(id, name, category, address, city, province,
+      country, businessPhone, fax, email, webpage, notes, attachments) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.post(Constants.addCompany,
+      Response resp = await _dio.post(Constants.updateCompany,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "id" : id,
-            "name" : name,
-            "category" : category,
-            "address" : address,
-            "city" : city,
-            "province" : province,
-            "country" : country,
-            "businessPhone" : businessPhone,
-            "fax" : fax,
-            "email" : email,
-            "webpage" : webpage,
-            "notes" : notes,
-            "attachments" : attachments
+            "id": id,
+            "name": name,
+            "category": category,
+            "address": address,
+            "city": city,
+            "province": province,
+            "country": country,
+            "businessPhone": businessPhone,
+            "fax": fax,
+            "email": email,
+            "webpage": webpage,
+            "notes": notes,
+            "attachments": attachments
           });
 
       return resp.data;
@@ -944,12 +1007,10 @@ class RemoteServices {
   Future<dynamic> suppliersDashboard() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(
-          Constants.suppliersDashboard,
+      Response resp = await _dio.get(Constants.suppliersDashboard,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-          })
-      );
+          }));
 
       return resp.data;
     } on DioError catch (e) {
@@ -958,7 +1019,7 @@ class RemoteServices {
   }
 
   Future<dynamic> getLogisticsDashboard() async {
-    try{
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.get(
         Constants.logisticsDashboard,
@@ -972,8 +1033,8 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> getSupplierDashboard () async {
-    try{
+  Future<dynamic> getSupplierDashboard() async {
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.get(
         Constants.suppliersDashboard,

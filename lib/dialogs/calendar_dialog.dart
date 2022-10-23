@@ -28,6 +28,8 @@ class _CalendarDialogState extends State<CalendarDialog> {
     setState(() {
       dataLoaded = false;
     });
+    //googleCalendar.listGoogleDriveFiles();
+
     googleCalendar.getGoogleEventsData().then((value) {
       List<CalendarEvent> apps = [];
 
@@ -40,7 +42,7 @@ class _CalendarDialogState extends State<CalendarDialog> {
                 startTime: DateTime.parse(e.start!.dateTime!.toString()).toLocal(),
                 endTime: DateTime.parse(e.end!.dateTime!.toString()).toLocal(),
                 color: const Color.fromRGBO(134, 97, 255, 1),
-                subject: e.summary!.toString(),
+                subject: e.summary ?? "",
               eventId: e.id,
               meetLink: e.hangoutLink,
               created: e.created!.toLocal(),

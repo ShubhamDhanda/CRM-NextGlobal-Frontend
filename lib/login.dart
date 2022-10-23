@@ -19,100 +19,77 @@ class _LoginPageState extends State<LoginPage> {
   bool isAnimating = true;
   ButtonState state = ButtonState.init;
   bool passwordVisible = false;
-  final snackBar1 = SnackBar(
+  final snackBar1 = const SnackBar(
     content: Text('Wrong Credentials'),
     backgroundColor: Colors.red,
   );
-  final snackBar2 = SnackBar(
+  final snackBar2 = const SnackBar(
     content: Text('Something Went Wrong!'),
     backgroundColor: Colors.red,
   );
-  final snackBar3 = SnackBar(
+  final snackBar3 = const SnackBar(
     content: Text('Please enter the Fields!'),
     backgroundColor: Colors.red,
   );
 
   void _login() async {
-    setState(() {
-      isLoading = true;
-    });
+    try{
+      setState(() {
+        isLoading = true;
+      });
 
-    if(validate() == true){
-      dynamic res = await _apiClient.login(
-        nameController.text,
-        passwordController.text,
-      );
+      if(validate() == true){
+        dynamic res = await _apiClient.login(
+          nameController.text,
+          passwordController.text,
+        );
 
-      if (res?["success"] == true) {
-        String accessToken = res['auth'];
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        if (res["success"] == true) {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-        prefs.setString("auth-token", accessToken);
-        prefs.setString("email", res["user"]["email"]);
-        prefs.setInt("id", res["user"]["employeeId"]);
+          prefs.setString("auth-token", res['auth']);
+          prefs.setString("email", res["user"]["emailWork"]);
+          prefs.setInt("id", res["user"]["employeeId"]);
+          prefs.setString('isLoggedIn', res['user']['department']);
 
-        int val = 0;
-        switch(res['user']['department']){
-          case "Admin":
-            val = 1;
-            break;
-          case "Supplier":
-            val = 2;
-            break;
-          case "Logistics":
-            val = 3;
-            break;
-          case "Sales":
-            val = 4;
-            break;
-          case "Manager":
-            val = 5;
-            break;
-          case "Engineer":
-            val = 6;
-            break;
-          case "IT":
-            val = 7;
-            break;
+          switch (res['user']['department']) {
+            case "Admin":
+              Navigator.pushReplacementNamed(context, "/admin");
+              break;
+            case "Supplier":
+              Navigator.pushReplacementNamed(context, "/supplier");
+              break;
+            case "Logistics":
+              Navigator.pushReplacementNamed(context, "/logistics");
+              break;
+            case "Sales":
+              Navigator.pushReplacementNamed(context, "/finance");
+              break;
+            case "Manager":
+              Navigator.pushReplacementNamed(context, "/manager");
+              break;
+            case "Engineer":
+              Navigator.pushReplacementNamed(context, "/engineer");
+              break;
+            case "IT":
+              Navigator.pushReplacementNamed(context, "/it");
+              break;
+          }
+        } else if(res["success"] == false){
+          ScaffoldMessenger.of(context).showSnackBar(snackBar1);
         }
-        prefs.setInt('isLoggedIn', val);
-        switch (val) {
-          case 1:
-            Navigator.pushReplacementNamed(context, "/admin");
-            break;
-          case 2:
-            Navigator.pushReplacementNamed(context, "/supplier");
-            break;
-          case 3:
-            Navigator.pushReplacementNamed(context, "/logistics");
-            break;
-          case 4:
-            Navigator.pushReplacementNamed(context, "/finance");
-            break;
-          case 5:
-            Navigator.pushReplacementNamed(context, "/manager");
-            break;
-          case 6:
-            Navigator.pushReplacementNamed(context, "/engineer");
-            break;
-          case 7:
-            Navigator.pushReplacementNamed(context, "/it");
-            break;
-        }
-      } else if(res?["success"] == false){
-        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
       }
-      else{
-        ScaffoldMessenger.of(context).showSnackBar(snackBar2);
-      }
+    } catch(e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+    } finally{
+      setState(() {
+        isLoading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      isLoading = false;
-    });
-
-    await Future.delayed(Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   bool validate() {
@@ -150,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextField(
                   cursorColor: Colors.white,
                   style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                   controller: nameController,
                   decoration: const InputDecoration(
                       enabledBorder: OutlineInputBorder(
@@ -193,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 100,
                 padding: const EdgeInsets.fromLTRB(90, 50, 90, 0),
                 child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     onEnd: () => setState(() {
                           isAnimating = !isAnimating;
                         }),

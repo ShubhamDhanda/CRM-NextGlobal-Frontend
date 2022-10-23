@@ -294,10 +294,9 @@ class _CompaniesState extends State<Companies>{
                           UpdateCompanyDialog(
                             mp: mp,
                           )).then((value) {
-                    _getData();
-                    setState(() {
-                      dataLoaded = true;
-                    });
+                            if(value! == true){
+                              _getData();
+                            }
                   }),
                   child: Icon(
                     Icons.edit,

@@ -90,27 +90,31 @@ class _updateCustomerDialogState extends State {
   }
 
   void _getData() async {
-    setState(() {
-      loading = true;
-    });
+    try{
+      setState(() {
+        loading = true;
+      });
+      companies.clear();
+      companyMap.clear();
 
-    dynamic res = await apiClient.getAllCompanyNames();
+      dynamic res = await apiClient.getAllCompanyNames();
 
-    if (res?["success"] == true) {
-      for (var e in res["res"]) {
-        companies.add(e["Name"]);
-        companyMap[e["Name"]] = e["ID"];
+      if (res["success"] == true) {
+        for (var e in res["res"]) {
+          companies.add(e["Name"]);
+          companyMap[e["Name"]] = e["ID"];
+        }
       }
-    } else {
+    } catch(e) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   _updateCustomerDialogState({required this.mp}) {

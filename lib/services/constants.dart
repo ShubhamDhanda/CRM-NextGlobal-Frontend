@@ -1,9 +1,9 @@
 class Constants {
   static const String iosClientId = "373756743234-smi7ct7k75gfld20nfbhch2k36oc91ag.apps.googleusercontent.com";
   static const String androidClientId = "373756743234-du2ljnfisg6vnr6pucjcq7vhrruhg4tv.apps.googleusercontent.com";
-  // static String baseURL = "http://192.168.181.150:8080";
-  // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
-  static String baseURL = "http://172.16.172.112:8080";
+  // static String baseURL = "http://192.168.0.112:8080";
+  static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
+  // static String baseURL = "http://172.16.172.112:8080";
   static String login = "/api/login";
 
   static String suppliersDashboard = "/api/getDashboard/suppliers";
@@ -27,6 +27,7 @@ class Constants {
   static String getAllContractors = "/api/get/contractors";
   static String getAllConsultants = "/api/get/consultants";
   static String getAllTimesheet = "/api/get/timesheet";
+  static String getAllJobTitles = "/api/get/jobTitles";
 
   static String addEmployee = "/api/add/employee";
   static String addContact = "/api/add/contact";
@@ -38,6 +39,7 @@ class Constants {
   static String addToTimeSheet = "/api/add/timesheet";
   static String addAsset = "/api/add/asset";
   static String addSoftware = "/api/add/software";
+  static String addJobTitle = "/api/add/jobTitle";
 
   static String updateCustomer = "/api/update/client";
   static String updateCompany = "/api/update/company";

@@ -26,13 +26,17 @@ class _AssetsState extends State<Assets> with TickerProviderStateMixin{
     _getData();
   }
 
+  _handleTabSelection() {
+    if (tabController.indexIsChanging) {
+      setState(() {});
+    }
+  }
+
   void _getData() async {
     dynamic res = await apiClient.getAllAssets();
     dynamic res2 = await apiClient.getAllSoftware();
 
     if(res?["success"] == true && res2?["success"] == true){
-      print(res);
-      print(res2);
 
       for(var e in res["res"]){
         Map<String, dynamic> mp = {};
@@ -186,13 +190,13 @@ tabs()
             style: TextStyle(color: Colors.white),
           ),
         )
-            : Expanded(child: ListView.builder(
+            : ListView.builder(
           itemCount: assets.length,
           prototypeItem: hardwareCard(assets.first),
           itemBuilder: (context, index) {
             return hardwareCard(assets[index]);
           },
-        ),)
+        ),
     );
   }
 
@@ -212,13 +216,13 @@ tabs()
             style: TextStyle(color: Colors.white),
           ),
         )
-            : Expanded(child: ListView.builder(
+            : ListView.builder(
           itemCount: software.length,
           prototypeItem: softwareCard(software.first),
           itemBuilder: (context, index) {
             return softwareCard(software[index]);
           },
-        ),)
+        ),
     );
   }
 

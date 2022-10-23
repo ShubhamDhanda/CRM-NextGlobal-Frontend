@@ -61,30 +61,27 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
   List<String> cities = Constants.cities, provinces = Constants.provinces, countries = Constants.countries;
 
   void postData() async {
-    setState(() {
-      loading = true;
-    });
+    try{
+      if (validate() == true) {
+        dynamic res = await apiClient.addCompany(name.text, category.toString(), address.text, city.text, province.text, country.text, businessPhone.text, faxNumber.text, email.text, webpage.text, notes.text, attachments.text);
 
-    if (validate() == true) {
-      dynamic res = await apiClient.addCompany(name.text, category.toString(), address.text, city.text, province.text, country.text, businessPhone.text, faxNumber.text, email.text, webpage.text, notes.text, attachments.text);
+        if(res["success"]==true) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        }
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      }
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally{
+      setState(() {
+        loading = false;
+      });
 
-      if(res?["success"]==true) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-      }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-      }
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      loading = false;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   bool validate() {
@@ -100,7 +97,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
       appBar: AppBar(
         leading: GestureDetector(
           child: const Icon(Icons.close),
-          onTap: () => Navigator.pop(context),
+          onTap: () => Navigator.pop(context, false),
         ),
         title: const Text("New Company"),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),

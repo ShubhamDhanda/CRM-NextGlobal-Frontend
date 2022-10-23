@@ -92,31 +92,30 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(milliseconds: 1500), () {});
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    var val = (prefs.getString('auth-token')==null) ? 0 : prefs.getInt('isLoggedIn');
+    String? val = prefs.getString('auth-token')==null ? "" : prefs.getString('isLoggedIn');
     switch (val) {
-      case 0:
+      case "":
         Navigator.pushReplacementNamed(context, "/login");
         break;
-      case 1:
+      case "Admin":
         Navigator.pushReplacementNamed(context, "/admin");
         break;
-      case 2:
+      case "Supplier":
         Navigator.pushReplacementNamed(context, "/supplier");
         break;
-      case 3:
+      case "Logistics":
         Navigator.pushReplacementNamed(context, "/logistics");
         break;
-      case 4:
+      case "Sales":
         Navigator.pushReplacementNamed(context, "/finance");
         break;
-      case 5:
+      case "Manager":
         Navigator.pushReplacementNamed(context, "/manager");
         break;
-      case 6:
+      case "Engineer":
         Navigator.pushReplacementNamed(context, "/engineer");
         break;
-      case 7:
+      case "IT":
         Navigator.pushReplacementNamed(context, "/it");
         break;
     }
