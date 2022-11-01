@@ -17,6 +17,7 @@ class _FilterCustomerDialogState extends State<FilterCustomerDialog> {
   @override
   Widget build(context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: GestureDetector(
           child: Icon(Icons.close),
@@ -74,7 +75,18 @@ class _FilterCustomerDialogState extends State<FilterCustomerDialog> {
                 Divider(
                   color: const Color.fromRGBO(41, 41, 41, 1),
                   thickness: 1.0,
-                )
+                ),
+                TextButton(
+                  onPressed: () {
+
+                  },
+                  child: Text("ABc", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),),
+                  style: ButtonStyle(
+                      textStyle: MaterialStateProperty.all<TextStyle>(
+                          TextStyle(color: Colors.white)
+                      )
+                  ),
+                ),
               ],
             ),
           ),

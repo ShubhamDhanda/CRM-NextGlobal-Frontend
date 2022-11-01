@@ -1,8 +1,8 @@
 class Constants {
   static const String iosClientId = "373756743234-smi7ct7k75gfld20nfbhch2k36oc91ag.apps.googleusercontent.com";
   static const String androidClientId = "373756743234-du2ljnfisg6vnr6pucjcq7vhrruhg4tv.apps.googleusercontent.com";
-  // static String baseURL = "http://192.168.0.112:8080";
-  static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
+  static String baseURL = "http://192.168.54.150:8080";
+  // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
   // static String baseURL = "http://172.16.172.112:8080";
   static String login = "/api/login";
 
@@ -11,6 +11,9 @@ class Constants {
   static String salesDashboard = "/api/getDashboard/sales";
 
   static String getAllCustomers = "/api/get/customers";
+  static String searchCustomers = "/api/search/customers";
+  static String filterCustomers = "/api/filter/customers";
+  static String searchFilterCustomers = "/api/search/filter/customers";
   static String getAllCompanies = "/api/get/companies";
   static String getAllShippers = "/api/get/shippers";
   static String getAllSuppliers = "/api/get/suppliers";

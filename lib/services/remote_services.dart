@@ -159,12 +159,62 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> getAllCustomers() async {
+  Future<dynamic> getAllCustomers(offset) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.get(Constants.getAllCustomers,
           options: Options(headers: {
-            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "offset" : offset
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> searchCustomers(offset, search) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.searchCustomers,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "offset" : offset,
+            "search" : search
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> filterCustomers(offset, filter) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.filterCustomers,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "offset" : offset,
+            "filter" : filter
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> searchFilterCustomers(offset, search, filter) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.searchFilterCustomers,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "offset" : offset,
+            "search" : search,
+            "filter" : filter
           }));
 
       return resp.data;

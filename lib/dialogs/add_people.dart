@@ -28,7 +28,7 @@ const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"],
 class _AddPeopleDialogState extends State {
   TextEditingController companyName = TextEditingController();
   var companyId;
-  var salutation;
+  var salutation = "None";
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController email = TextEditingController();
@@ -142,10 +142,10 @@ class _AddPeopleDialogState extends State {
             attachment.text,
             birthday.text,
             anniversary.text,
-            sport.toString(),
-            activity.toString(),
-            beverage.toString(),
-            alcohol.toString(),
+            sport ?? "",
+            activity ?? "",
+            beverage ?? "",
+            alcohol ?? "",
             travel.text,
             spouse.text,
             children.text,
@@ -190,7 +190,7 @@ class _AddPeopleDialogState extends State {
             child: const Icon(Icons.close),
             onTap: () => Navigator.pop(context, false),
           ),
-          title: const Text("New Contact"),
+          title: const Text("New Client"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),

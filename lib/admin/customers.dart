@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:crm/admin/drawer.dart';
@@ -5,6 +6,7 @@ import 'package:crm/dialogs/add_ship_sup_dialog.dart';
 import 'package:crm/dialogs/filter_customer_dialog.dart';
 import 'package:crm/dialogs/update_customer.dart';
 import 'package:crm/services/remote_services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Customers extends StatefulWidget {
@@ -16,109 +18,206 @@ class Customers extends StatefulWidget {
 
 class _CustomersState extends State<Customers> {
   var apiClient = RemoteServices();
-  bool dataLoaded = false;
   TextEditingController searchController = TextEditingController();
+  bool dataLoaded = false;
   final snackBar1 = SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
   );
 
   List<Map<String, dynamic>> customers = [];
-  List<Map<String, dynamic>> filtered = [];
-  List<Map<String, dynamic>> search = [];
   List<String> cat = [];
+  late ScrollController _scrollController;
+  bool _isLastPage = false;
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      var nextPageTrigger = 0.8 * _scrollController.position.maxScrollExtent;
+      if (_scrollController.position.pixels > nextPageTrigger && !_isLastPage) {
+        if(searchController.text=="") {
+          _getData();
+        }else{
+          _getSearchData(searchController.text);
+        }
+      }
+    });
+
     _getData();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
   void _getData() async {
-    setState(() {
-      dataLoaded = false;
-    });
-    dynamic res = await apiClient.getAllCustomers();
-
-    customers.clear();
-    search.clear();
-    filtered.clear();
-
-    if (res?["success"] == true) {
-      for(var i=0;i<res["res"].length;i++){
-        var e = res["res"][i];
-        Map<String, dynamic> mp = {};
-
-        mp["id"] = e["ID"];
-        mp["companyId"] = e["Company_ID"];
-        mp["salutation"] = e["Salutation"] ?? "";
-        mp["lastName"] = e["Last_Name"] ?? "";
-        mp["firstName"] = e["First_Name"];
-        mp["emailPersonal"] = e["Email_Personal"] ?? "";
-        mp["emailWork"] = e["Email_Work"] ?? "";
-        mp["jobTitle"] = e["Job_Title"] ?? "";
-        mp["business"] = e["Business_Phone"] ?? "";
-        mp["mobile"] = e["Mobile_Phone_Personal"] ?? "";
-        mp["address"] = e["Address"] ?? "";
-        mp["city"] = e["City"] ?? "";
-        mp["province"] = e["Province"] ?? "";
-        mp["zip"] = e["ZIP"] ?? "";
-        mp["country"] = e["Country"] ?? "";
-        mp["notes"] = e["Notes"] ?? "";
-        mp["attachments"] = e["Attachments"] ?? "";
-
-        mp["birthday"] = e["Birthday"] ?? "";
-        mp["anniversary"] = e["Anniversary"] ?? "";
-        mp["sports"] = e["Sports"] ?? "";
-        mp["activities"] = e["Activities"] ?? "";
-        mp["beverage"] = e["Beverage"] ?? "";
-        mp["Alcohol"] = e["Alcohol"] ?? "";
-        mp["travelDestination"] = e["Travel_Destination"] ?? "";
-        mp["spouseName"] = e["Spouse_Name"] ?? "";
-        mp["children"] = e["Children"] ?? "";
-        mp["tvShow"] = e["TV_Show"] ?? "";
-        mp["movies"] = e["Movies"] ?? "";
-        mp["actor"] = e["Actor"] ?? "";
-        mp["dislikes"] = e["Dislikes"] ?? "";
-
-        mp["companyName"] = e["Company_Name"];
-        mp["category"] = e["Category"];
-        customers.add(mp);
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
+      dynamic res;
+      if(cat.isEmpty) {
+         res = await apiClient.getAllCustomers(customers.length);
+      }else{
+        List<String> filter = [];
+        cat.forEach((e) => filter.add("'$e'"));
+        res = await apiClient.filterCustomers(customers.length, filter.join(', '));
       }
-    } else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+
+      if (res["success"] == true) {
+        if(res["res"].length==0 || res["res"].length%3!=0){
+          _isLastPage = true;
+        }
+        for(var i=0;i<res["res"].length;i++){
+          var e = res["res"][i];
+          Map<String, dynamic> mp = {};
+
+          mp["id"] = e["ID"];
+          mp["companyId"] = e["Company_ID"];
+          mp["salutation"] = e["Salutation"] ?? "";
+          mp["lastName"] = e["Last_Name"] ?? "";
+          mp["firstName"] = e["First_Name"];
+          mp["emailPersonal"] = e["Email_Personal"] ?? "";
+          mp["emailWork"] = e["Email_Work"] ?? "";
+          mp["jobTitle"] = e["Job_Title"] ?? "";
+          mp["business"] = e["Business_Phone"] ?? "";
+          mp["mobile"] = e["Mobile_Phone_Personal"] ?? "";
+          mp["address"] = e["Address"] ?? "";
+          mp["city"] = e["City"] ?? "";
+          mp["province"] = e["Province"] ?? "";
+          mp["zip"] = e["ZIP"] ?? "";
+          mp["country"] = e["Country"] ?? "";
+          mp["notes"] = e["Notes"] ?? "";
+          mp["attachments"] = e["Attachments"] ?? "";
+
+          mp["birthday"] = e["Birthday"] ?? "";
+          mp["anniversary"] = e["Anniversary"] ?? "";
+          mp["sports"] = e["Sports"] ?? "";
+          mp["activities"] = e["Activities"] ?? "";
+          mp["beverage"] = e["Beverage"] ?? "";
+          mp["Alcohol"] = e["Alcohol"] ?? "";
+          mp["travelDestination"] = e["Travel_Destination"] ?? "";
+          mp["spouseName"] = e["Spouse_Name"] ?? "";
+          mp["children"] = e["Children"] ?? "";
+          mp["tvShow"] = e["TV_Show"] ?? "";
+          mp["movies"] = e["Movies"] ?? "";
+          mp["actor"] = e["Actor"] ?? "";
+          mp["dislikes"] = e["Dislikes"] ?? "";
+
+          mp["companyName"] = e["Company_Name"];
+          mp["category"] = e["Category"];
+          customers.add(mp);
+        }
+      }
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
+  }
 
-    search.addAll(customers);
-    filtered.addAll(customers);
+  void _getSearchData (String text) async {
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
 
-    setState(() {
-      dataLoaded = true;
-    });
+      dynamic res;
+      if(cat.isEmpty) {
+        res = await apiClient.searchCustomers(customers.length, text);
+      }else{
+        List<String> filter = [];
+        cat.forEach((e) => filter.add("'$e'"));
+        res = await apiClient.searchFilterCustomers(customers.length, text, filter.join(', '));
+      }
 
-    await Future.delayed(Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (res["success"] == true) {
+        if(res["res"].length==0 || res["res"].length%3!=0){
+          _isLastPage = true;
+        }
+        for(var i=0;i<res["res"].length;i++){
+          var e = res["res"][i];
+          Map<String, dynamic> mp = {};
 
+          mp["id"] = e["ID"];
+          mp["companyId"] = e["Company_ID"];
+          mp["salutation"] = e["Salutation"] ?? "";
+          mp["lastName"] = e["Last_Name"] ?? "";
+          mp["firstName"] = e["First_Name"];
+          mp["emailPersonal"] = e["Email_Personal"] ?? "";
+          mp["emailWork"] = e["Email_Work"] ?? "";
+          mp["jobTitle"] = e["Job_Title"] ?? "";
+          mp["business"] = e["Business_Phone"] ?? "";
+          mp["mobile"] = e["Mobile_Phone_Personal"] ?? "";
+          mp["address"] = e["Address"] ?? "";
+          mp["city"] = e["City"] ?? "";
+          mp["province"] = e["Province"] ?? "";
+          mp["zip"] = e["ZIP"] ?? "";
+          mp["country"] = e["Country"] ?? "";
+          mp["notes"] = e["Notes"] ?? "";
+          mp["attachments"] = e["Attachments"] ?? "";
+
+          mp["birthday"] = e["Birthday"] ?? "";
+          mp["anniversary"] = e["Anniversary"] ?? "";
+          mp["sports"] = e["Sports"] ?? "";
+          mp["activities"] = e["Activities"] ?? "";
+          mp["beverage"] = e["Beverage"] ?? "";
+          mp["Alcohol"] = e["Alcohol"] ?? "";
+          mp["travelDestination"] = e["Travel_Destination"] ?? "";
+          mp["spouseName"] = e["Spouse_Name"] ?? "";
+          mp["children"] = e["Children"] ?? "";
+          mp["tvShow"] = e["TV_Show"] ?? "";
+          mp["movies"] = e["Movies"] ?? "";
+          mp["actor"] = e["Actor"] ?? "";
+          mp["dislikes"] = e["Dislikes"] ?? "";
+
+          mp["companyName"] = e["Company_Name"];
+          mp["category"] = e["Category"];
+          customers.add(mp);
+        }
+      }
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
   }
 
   void _onSearchChanged(String text) async {
-    setState(() {
-      dataLoaded = false;
-    });
-    search.clear();
-
-    if(text.isEmpty){
-      search.addAll(filtered);
-    }else{
-      filtered.forEach((e) {
-        if(e["firstName"].toString().toLowerCase().contains(text.toLowerCase()) || e["lastName"].toString().toLowerCase().contains(text.toLowerCase()) || (e["firstName"] + " " + e["lastName"]).toString().toLowerCase().contains(text.toLowerCase()) || (int.tryParse(text)!=null && e["id"] == int.parse(text))  || e["company"].toString().toLowerCase().contains(text.toLowerCase())){
-          search.add(e);
-        }
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        dataLoaded = false;
       });
-    }
 
-    setState(() {
-      dataLoaded = true;
+      _isLastPage = false;
+      customers.clear();
+
+      if(text.isEmpty){
+        _getData();
+      }else{
+        _getSearchData(text);
+      }
+
+      setState(() {
+        dataLoaded = true;
+      });
     });
   }
 
@@ -162,7 +261,7 @@ class _CustomersState extends State<Customers> {
                       ),
                     ),
                     visible: dataLoaded,
-                    child: search.isEmpty
+                    child: customers.isEmpty
                         ? const Center(
                       child: Text(
                         "No Clients Found",
@@ -171,10 +270,31 @@ class _CustomersState extends State<Customers> {
                     )
                         :
                     Expanded(child: ListView.builder(
-                      itemCount: search.length,
-                      prototypeItem: ListCard(search.first),
+                      itemCount: customers.length+(_isLastPage ? 0 : 1),
+                      prototypeItem: ListCard(customers.first),
+                      controller: _scrollController,
                       itemBuilder: (context, index) {
-                        return ListCard(search[index]);
+                        if(index==customers.length){
+                          return Card(
+                            color: const Color.fromRGBO(0, 0, 0, 0),
+                            child: Container(
+                              height: 280,
+                              width: MediaQuery.of(context).size.width - 20,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10.0),
+                                color: const Color.fromRGBO(41, 41, 41, 1),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: Color.fromRGBO(134, 97, 255, 1),
+                                ),
+                              ),
+                            ),
+                          );
+                        }else {
+                          return ListCard(customers[index]);
+                        }
                       },
                     ),
                     )
@@ -192,6 +312,7 @@ class _CustomersState extends State<Customers> {
       child: TextField(
         cursorColor: Colors.white,
         onChanged: _onSearchChanged,
+        controller: searchController,
         // controller: searchController,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
@@ -238,20 +359,20 @@ class _CustomersState extends State<Customers> {
               },
               pageBuilder: (context, animation, secondaryAnimation) => FilterCustomerDialog(cat: cat)
           ).then((value) {
-            value ?? [];
-            filtered.clear();
-            cat = value as List<String>;
-            if(cat.isEmpty){
-              filtered.addAll(customers);
-            }else{
-              customers.forEach((e) {
-                if(cat.contains(e["category"])){
-                  filtered.add(e);
-                }
-              });
-            }
+            value as List<String>;
+            if(!areListsEqual(cat, value)){
 
-            _onSearchChanged(searchController.text);
+            }else{
+              print(value);
+              customers.clear();
+              _isLastPage = false;
+              cat = value;
+              if(searchController.text == ""){
+                _getData();
+              }else{
+                _getSearchData(searchController.text);
+              }
+            }
           });
         },
         child: Padding(
@@ -450,5 +571,17 @@ class _CustomersState extends State<Customers> {
         ),
       ),
     );
+  }
+
+  bool areListsEqual(List<String> list1, List<String> list2) {
+    if(list1.length!=list2.length) {
+      return false;
+    }
+    for(int i=0;i<list1.length;i++) {
+      if(list1[i]!=list2[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 }
