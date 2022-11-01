@@ -1,12 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:crm/services/google_services.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class GoogleCalendar{
   late GoogleAPIClient? httpClient;
