@@ -61,6 +61,21 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getTasksById() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getTasksById,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "id": prefs.getInt("id")
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> getAllCompanies() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -689,18 +704,17 @@ class RemoteServices {
       followUpNotes,
       nextFollowUp,
       tentClosing,
-      quantity,
-      specified,
       value,
-      consultant,
       city,
       province,
       department,
-      assignedTo,
-      contractor,
-      distributor) async {
+      projectManager,
+      teamMembers,
+      status,
+      projectCategory) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print(department);
       Response resp = await _dio.post(Constants.addProject,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
@@ -715,16 +729,14 @@ class RemoteServices {
             "nextFollowUp": nextFollowUp,
             "tentClosing": tentClosing,
             "id": prefs.getInt("id"),
-            "quantity": quantity,
-            "specified": specified,
             "value": value,
-            "consultant": consultant,
             "city": city,
             "province": province,
             "department": department,
-            "assignedTo": assignedTo,
-            "contractor": contractor,
-            "distributor": distributor
+            "projectManager": projectManager,
+            "teamMembers": teamMembers,
+            "status": status,
+            "projectCategory": projectCategory
           });
 
       return resp.data;
@@ -768,6 +780,37 @@ class RemoteServices {
             "taxRate": taxRate,
             "taxStatus": (taxStatus == "Taxable" ? 1 : 0),
             "notes": notes
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> addTask(
+      title,
+      priority,
+      assignedToId,
+      description,
+      startDate,
+      dueDate,
+      attachments) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addTask,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "title" : title,
+            "priority" : priority,
+            "completedPercent" : "0",
+            "assignedTo" : assignedToId,
+            "description" : description,
+            "startDate" : startDate,
+            "dueDate" : dueDate,
+            "completedOn" : "",
+            "attachments" : attachments
           });
 
       return resp.data;
@@ -871,7 +914,7 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> updateProject(
+  Future <dynamic> updateProject(
       projectId,
       projectName,
       dueDate,
@@ -879,39 +922,40 @@ class RemoteServices {
       followUpNotes,
       nextFollowUp,
       tentClosing,
-      quantity,
-      specified,
       value,
-      consultant,
       city,
       province,
       department,
-      assignedTo,
-      contractor,
-      distributor) async {
+      projectManager,
+      teamMembers,
+      status,
+      projectCategory
+      ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.updateProject,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "projectId": projectId,
+            "projectId" : projectId,
             "projectName": projectName,
+            "dateCreated": DateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(DateTime.now())
+                .toString(),
             "dueDate": dueDate,
             "stage": stage,
             "followUpNotes": followUpNotes,
             "nextFollowUp": nextFollowUp,
             "tentClosing": tentClosing,
-            "quantity": quantity,
-            "specified": specified,
+            // "id": prefs.getInt("id"),
             "value": value,
-            "consultant": consultant,
             "city": city,
             "province": province,
             "department": department,
-            "assignedTo": assignedTo,
-            "contractor": contractor,
-            "distributor": distributor
+            "projectManager": projectManager,
+            "teamMembers": teamMembers,
+            "status": status,
+            "projectCategory": projectCategory
           });
 
       return resp.data;
@@ -1046,6 +1090,23 @@ class RemoteServices {
             "webpage": webpage,
             "notes": notes,
             "attachments": attachments
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateTask(id, completedPercent) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateTask,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "id": id,
+            "completedPercent" : completedPercent
           });
 
       return resp.data;

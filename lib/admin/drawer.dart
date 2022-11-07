@@ -42,8 +42,13 @@ class NavDrawerWidget extends StatelessWidget {
                 onClick: () => onItemSelected(context, '/customers')
             ),
             MenuItem(
-                text: "Projects",
+                text: "Budgets",
                 iconData: Icons.work,
+                onClick: () => onItemSelected(context, '/budgets')
+            ),
+            MenuItem(
+                text: "Projects",
+                iconData: Icons.account_balance,
                 onClick: () => onItemSelected(context, '/projects')
             ),
             MenuItem(

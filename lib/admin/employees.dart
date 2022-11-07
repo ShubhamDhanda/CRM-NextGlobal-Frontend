@@ -134,7 +134,7 @@ class _EmployeesState extends State<Employees> {
         if ((e["firstName"] + " " + e["lastName"])
             .toString()
             .toLowerCase()
-            .contains(text.toLowerCase())) {
+            .startsWith(text.toLowerCase())) {
           search.add(e);
         }
       });

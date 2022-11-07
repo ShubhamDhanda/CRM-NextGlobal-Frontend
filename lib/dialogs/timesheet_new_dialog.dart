@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
-class TimeSheetNewDialog extends StatefulWidget{
+class TimeSheetNewDialog extends StatefulWidget {
   const TimeSheetNewDialog({super.key});
 
   @override
-  State<StatefulWidget> createState() =>_TimeSheetNewDialogState();
+  State<StatefulWidget> createState() => _TimeSheetNewDialogState();
 }
 
-class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
+class _TimeSheetNewDialogState extends State<TimeSheetNewDialog> {
   TextEditingController project = TextEditingController();
   TextEditingController comments = TextEditingController();
   TextEditingController date = TextEditingController();
@@ -18,7 +18,7 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
   TextEditingController endTime = TextEditingController();
 
   var apiClient = RemoteServices();
-  bool loading = false;
+  bool dataLoaded = false;
   List<String> projects = [];
   Map<String, int> idMap = {};
 
@@ -44,39 +44,65 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
   }
 
   void _getData() async {
-    dynamic res = await apiClient.getAllProjectNames();
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
 
-    if(res?["success"] == true){
-      for(var e in res["res"]){
-        if(e["Project_Name"] != null && e["Project_ID"] != null){
+      dynamic res = await apiClient.getAllProjectNames();
+      for (var e in res["res"]) {
+        if (e["Project_Name"] != null && e["Project_ID"] != null) {
           projects.add(e["Project_Name"]);
           idMap[e["Project_Name"]] = e["Project_ID"];
         }
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+    } finally {
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
 
   void postData() async {
-    if(validate() == true){
-      dynamic res = await apiClient.addToTimeSheet(idMap[project.text], date.text, startTime.text, endTime.text, comments.text);
+    try {
+      if (validate() == true) {
+        setState(() {
+          dataLoaded = false;
+        });
+print(startTime.text);
+        dynamic res = await apiClient.addToTimeSheet(idMap[project.text],
+            date.text, startTime.text, endTime.text, comments.text);
 
-      print(res);
-      if(res?["success"] == true){
-        ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-        Navigator.pop(context, "Changed");
-      }else{
-        ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+        print(res);
+        if (res["success"] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+          Navigator.pop(context, true);
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
       }
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-    }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+    } finally {
+      setState(() {
+        dataLoaded = true;
+      });
 
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
   }
 
   bool validate() {
-    if(project.text == "" || date.text == "" || startTime.text == "" || endTime.text == ""){
+    if (project.text == "" ||
+        date.text == "" ||
+        startTime.text == "" ||
+        endTime.text == "") {
       return false;
     }
     return true;
@@ -85,17 +111,26 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
   @override
   Widget build(context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: GestureDetector(
-            child: const Icon(Icons.close),
-            onTap: () => Navigator.pop(context, "Not Changed"),
-          ),
-          title: const Text("Add Event"),
-          titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
-          backgroundColor: Colors.black,
+      appBar: AppBar(
+        leading: GestureDetector(
+          child: const Icon(Icons.close),
+          onTap: () => Navigator.pop(context, false),
         ),
-        backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
-        body: body());
+        title: const Text("Add Event"),
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
+        backgroundColor: Colors.black,
+      ),
+      backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
+      body: Visibility(
+        replacement: const Center(
+          child: CircularProgressIndicator(
+            color: Color.fromRGBO(134, 97, 255, 1),
+          ),
+        ),
+        visible: dataLoaded,
+        child: body(),
+      ),
+    );
   }
 
   Widget body() {
@@ -105,11 +140,14 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
         children: [
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              project.text = suggestion==null ? "" : suggestion.toString();
+              project.text = suggestion == null ? "" : suggestion.toString();
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(
+                  suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
                 tileColor: Colors.black,
               );
             },
@@ -120,7 +158,10 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
               var curList = [];
 
               for (var e in projects) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                if (e
+                    .toString()
+                    .toLowerCase()
+                    .startsWith(pattern.toLowerCase())) {
                   curList.add(e);
                 }
               }
@@ -138,24 +179,29 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     hintText: "Project*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.text,
             controller: comments,
             decoration: const InputDecoration(
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
                 hintText: "Your Comments",
-                hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-            ),
+                hintStyle:
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -179,7 +225,7 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                           onSurface: Colors.white,
                         ),
                         dialogBackgroundColor:
-                        const Color.fromRGBO(41, 41, 41, 1),
+                            const Color.fromRGBO(41, 41, 41, 1),
                       ),
                       child: child!,
                     );
@@ -199,9 +245,11 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Date",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           Row(
             children: [
               Expanded(
@@ -216,7 +264,8 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                         context: context,
                         initialTime: startTime.text == ""
                             ? TimeOfDay.now()
-                            : TimeOfDay.fromDateTime(DateFormat.jm().parse(startTime.text)),
+                            : TimeOfDay.fromDateTime(
+                                DateFormat.jm().parse(startTime.text)),
                         builder: (context, child) {
                           return Theme(
                             data: ThemeData.dark().copyWith(
@@ -226,13 +275,15 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                                 onSurface: Colors.white,
                               ),
                               dialogBackgroundColor:
-                              const Color.fromRGBO(41, 41, 41, 1),
+                                  const Color.fromRGBO(41, 41, 41, 1),
                             ),
                             child: child!,
                           );
                         }).then((value) {
                       setState(() {
-                        startTime.text = value != null ? value.format(context) : startTime.text;
+                        startTime.text = value != null
+                            ? value.format(context)
+                            : startTime.text;
                       });
                     });
                   },
@@ -244,7 +295,7 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                           borderSide: BorderSide(color: Colors.white)),
                       hintText: "Start Time",
                       hintStyle:
-                      TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                          TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
                 ),
               ),
               const SizedBox(
@@ -262,7 +313,8 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                         context: context,
                         initialTime: endTime.text == ""
                             ? TimeOfDay.now()
-                            : TimeOfDay.fromDateTime(DateFormat.jm().parse(endTime.text)),
+                            : TimeOfDay.fromDateTime(
+                                DateFormat.jm().parse(endTime.text)),
                         builder: (context, child) {
                           return Theme(
                             data: ThemeData.dark().copyWith(
@@ -272,13 +324,15 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                                 onSurface: Colors.white,
                               ),
                               dialogBackgroundColor:
-                              const Color.fromRGBO(41, 41, 41, 1),
+                                  const Color.fromRGBO(41, 41, 41, 1),
                             ),
                             child: child!,
                           );
                         }).then((value) {
                       setState(() {
-                        endTime.text = value != null ? value.format(context) : endTime.text;
+                        endTime.text = value != null
+                            ? value.format(context)
+                            : endTime.text;
                       });
                     });
                   },
@@ -290,22 +344,23 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
                           borderSide: BorderSide(color: Colors.white)),
                       hintText: "End Time",
                       hintStyle:
-                      TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                          TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
                 ),
               )
             ],
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           Container(
             padding: const EdgeInsets.fromLTRB(100, 0, 100, 0),
             child: ElevatedButton(
               onPressed: () => postData(),
-              style: ElevatedButton.styleFrom(primary: const Color.fromRGBO(134, 97, 255, 1)),
-              child: const Text("Add Work",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16
-                ),
+              style: ElevatedButton.styleFrom(
+                  primary: const Color.fromRGBO(134, 97, 255, 1)),
+              child: const Text(
+                "Add Work",
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           )
@@ -313,5 +368,4 @@ class _TimeSheetNewDialogState extends State<TimeSheetNewDialog>{
       ),
     );
   }
-
 }

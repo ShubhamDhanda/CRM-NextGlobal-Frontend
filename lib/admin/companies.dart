@@ -221,10 +221,6 @@ class _CompaniesState extends State<Companies>{
             _onSearchChanged(searchController.text);
           });
         },
-        child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Icon(Icons.filter_alt),
-        ),
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(const Color.fromRGBO(134, 97, 255, 1)),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -232,6 +228,10 @@ class _CompaniesState extends State<Companies>{
                   borderRadius: BorderRadius.circular(40.0),
                 )
             )
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Icon(Icons.filter_alt),
         ),
       ),
     );
@@ -317,13 +317,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["name"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -358,13 +357,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["address"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -380,13 +378,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["city"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -402,13 +399,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["province"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -424,13 +420,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["country"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -446,13 +441,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["businessPhone"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -468,13 +462,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["email"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
               const SizedBox(
@@ -490,13 +483,12 @@ class _CompaniesState extends State<Companies>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(child: Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["webpage"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
-                  ),
-                    fit: FlexFit.loose,)
+                  ),)
                 ],
               ),
             ],

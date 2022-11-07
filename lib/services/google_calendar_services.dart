@@ -80,7 +80,6 @@ class GoogleCalendar{
 
       return res;
     } catch(err){
-    } catch(err){
       print("Error - $err");
     }
     return "unconfirmed";

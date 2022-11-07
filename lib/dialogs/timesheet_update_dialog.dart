@@ -20,7 +20,7 @@ class _TimeSheetUpdateDialogState extends State<TimeSheetUpdateDialog> {
   TextEditingController endTime = TextEditingController();
 
   var apiClient = RemoteServices();
-  bool loading = false;
+  bool dataLoaded = false;
   List<String> projects = [];
   Map<String, int> idMap = {};
 
@@ -55,16 +55,28 @@ class _TimeSheetUpdateDialogState extends State<TimeSheetUpdateDialog> {
     _getData();
   }
 
-  void _getData() async {
-    dynamic res = await apiClient.getAllProjectNames();
+    void _getData() async {
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
 
-    if(res?["success"] == true){
-      for(var e in res["res"]){
-        if(e["Project_Name"] != null && e["Project_ID"] != null){
+      dynamic res = await apiClient.getAllProjectNames();
+      for (var e in res["res"]) {
+        if (e["Project_Name"] != null && e["Project_ID"] != null) {
           projects.add(e["Project_Name"]);
           idMap[e["Project_Name"]] = e["Project_ID"];
         }
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+    } finally {
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
 
@@ -85,14 +97,22 @@ class _TimeSheetUpdateDialogState extends State<TimeSheetUpdateDialog> {
         appBar: AppBar(
           leading: GestureDetector(
             child: const Icon(Icons.close),
-            onTap: () => Navigator.pop(context, "Not Changed"),
+            onTap: () => Navigator.pop(context, false),
           ),
-          title: const Text("Add Event"),
+          title: const Text("Update Event"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
-        body: body());
+        body: Visibility(
+        replacement: const Center(
+          child: CircularProgressIndicator(
+            color: Color.fromRGBO(134, 97, 255, 1),
+          ),
+        ),
+        visible: dataLoaded,
+        child: body(),
+      ),);
   }
 
   Widget body() {
@@ -298,7 +318,7 @@ class _TimeSheetUpdateDialogState extends State<TimeSheetUpdateDialog> {
             child: ElevatedButton(
               onPressed: () => postData(),
               style: ElevatedButton.styleFrom(primary: const Color.fromRGBO(134, 97, 255, 1)),
-              child: const Text("Add Work",
+              child: const Text("Update Work",
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 16

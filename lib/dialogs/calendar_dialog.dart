@@ -35,8 +35,7 @@ class _CalendarDialogState extends State<CalendarDialog> {
 
       value.forEach((e) {
         if(e.start!.dateTime == null || e.end!.dateTime == null) return;
-
-        print(DateTime.parse(e.start!.dateTime!.toString()).toLocal());
+        
         apps.add(
             CalendarEvent(
                 startTime: DateTime.parse(e.start!.dateTime!.toString()).toLocal(),
@@ -93,14 +92,8 @@ class _CalendarDialogState extends State<CalendarDialog> {
                       );
                     },
                     pageBuilder: (context, animation, secondaryAnimation) => const CalendarEventDialog()).then((value) {
-                      if(value! == "Changed"){
-                        setState(() {
-                          dataLoaded = false;
-                        });
+                      if(value == true){
                         _getData();
-                        setState(() {
-                          dataLoaded = true;
-                        });
                       }
                 }
                 );

@@ -23,6 +23,7 @@ const List<String> titles = [
 class _CalendarEventDialogDialog extends State<CalendarEventDialog> {
   TextEditingController title = TextEditingController();
   TextEditingController project = TextEditingController();
+  var projectId;
   TextEditingController comments = TextEditingController();
   TextEditingController description = TextEditingController();
   TextEditingController date = TextEditingController();
@@ -31,11 +32,11 @@ class _CalendarEventDialogDialog extends State<CalendarEventDialog> {
 
   var apiClient = RemoteServices();
   GoogleCalendar googleCalendar = GoogleCalendar();
-  bool loading = false;
+  bool dataLoaded = false;
   List<String> list = [], clientList = [];
-  List<String> employees = [], clients = [];
+  List<String> employees = [], clients = [], projects = [];
   Map<String, String> empMap = {}, clientMap = {};
-  List<String> projects = [];
+  Map<String, int>projectMap = {};
 
   final snackBar1 = const SnackBar(
     content: Text('Meet Added Successfully'),
@@ -59,44 +60,55 @@ class _CalendarEventDialogDialog extends State<CalendarEventDialog> {
   }
 
   void _getData() async {
-    dynamic res = await apiClient.getAllEmployeeNames();
-    dynamic res2 = await apiClient.getAllProjectNames();
-    dynamic res3 = await apiClient.getAllCustomerNames();
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
 
-    if(res?["success"] == true && res2?["success"] && res3?["success"]){
+      dynamic res = await apiClient.getAllEmployeeNames();
+      dynamic res2 = await apiClient.getAllProjectNames();
+      dynamic res3 = await apiClient.getAllCustomerNames();
+
       for(var e in res["res"]){
         employees.add(e["Full_Name"]);
-        empMap[e["Full_Name"]] = e["Email"];
+        empMap[e["Full_Name"]] = e["Email_Work"];
       }
 
       for(var e in res3["res"]){
         if(e["Email"] != null && e["Email"] != "") {
           clients.add(e["Full_Name"]);
-          clientMap[e["Full_Name"]] = e["Email"];
+          clientMap[e["Full_Name"]] = e["Email_Work"];
         }
       }
 
       for(var e in res2["res"]){
         if(e["Project_Name"] != null) {
           projects.add(e["Project_Name"]);
+          projectMap[e["Project_Name"]] = e["Project_ID"];
         }
       }
-    }else{
+    } catch(e) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar2);
-    }
+    } finally{
+      setState(() {
+        dataLoaded = true;
+      });
 
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
   }
 
   void postData() async {
     if(validate() == true){
       var start = DateTime.parse("${date.text} ${DateFormat.jm().parse(startTime.text).toString().split(" ")[1]}");
       var end = DateTime.parse("${date.text} ${DateFormat.jm().parse(endTime.text).toString().split(" ")[1]}");
-      googleCalendar.createEvent(title.text, project.text, comments.text, description.text, start, end, list).then((res) {
+
+      googleCalendar.createEvent(title.text, project.text, comments.text, description.text, start, end, list).then((res) async {
         if(res=="confirmed"){
+          dynamic res = await apiClient.addToTimeSheet(projectId, date.text, startTime.text, endTime.text, title.text);
           ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-          Navigator.pop(context, "Changed");
+          Navigator.pop(context, true);
         }else{
           ScaffoldMessenger.of(context).showSnackBar(snackBar2);
         }
@@ -110,7 +122,7 @@ class _CalendarEventDialogDialog extends State<CalendarEventDialog> {
   }
 
   bool validate() {
-    if(title.text == "" || project.text == "" || date.text == "" || startTime.text == "" || endTime.text == "" || DateTime.parse(date.text).isBefore(DateTime.now()) || DateFormat.jm().parse(startTime.text).isAfter(DateFormat.jm().parse(endTime.text))) {
+    if(title.text == "" || project.text == "" || date.text == "" || startTime.text == "" || endTime.text == "" || DateFormat.jm().parse(startTime.text).isAfter(DateFormat.jm().parse(endTime.text))) {
       return false;
     }
 
@@ -123,14 +135,23 @@ class _CalendarEventDialogDialog extends State<CalendarEventDialog> {
         appBar: AppBar(
           leading: GestureDetector(
             child: const Icon(Icons.close),
-            onTap: () => Navigator.pop(context, "Not Changed"),
+            onTap: () => Navigator.pop(context, false),
           ),
           title: const Text("Add Event"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
-        body: body());
+        body: Visibility(
+          replacement: const Center(
+            child: CircularProgressIndicator(
+              color: Color.fromRGBO(134, 97, 255, 1),
+            ),
+          ),
+          visible: dataLoaded,
+          child: body(),
+        )
+    );
   }
 
   Widget body() {
@@ -180,7 +201,10 @@ class _CalendarEventDialogDialog extends State<CalendarEventDialog> {
           const SizedBox(height: 20,),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              project.text = suggestion==null ? "" : suggestion.toString();
+              if(suggestion!=null) {
+                project.text = suggestion.toString();
+                projectId = projectMap[project.text];
+              }
             },
             itemBuilder: (context, suggestion) {
               return ListTile(

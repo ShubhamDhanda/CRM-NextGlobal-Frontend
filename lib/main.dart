@@ -1,15 +1,15 @@
 import 'package:crm/admin/add_data.dart';
 import 'package:crm/admin/admin.dart';
 import 'package:crm/admin/assets.dart';
+import 'package:crm/admin/budgets.dart';
 import 'package:crm/admin/companies.dart';
 import 'package:crm/admin/customers.dart';
 import 'package:crm/admin/employees.dart';
 import 'package:crm/admin/pending_requests.dart';
 import 'package:crm/admin/projects.dart';
 import 'package:crm/admin/requests.dart';
-import 'package:crm/admin/shippers.dart';
-import 'package:crm/admin/suppliers.dart';
 import 'package:crm/engineers/engineers_dashboard.dart';
+import 'package:crm/engineers/projects.dart' as engineer_projects;
 import 'package:crm/finances/finances_dashboard.dart';
 import 'package:crm/it/it_dashboard.dart';
 import 'package:crm/login.dart';
@@ -45,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/customers' : (context) => const Customers(),
         '/projects' : (context) => const Projects(),
         '/employees' : (context) => const Employees(),
+        '/budgets' : (context) => const Budgets(),
         '/requests' : (context) => const Requests(),
         '/pendingRequests' : (context) => const PendingRequests(),
         '/assets' : (context) => const Assets(),
@@ -54,7 +55,11 @@ class MyApp extends StatelessWidget {
         '/supplier' : (context) => const SupplierDashboard(),
         '/logistics' : (context) => const LogisticsDashboard(),
         '/finance' : (context) => const FinanceDashboard(),
+
+        //Engineer Dashboard
         '/engineer' : (context) => const EngineersDashboard(),
+        '/engineerProjects' : (context) => const engineer_projects.Projects(),
+
         '/it' : (context) => const ItDashboard(),
         '/manager' : (context) => const ManagerDashboard()
       }
@@ -89,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToHome() async {
-    await Future.delayed(Duration(milliseconds: 1500), () {});
+    await Future.delayed(const Duration(milliseconds: 1500), () {});
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? val = prefs.getString('auth-token')==null ? "" : prefs.getString('isLoggedIn');

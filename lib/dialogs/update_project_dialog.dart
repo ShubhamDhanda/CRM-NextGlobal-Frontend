@@ -2,6 +2,7 @@ import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
@@ -14,15 +15,30 @@ class updateProjectDialog extends StatefulWidget{
   State<StatefulWidget> createState() => _updateProjectDialogState(mp: mp);
 }
 
-const List<String> stages = <String>[
-  "New Project",
-  "Modifications",
-  "Quote",
-  "Negotiation",
-  "Closed",
-  "Dead"
+List<String> clients = [];
+Map<String, String> empMap = {}, clientMap = {};
+Map<String, int> projectManagerMap = {};
+var stringList,empId,Team;
+var status;
+List<Map<String, dynamic>> customers = [];
+List<String> departments = ["Storm Water","Traffic","Transportation","Site Plan","Land Development","Proposal","Take-Off","Data Mining","IT","Smart Infra","Marketing"];
+List<String> categories = ["Water Main","Road","Highway","Traffic","Site Development","Site Plan","Traffic","Sub Division"];
+const List<String> Status = <String>["Not Started Yet", "Ongoing","Completed"];
+List<String> Departments = [];
+List<Map<String, dynamic>> employees = [];
+List<Map<String, dynamic>> search = [];
+List<Map<String, dynamic>> search1 = [];
+List<Map<String, dynamic>> filtered = [];
+bool dataLoaded = false;
+var ProjectManager;
+const List<String> list = <String>[
+  'New Project',
+  'Modifications',
+  'Quote',
+  'Negotiation',
+  'Closed',
+  'Dead'
 ];
-
 const List<String> depts = <String>[
   'Engineer',
   'Manager',
@@ -32,6 +48,7 @@ const List<String> depts = <String>[
   'Dead'
 ];
 
+
 class _updateProjectDialogState extends State<updateProjectDialog>{
   final Map<String, dynamic> mp;
   TextEditingController projectController = TextEditingController();
@@ -39,17 +56,13 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
   TextEditingController followUpNotes = TextEditingController();
   TextEditingController nextFollowUp = TextEditingController();
   TextEditingController tentClosing = TextEditingController();
-  TextEditingController empId = TextEditingController();
-  TextEditingController productQuantity = TextEditingController();
-  TextEditingController productSpecified = TextEditingController();
   TextEditingController projectValue = TextEditingController();
-  TextEditingController consultant = TextEditingController();
   TextEditingController city = TextEditingController();
   TextEditingController province = TextEditingController();
   TextEditingController department = TextEditingController();
-  TextEditingController assignedTo = TextEditingController();
-  TextEditingController distributor = TextEditingController();
-  TextEditingController contractor = TextEditingController();
+  TextEditingController projectManager = TextEditingController();
+  TextEditingController teamMembers = TextEditingController();
+  TextEditingController projectCategory = TextEditingController();
 
   final snackBar1 = const SnackBar(
     content: Text('Please fill all the Required fields!'),
@@ -67,7 +80,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
   );
 
   var apiClient = RemoteServices();
-  bool loading = false;
+  bool dataLoaded = false;
   var projectStageVal, dept;
   List<String> cities = Constants.cities;
   List<String> provinces = Constants.provinces;
@@ -75,6 +88,9 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
   List<String> contractors = <String>[];
   List<String> consultants = <String>[];
   List<String> employees = <String>[];
+  List<String> prevCat = [];
+  List<String> prevDep= [];
+  List<String> prevMember = [];
 
   _updateProjectDialogState({required this.mp}) {
     projectController.text = mp["name"];
@@ -83,17 +99,24 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
     followUpNotes.text = mp["followupNotes"];
     nextFollowUp.text = mp["nextFollowup"];
     tentClosing.text = mp["tentClosing"];
-    empId.text = mp["employee"];
-    productQuantity.text = mp["quantity"];
-    productSpecified.text = mp["specified"];
     projectValue.text = mp["value"];
-    consultant.text = mp["consultant"];
     city.text = mp["city"];
     province.text = mp["province"];
-    dept = mp["department"]=="" ? "Engineer" : mp["department"];
-    assignedTo.text = mp["assignedTo"];
-    contractor.text = mp["contractor"];
-    distributor.text = mp["distributor"];
+    department.text = mp["department"];
+    projectManager.text = mp["projectManager"] ?? "";
+    teamMembers.text = mp["teamMembers"];
+    projectCategory.text = mp["projectCategory"];
+    projectCategory.text = mp["projectCategory"];
+    print(mp["projectCategory"]);
+
+    if(mp["status"]!=""){
+      status = mp["status"];
+    }
+    prevDep = department.text.split(",");
+    print(prevDep);
+    prevMember = teamMembers.text.split(",");
+    print(prevMember);
+
   }
 
   @override
@@ -104,30 +127,37 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
   }
 
   void _getData() async {
-    dynamic res = await apiClient.getAllDistributors();
-    dynamic res2 = await apiClient.getAllConsultants();
+    setState(() {
+      dataLoaded = false;
+    });
+    // dynamic res = await apiClient.getAllDistributors();
+    // dynamic res2 = await apiClient.getAllConsultants();
     dynamic res3 = await apiClient.getAllEmployeeNames();
-    dynamic res4 = await apiClient.getAllContractors();
+    // dynamic res4 = await apiClient.getAllContractors();
 
-    if(res?["success"] == true && res2?["success"] == true && res3?["success"] == true && res4?["success"]){
-      for(var e in res["res"]){
-        distributors.add(e["Full_Name"].toString());
-      }
-
-      for(var e in res2["res"]){
-        consultants.add(e["Full_Name"].toString());
-      }
+    // if(res?["success"] == true && res2?["success"] == true && res3?["success"] == true && res4?["success"]){
+    if(res3?["success"] == true ){
+      // for(var e in res["res"]){
+      //   distributors.add(e["Full_Name"].toString());
+      // }
+      //
+      // for(var e in res2["res"]){
+      //   consultants.add(e["Full_Name"].toString());
+      // }
 
       for(var e in res3["res"]){
         employees.add(e["Full_Name"].toString());
       }
-
-      for(var e in res4["res"]){
-        contractors.add(e["Full_Name"].toString());
-      }
+      print(employees);
+      // for(var e in res4["res"]){
+      //   contractors.add(e["Full_Name"].toString());
+      // }
     }else{
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
     }
+    setState(() {
+      dataLoaded = true;
+    });
 
     await Future.delayed(Duration(seconds: 2));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -135,30 +165,53 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
 
   void postData() async {
     setState(() {
-      loading = true;
+      dataLoaded = false;
     });
 
     if (validate() == true) {
-      dynamic res = await apiClient.updateProject(mp["id"], projectController.text, dueDate.text, projectStageVal.toString(), followUpNotes.text, nextFollowUp.text, tentClosing.text, productQuantity.text, productSpecified.text, projectValue.text, consultant.text, city.text, province.text, department.text, assignedTo.text, contractor.text, distributor.text);
+      dynamic res = await apiClient.updateProject(mp["id"], projectController.text, dueDate.text, projectStageVal.toString(), followUpNotes.text, nextFollowUp.text, tentClosing.text,  projectValue.text,  city.text, province.text, stringList, projectManager.text,  Team, status.toString(),projectCategory.text);
 
       if(res?["success"]==true) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(snackBar3);
       } else {
+
+        print("NO");
         ScaffoldMessenger.of(context).showSnackBar(snackBar4);
       }
 
-    setState(() {
-      loading = false;
-    });
+      setState(() {
+        dataLoaded = false;
+      });
 
-    await Future.delayed(Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
 
+  void _onSearchChanged(String text) async {
+    setState(() {
+      dataLoaded = false;
+    });
+    search.clear();
+
+    if(text.isEmpty){
+      search.addAll(filtered);
+    }else{
+      search.forEach((e) {
+        if(e["firstName"].toString().toLowerCase().contains(text.toLowerCase()) || e["lastName"].toString().toLowerCase().contains(text.toLowerCase()) || (e["firstName"] + " " + e["lastName"]).toString().toLowerCase().contains(text.toLowerCase()) || (int.tryParse(text)!=null && e["id"] == int.parse(text))  || e["company"].toString().toLowerCase().contains(text.toLowerCase())){
+          search.add(e);
+        }
+      });
+    }
+
+    setState(() {
+      dataLoaded = true;
+    });
+  }
+
   bool validate() {
-    if(projectController.text=="" || dueDate.text=="" || projectStageVal.toString() == "" || tentClosing.text == "" || projectValue.text == "" || consultant.text == "" || dept.toString() == "" || assignedTo.text == ""){
+    if(projectController.text=="" || dueDate.text=="" || projectStageVal.toString() == "" || tentClosing.text == "" || projectValue.text == "" ||stringList == ""|| projectManager.text==""){
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
       return false;
     }
@@ -182,13 +235,21 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
         backgroundColor: Colors.black,
       ),
       backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
-      body: form(),
+      body: Visibility(
+        replacement: const Center(
+          child: CircularProgressIndicator(
+            color: Color.fromRGBO(134, 97, 255, 1),
+          ),
+        ),
+        visible: dataLoaded,
+        child: form(),
+      ),
     );
   }
 
   Widget form() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
       child: ListView(
         children: [
           TextField(
@@ -196,10 +257,10 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.text,
             controller: projectController,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
+                focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Project Name*",
                 hintStyle:
@@ -208,6 +269,50 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
           const SizedBox(
             height: 20,
           ),
+          TypeAheadFormField(
+            onSuggestionSelected: (suggestion) {
+              projectCategory.text = suggestion==null ? "" : suggestion.toString();
+            },
+
+            itemBuilder: (context, suggestion) {
+              return ListTile(
+                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                tileColor: Colors.black,
+              );
+            },
+            transitionBuilder: (context, suggestionsBox, controller) {
+              return suggestionsBox;
+            },
+            suggestionsCallback: (pattern) {
+              var curListed = [];
+
+              for (var e in categories) {
+                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                  curListed.add(e);
+                }
+              }
+
+              return curListed;
+            },
+            textFieldConfiguration: TextFieldConfiguration(
+                cursorColor: Colors.white,
+                onChanged: (text){
+
+                },
+                style: const TextStyle(color: Colors.white),
+                keyboardType: TextInputType.text,
+                controller: projectCategory,
+                decoration: const InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    hintText: "Project Category*",
+                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                )
+            ),
+          ),
+          const SizedBox(height: 20,),
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -225,7 +330,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
                   builder: (context, child) {
                     return Theme(
                       data: ThemeData.dark().copyWith(
-                        colorScheme: ColorScheme.dark(
+                        colorScheme: const ColorScheme.dark(
                           onPrimary: Colors.white,
                           surface: Colors.black,
                           onSurface: Colors.white,
@@ -244,12 +349,12 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
               });
             },
             controller: dueDate,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
+                focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Project Due Date*",
+                hintText: "Due Date*",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -260,9 +365,9 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
             value: projectStageVal,
             isExpanded: true,
             dropdownColor: Colors.black,
-            hint: Text(
+            hint: const Text(
               "Project Stage*",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16.0),
             ),
             icon: null,
             style: const TextStyle(color: Colors.white),
@@ -276,12 +381,12 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
                 projectStageVal = value!;
               });
             },
-            items: stages.map<DropdownMenuItem<String>>((String value) {
+            items: list.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(
                   value,
-                  style: TextStyle(),
+                  style: const TextStyle(),
                 ),
               );
             }).toList(),
@@ -294,10 +399,10 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.text,
             controller: followUpNotes,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
+                focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Follow Up Notes",
                 hintStyle:
@@ -323,7 +428,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
                   builder: (context, child) {
                     return Theme(
                       data: ThemeData.dark().copyWith(
-                        colorScheme: ColorScheme.dark(
+                        colorScheme: const ColorScheme.dark(
                           // primary: Colors.black,
                           onPrimary: Colors.white,
                           surface: Colors.black,
@@ -343,10 +448,10 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
               });
             },
             controller: nextFollowUp,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
+                focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Next Follow Up",
                 hintStyle:
@@ -372,7 +477,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
                   builder: (context, child) {
                     return Theme(
                       data: ThemeData.dark().copyWith(
-                        colorScheme: ColorScheme.dark(
+                        colorScheme: const ColorScheme.dark(
                           // primary: Colors.black,
                           onPrimary: Colors.white,
                           surface: Colors.black,
@@ -392,10 +497,10 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
               });
             },
             controller: tentClosing,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
+                focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Tentative Closing Date*",
                 hintStyle:
@@ -404,49 +509,16 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
           const SizedBox(
             height: 20,
           ),
-          TextField(
-            cursorColor: Colors.white,
-            style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.number,
-            controller: productQuantity,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                hintText: "Product Quantity",
-                hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextField(
-            cursorColor: Colors.white,
-            style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.number,
-            controller: productSpecified,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                hintText: "Product Specified",
-                hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.number,
             controller: projectValue,
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: const UnderlineInputBorder(
+                focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Project Value*",
                 hintStyle:
@@ -455,13 +527,14 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
           const SizedBox(
             height: 20,
           ),
+
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               city.text = suggestion==null ? "" : suggestion.toString();
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: TextStyle(color: Colors.white),),
+                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
                 tileColor: Colors.black,
               );
             },
@@ -484,12 +557,12 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
                 controller: city,
-                decoration: InputDecoration(
-                    enabledBorder: const UnderlineInputBorder(
+                decoration: const InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: const UnderlineInputBorder(
+                    focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    hintText: "City",
+                    hintText: "City*",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
@@ -503,7 +576,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: TextStyle(color: Colors.white),),
+                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
                 tileColor: Colors.black,
               );
             },
@@ -526,10 +599,10 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
                 controller: province,
-                decoration: InputDecoration(
-                    enabledBorder: const UnderlineInputBorder(
+                decoration: const InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: const UnderlineInputBorder(
+                    focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     hintText: "Province",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
@@ -539,65 +612,48 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
           const SizedBox(
             height: 20,
           ),
-          DropdownButton<String>(
-            value: dept,
-            isExpanded: true,
-            dropdownColor: Colors.black,
-            hint: Text(
-              "Department*",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5), fontSize: 16.0),
+          DropdownSearch<String>.multiSelection(
+            items: departments,
+            selectedItems: prevDep,
+            dropdownButtonProps: const DropdownButtonProps(
+                color: Color.fromRGBO(255, 255, 255, 0.5)
             ),
-            style: const TextStyle(color: Colors.white),
-            underline: Container(
-              height: 1,
-              color: Colors.white,
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    hintText: "Departments",
+                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                )
             ),
-            onChanged: (String? value) {
-              setState(() {
-                dept = value!;
-              });
+            // dropdownBuilder: (context, distributors) {
+            //   return
+            // },
+            popupProps: const PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                menuProps: MenuProps(
+                  backgroundColor: Colors.white,
+                )
+            ),
+            onChanged: (value) {
+              Departments = value;
+              Departments.sort((a, b) => a.toString().compareTo(b.toString()));
+              stringList = Departments.join(",");
+              print(stringList);
             },
-            items: depts.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(
-                  value,
-                  style: TextStyle(),
-                ),
-              );
-            }).toList(),
           ),
           const SizedBox(
             height: 20,
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion?.toString() == "+ Add Employee"){
-                Navigator.pop(context);
-                showGeneralDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    transitionDuration: Duration(milliseconds: 500),
-                    transitionBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                    pageBuilder: (context, animation, secondaryAnimation) => const AddEmployeeDialog());
-                return;
-              }
-              assignedTo.text = suggestion==null ? "" : suggestion.toString();
+              projectManager.text = suggestion==null ? "" : suggestion.toString();
             },
+
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: TextStyle(color: Colors.white),),
+                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
                 tileColor: Colors.black,
               );
             },
@@ -605,7 +661,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = ["+ Add Employee"];
+              var curList = [];
 
               for (var e in employees) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
@@ -617,213 +673,133 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
             },
             textFieldConfiguration: TextFieldConfiguration(
                 cursorColor: Colors.white,
+                onChanged: _onSearchChanged,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: assignedTo,
-                decoration: InputDecoration(
-                    enabledBorder: const UnderlineInputBorder(
+                controller: projectManager,
+                decoration: const InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: const UnderlineInputBorder(
+                    focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Assigned To*",
+                    hintText: "Project Manager*",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
+          ),
+          const SizedBox(height: 20,),
+
+          // TypeAheadFormField(
+          //   onSuggestionSelected: (suggestion) {
+          //     teamMembers.text = suggestion==null ? "" : suggestion.toString();
+          //   },
+          //
+          //   itemBuilder: (context, suggestion) {
+          //     return ListTile(
+          //       title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+          //       tileColor: Colors.black,
+          //     );
+          //   },
+          //   transitionBuilder: (context, suggestionsBox, controller) {
+          //     return suggestionsBox;
+          //   },
+          //   suggestionsCallback: (pattern) {
+          //     var curListed = [];
+          //
+          //     for (var e in employees) {
+          //       if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+          //         curListed.add(e);
+          //       }
+          //     }
+          //
+          //     return curListed;
+          //   },
+          //   textFieldConfiguration: TextFieldConfiguration(
+          //       cursorColor: Colors.white,
+          //       onChanged: _onSearchChange2,
+          //       style: const TextStyle(color: Colors.white),
+          //       keyboardType: TextInputType.text,
+          //       controller: teamMembers,
+          //       decoration: const InputDecoration(
+          //           enabledBorder: UnderlineInputBorder(
+          //               borderSide: BorderSide(color: Colors.white)),
+          //           focusedBorder: UnderlineInputBorder(
+          //               borderSide: BorderSide(color: Colors.white)),
+          //           hintText: "Team Member",
+          //           hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+          //       )
+          //   ),
+          // ),
+          // const SizedBox(height: 20,),
+
+          DropdownSearch<String>.multiSelection(
+            items: employees,
+            selectedItems: prevMember,
+            dropdownButtonProps: const DropdownButtonProps(
+                color: Color.fromRGBO(255, 255, 255, 0.5)
+            ),
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    hintText: "Team Members",
+                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                )
+            ),
+            // dropdownBuilder: (context, distributors) {
+            //   return
+            // },
+            popupProps: const PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                menuProps: MenuProps(
+                  backgroundColor: Colors.white,
+                )
+            ),
+            onChanged: (value) {
+              List<String> member=[];
+              member = value;
+              member.sort((a, b) => a.toString().compareTo(b.toString()));
+              Team = member.join(",");
+              print(Team);
+            },
           ),
           const SizedBox(
             height: 20,
           ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              if(suggestion?.toString() == "+ Add Consultant"){
-                Navigator.pop(context);
-                showGeneralDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    transitionDuration: Duration(milliseconds: 500),
-                    transitionBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                    pageBuilder: (context, animation, secondaryAnimation) => const AddPeopleDialog());
-                return;
-              }
-              consultant.text = suggestion==null ? "" : suggestion.toString();
-            },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = ["+ Add Consultant"];
-
-              for (var e in consultants) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: consultant,
-                decoration: InputDecoration(
-                    enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Consultant",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
+          DropdownButton<String>(
+            value: status,
+            isExpanded: true,
+            dropdownColor: Colors.black,
+            hint: const Text(
+              "Status*",
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              if(suggestion?.toString() == "+ Add Distributor"){
-                Navigator.pop(context);
-                showGeneralDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    transitionDuration: Duration(milliseconds: 500),
-                    transitionBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                    pageBuilder: (context, animation, secondaryAnimation) => const AddPeopleDialog());
-                return;
-              }
-              distributor.text = suggestion==null ? "" : suggestion.toString();
-            },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = ["+ Add Distributor"];
-
-              for (var e in distributors) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: distributor,
-                decoration: InputDecoration(
-                    enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Distributor",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
+            icon: null,
+            style: const TextStyle(color: Colors.white),
+            underline: Container(
+              height: 1,
+              color: Colors.white,
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              if(suggestion?.toString() == "+ Add Contractor"){
-                Navigator.pop(context);
-                showGeneralDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    transitionDuration: Duration(milliseconds: 500),
-                    transitionBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                    pageBuilder: (context, animation, secondaryAnimation) => const AddPeopleDialog());
-                return;
-              }
-              contractor.text = suggestion==null ? "" : suggestion.toString();
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                status = value;
+              });
             },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
+            items: Status.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: const TextStyle(),
+                ),
               );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = ["+ Add Contractor"];
-
-              for (var e in contractors) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: contractor,
-                decoration: InputDecoration(
-                    enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Contractor",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+            }).toList(),
           ),
-          const SizedBox(
-            height: 60,
-          ),
+          const SizedBox(height: 20,),
           Container(
-            padding: EdgeInsets.fromLTRB(100, 0, 100, 0),
+            padding: const EdgeInsets.fromLTRB(100, 0, 100, 0),
             child: ElevatedButton(
               onPressed: () => postData(),
               style: ElevatedButton.styleFrom(

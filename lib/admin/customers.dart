@@ -20,7 +20,7 @@ class _CustomersState extends State<Customers> {
   var apiClient = RemoteServices();
   TextEditingController searchController = TextEditingController();
   bool dataLoaded = false;
-  final snackBar1 = SnackBar(
+  final snackBar1 = const SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
   );
@@ -122,7 +122,7 @@ class _CustomersState extends State<Customers> {
         dataLoaded = true;
       });
 
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
@@ -194,7 +194,7 @@ class _CustomersState extends State<Customers> {
         dataLoaded = true;
       });
 
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
@@ -225,7 +225,7 @@ class _CustomersState extends State<Customers> {
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Clients"),
+          title: const Text("Clients"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
@@ -285,7 +285,7 @@ class _CustomersState extends State<Customers> {
                                 color: const Color.fromRGBO(41, 41, 41, 1),
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                              child: Center(
+                              child: const Center(
                                 child: CircularProgressIndicator(
                                   color: Color.fromRGBO(134, 97, 255, 1),
                                 ),
@@ -316,7 +316,7 @@ class _CustomersState extends State<Customers> {
         // controller: searchController,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          prefixIcon: Icon(Icons.search, color: Colors.white,),
+          prefixIcon: const Icon(Icons.search, color: Colors.white,),
           hintText: "Search",
             hintStyle: const TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
             border: OutlineInputBorder(
@@ -338,13 +338,13 @@ class _CustomersState extends State<Customers> {
   
   Widget filterButton() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       child: ElevatedButton(
         onPressed: () {
           showGeneralDialog(
               context: context,
               barrierDismissible: false,
-              transitionDuration: Duration(milliseconds: 500),
+              transitionDuration: const Duration(milliseconds: 500),
               transitionBuilder: (context, animation, secondaryAnimation, child) {
                 const begin = Offset(0.0, 1.0);
                 const end = Offset.zero;
@@ -375,7 +375,7 @@ class _CustomersState extends State<Customers> {
             }
           });
         },
-        child: Padding(
+        child: const Padding(
           padding: EdgeInsets.all(10.0),
           child: Icon(Icons.filter_alt),
         ),
@@ -431,7 +431,7 @@ class _CustomersState extends State<Customers> {
                       showGeneralDialog(
                           context: context,
                           barrierDismissible: false,
-                          transitionDuration: Duration(milliseconds: 500),
+                          transitionDuration: const Duration(milliseconds: 500),
                           transitionBuilder: (context, animation, secondaryAnimation, child) {
                             const begin = Offset(0.0, 1.0);
                             const end = Offset.zero;
@@ -451,7 +451,7 @@ class _CustomersState extends State<Customers> {
                         }
                       })
                     ,
-                    child: Icon(
+                    child: const Icon(
                       Icons.edit,
                       color: Color.fromRGBO(134, 97, 255, 1),
                     ),

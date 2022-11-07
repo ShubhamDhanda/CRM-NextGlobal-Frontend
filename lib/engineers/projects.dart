@@ -1,4 +1,5 @@
 import 'package:crm/admin/drawer.dart';
+import 'package:crm/dialogs/add_project_dialog.dart';
 import 'package:crm/dialogs/filter_project_dialog.dart';
 import 'package:crm/dialogs/update_project_dialog.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,9 @@ class _ProjectsState extends State<Projects>{
         mp["dueDate"] = e["Project_Due_Date"]==null ? "" : DateFormat("yyyy-MM-dd").parse(e["Project_Due_Date"]).add(Duration(days: 1)).toString().substring(0, 10);
         mp["stage"] = e["Project_Stage"]==null ? "" : e["Project_Stage"].toString();
         mp["followupNotes"] = e["Follow_Up_Notes"]==null ? "" : e["Follow_Up_Notes"].toString();
+        print(mp["followupNotes"]);
         mp["nextFollowup"] = e["Next_Follow_Up"]==null ? "" : DateFormat("yyyy-MM-dd").parse(e["Next_Follow_Up"]).add(Duration(days: 1)).toString().substring(0, 10);
+        print(mp["nextFollowup"]);
         mp["tentClosing"] = e["Tentative_Closing"]==null ? "" : DateFormat("yyyy-MM-dd").parse(e["Tentative_Closing"]).add(Duration(days: 1)).toString().substring(0, 10);
         mp["value"] = e["Project_Value"]==null ? "" : e["Project_Value"].toString();
         mp["city"] = e["City"]==null ? "" : e["City"].toString();
@@ -105,14 +108,47 @@ class _ProjectsState extends State<Projects>{
   @override
   Widget build(context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Projects"),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Center(child: Text("Projects")),
+              GestureDetector(
+                onTap: () async {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) => const AddProjectDialog()).then((value) {
+                     if(value! == true){
+                       _getData();
+                     }
+                  });
+                },
+                child: const Icon(
+                  Icons.add,
+                  color: Color.fromRGBO(134, 97, 255, 1),
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
-        ),
-        drawer: const NavDrawerWidget(
-          name: '/projects',
         ),
         body: dashboard());
   }

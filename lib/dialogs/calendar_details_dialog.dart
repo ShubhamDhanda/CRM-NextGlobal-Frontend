@@ -35,7 +35,7 @@ class _CalendarDetailsDialogState extends State<CalendarDetailsDialog> {
   Widget body() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-      child: Column(
+      child: ListView(
         children: [
           Center(
             child: Text(calendarEvent.subject ?? "No  Title",
