@@ -2,8 +2,8 @@ class Constants {
   static const String iosClientId = "373756743234-smi7ct7k75gfld20nfbhch2k36oc91ag.apps.googleusercontent.com";
   static const String androidClientId = "373756743234-du2ljnfisg6vnr6pucjcq7vhrruhg4tv.apps.googleusercontent.com";
   // static String baseURL = "http://192.168.54.150:8080";
-  static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
-  // static String baseURL = "http://172.16.172.112:8080";
+  // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
+  static String baseURL = "http://172.16.172.112:8080";
   static String login = "/api/login";
 
   static String suppliersDashboard = "/api/getDashboard/suppliers";
@@ -19,6 +19,7 @@ class Constants {
   static String getAllSuppliers = "/api/get/suppliers";
   static String getAllEmployees = "/api/get/employees";
   static String getAllProjects = "/api/get/projects";
+  static String getAllBudgets = "/api/get/budgets";
   static String getAllAssets = "/api/get/assets";
   static String getAllSoftware = "/api/get/softwares";
   static String getTasksById= "/api/get/tasksById";
@@ -32,6 +33,9 @@ class Constants {
   static String getAllConsultants = "/api/get/consultants";
   static String getAllTimesheet = "/api/get/timesheet";
   static String getAllJobTitles = "/api/get/jobTitles";
+  static String getCities = "/api/get/list/cities";
+  static String getDepartments = "/api/get/list/departments";
+  static String getProjectCategories = "/api/get/list/projectCategories";
 
   static String addEmployee = "/api/add/employee";
   static String addContact = "/api/add/contact";
@@ -39,6 +43,7 @@ class Constants {
   static String addSupplier = "/api/add/supplier";
   static String newOrder = "/api/add/order";
   static String addProject = "/api/add/project";
+  static String addBudget = "/api/add/budget";
   static String addCompany = "/api/add/company";
   static String addToTimeSheet = "/api/add/timesheet";
   static String addTask = "/api/add/task";

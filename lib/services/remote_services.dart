@@ -160,6 +160,20 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getBudgets() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllBudgets,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> getAllProjectNames() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -280,6 +294,48 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getCities() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getCities,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getDepartments() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getDepartments,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getProjectCategories() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getProjectCategories,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> getAllSoftware() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -343,6 +399,33 @@ class RemoteServices {
             "webpage": webpage,
             "notes": notes,
             "attachments": attachments
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> addBudget(
+      cityId,
+      departmentId,
+      categoryId,
+      projectName,
+      budgetCategory,
+      budgetAmount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addBudget,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "cityId" : cityId,
+            "departmentId" : departmentId,
+            "categoryId" : categoryId,
+            "projectName" : projectName,
+            "budgetCategory" : budgetCategory,
+            "budgetAmount" : budgetAmount
           });
 
       return resp.data;

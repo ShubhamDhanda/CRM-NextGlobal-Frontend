@@ -1,5 +1,6 @@
 import 'package:crm/admin/drawer.dart';
 import 'package:crm/dialogs/add_asset_dialog.dart';
+import 'package:crm/dialogs/add_budget_dialog.dart';
 import 'package:crm/dialogs/add_company_dialog.dart';
 import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
@@ -128,7 +129,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
                   onClick: () => onRequest(1)),
               requestCard(text: "Add Project",
                   onClick: () => onRequest(2)),
-              requestCard(text: "Add Quote",
+              requestCard(text: "Add Budget",
                   onClick: () => onRequest(3)),
               requestCard(text: "Add Client",
                   onClick: () => onRequest(4)),
@@ -313,7 +314,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
                 child: child,
               );
             },
-            pageBuilder: (context, animation, secondaryAnimation) => const AddQuoteDialog());
+            pageBuilder: (context, animation, secondaryAnimation) => const AddBudgetDialog());
         break;
       case 4:
         showGeneralDialog(

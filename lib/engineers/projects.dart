@@ -17,7 +17,7 @@ class Projects extends StatefulWidget{
 class _ProjectsState extends State<Projects>{
   TextEditingController searchController = TextEditingController();
   var apiClient = RemoteServices();
-  bool dataLoaded = false;
+  bool dataLoaded = false, filtersLoaded = false;
   final snackBar1 = SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
@@ -27,7 +27,7 @@ class _ProjectsState extends State<Projects>{
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
   List<String> projectManager=[];
-  List<String> cat = [];
+  List<String> selectedCat = [], selectedDept = [], dept = [], cat = [];
   int price = 0;
   String name = "";
 
@@ -35,6 +35,7 @@ class _ProjectsState extends State<Projects>{
   void initState() {
     super.initState();
     _getData();
+    _getFilters();
   }
 
   void _getData() async {
@@ -83,6 +84,35 @@ class _ProjectsState extends State<Projects>{
     await Future.delayed(Duration(seconds: 2));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
+
+  void _getFilters() async {
+    try{
+      setState(() {
+        filtersLoaded = false;
+      });
+
+      dynamic res = await apiClient.getDepartments();
+      dynamic res2 = await apiClient.getProjectCategories();
+
+      for(var e in res["res"]){
+        dept.add(e["Department"]);
+      }
+
+      for(var e in res2["res"]){
+        cat.add(e["Project_Category"]);
+      }
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        filtersLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
+
 
   void _onSearchChanged(String text) async {
     setState(() {
@@ -262,7 +292,7 @@ class _ProjectsState extends State<Projects>{
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: !filtersLoaded ? null : () {
           showGeneralDialog(
               context: context,
               barrierDismissible: false,
@@ -281,31 +311,21 @@ class _ProjectsState extends State<Projects>{
                   child: child,
                 );
               },
-              pageBuilder: (context, animation, secondaryAnimation) =>
-              // FilterProjectDialog(cat: cat,price: price, name: name, employee: projectManager)).then((value) {
-              FilterProjectDialog(cat: cat,price: price)).then((value) {
+              pageBuilder: (context, animation, secondaryAnimation) => FilterProjectDialog(cat: cat, dept: dept, prevCat: selectedCat, prevDept: selectedDept)).then((value) {
             filtered.clear();
-            cat = value as List<String>;
-            if (cat.isEmpty) {
+            Map<String, List<String>> mp = value as Map<String, List<String>>;
+            selectedCat = mp["Categories"]!;
+            selectedDept = mp["Departments"]!;
+            if (selectedDept.isEmpty && selectedCat.isEmpty) {
               filtered.addAll(projects);
             } else {
               projects.forEach((e) {
-                String dep = e["department"];
-                List<String> temp = [];
-                temp = dep.split(",");
-                int a= 0;
-                cat.forEach((element) {
-                  if(temp.contains(element)){
-                    a=1;
-                  }
-                });
-                if(a==1)filtered.add(e);
+                if (selectedCat.contains(e["projectCategory"]) || selectedDept.contains(e["department"])) {
+                  filtered.add(e);
+                }
               });
             }
 
-            setState(() {
-              dataLoaded = true;
-            });
             _onSearchChanged(searchController.text);
           });
         },
