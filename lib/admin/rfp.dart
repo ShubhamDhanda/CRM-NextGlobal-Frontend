@@ -1,28 +1,27 @@
 import 'package:crm/admin/drawer.dart';
-import 'package:crm/dialogs/filter_employee_dialog.dart';
 import 'package:crm/dialogs/filter_project_dialog.dart';
-import 'package:crm/dialogs/update_budget_dialog.dart';
+import 'package:crm/dialogs/update_rfp_dialog.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class Budgets extends StatefulWidget{
-  const Budgets({super.key});
+class Rfp extends StatefulWidget{
+  const Rfp({super.key});
 
   @override
-  State<StatefulWidget> createState() => _BudgetsState();
+  State<StatefulWidget> createState() => _RfpState();
 }
 
-class _BudgetsState extends State<Budgets>{
+class _RfpState extends State<Rfp> {
   var apiClient = RemoteServices();
   TextEditingController searchController = TextEditingController();
   bool dataLoaded = false, filtersLoaded = false;
+  List<Map<String, dynamic>> rfps = [], search = [], filtered = [];
+  List<String> selectedCat = [], selectedDept = [], dept = [], cat = [];
   final snackBar1 = const SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
   );
-
-  List<Map<String, dynamic>> budgets = [], search = [], filtered = [];
-  List<String> selectedCat = [], selectedDept = [], dept = [], cat = [];
 
   @override
   void initState() {
@@ -36,8 +35,8 @@ class _BudgetsState extends State<Budgets>{
       setState(() {
         dataLoaded = false;
       });
-      dynamic res = await apiClient.getBudgets();
-      budgets.clear();
+      dynamic res = await apiClient.getAllRFP();
+      rfps.clear();
       search.clear();
       filtered.clear();
 
@@ -46,20 +45,24 @@ class _BudgetsState extends State<Budgets>{
 
         Map<String, dynamic> mp = {};
 
-        mp["budgetId"] = e["Budget_ID"];
+        mp["rfpId"] = e["RFP_ID"].toString();
         mp["cityId"] = e["City_ID"];
         mp["departmentId"] = e["Department_ID"];
-        mp["projectCatId"] = e["Project_Cat_ID"];
+        mp["action"] = e["Action"];
+        mp["projectManagerId"] = e["Project_Manager_ID"];
+        mp["bidDate"] = e["Bid_Date"] == null ? "" : DateFormat("yyyy-MM-dd").format(DateTime.parse(e["Bid_Date"]).toLocal()).toString();
+        mp["startDate"] = e["Start_Date"] == null ? "" : DateFormat("yyyy-MM-dd").format(DateTime.parse(e["Start_Date"]).toLocal()).toString();
+        mp["submissionDate"] = e["Submission_Date"] == null ? "" : DateFormat("yyyy-MM-dd").format(DateTime.parse(e["Submission_Date"]).toLocal()).toString();
         mp["projectName"] = e["Project_Name"] ?? "";
-        mp["budgetCategory"] = e["Budget_Category"] ?? "";
-        mp["budgetAmount"] = e["Budget_Amount"] ?? "";
-        mp["city"] = e["City"];
-        mp["province"] = e["Province"];
-        mp["country"] = e["Country"];
-        mp["department"] = e["Department"];
-        mp["projectCategory"] = e["Project_Category"];
+        mp["rfpNumber"] = e["rfpNumber"] ?? "";
+        mp["amount"] = e["Amount"] ?? "";
+        mp["city"] = e["City"] ?? "";
+        mp["managerName"] = e["Manager_Name"] ?? "";
+        mp["department"] = e["Department"] ?? "";
+        mp["province"] = e["Province"] ?? "";
+        mp["country"] = e["Country"] ?? "";
 
-        budgets.add(mp);
+        rfps.add(mp);
         search.add(mp);
         filtered.add(mp);
       }
@@ -132,12 +135,12 @@ class _BudgetsState extends State<Budgets>{
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Budgets"),
+          title: Text("RFPs"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         drawer: const NavDrawerWidget(
-          name: '/budgets',
+          name: '/rfps',
         ),
         body: dashboard());
   }
@@ -166,7 +169,7 @@ class _BudgetsState extends State<Budgets>{
                     child: search.isEmpty
                         ? const Center(
                       child: Text(
-                        "No Budgets Found",
+                        "No RFPs Found",
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -245,9 +248,9 @@ class _BudgetsState extends State<Budgets>{
             selectedDept = mp["Departments"] ?? [];
 
             if (selectedDept.isEmpty && selectedCat.isEmpty) {
-              filtered.addAll(budgets);
+              filtered.addAll(rfps);
             } else {
-              budgets.forEach((e) {
+              rfps.forEach((e) {
                 if (selectedCat.contains(e["projectCategory"]) || selectedDept.contains(e["department"])) {
                   filtered.add(e);
                 }
@@ -276,7 +279,7 @@ class _BudgetsState extends State<Budgets>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 200,
+        height: 330,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -293,14 +296,14 @@ class _BudgetsState extends State<Budgets>{
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Budget ID : ",
+                      "RFP ID : ",
                       style: TextStyle(
                           color: Color.fromRGBO(134, 97, 255, 1),
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      mp["budgetId"].toString(),
+                      mp["rfpId"].toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -323,9 +326,9 @@ class _BudgetsState extends State<Budgets>{
                               child: child,
                             );
                           },
-                          pageBuilder: (context, animation, secondaryAnimation) => UpdateBudgetDialog(mp : mp)
+                          pageBuilder: (context, animation, secondaryAnimation) => UpdateRfpDialog(mp: mp)
                       ).then((value) {
-                        if(value != null){
+                        if(value == true){
                           _getData();
                           setState(() {
                             dataLoaded = true;
@@ -345,7 +348,7 @@ class _BudgetsState extends State<Budgets>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Design/Product : ",
+                    "Action : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
@@ -354,7 +357,7 @@ class _BudgetsState extends State<Budgets>{
                   Flexible(
                     fit: FlexFit.loose,
                     child: Text(
-                      mp["budgetCategory"],
+                      mp["action"],
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       softWrap: false,
                       overflow: TextOverflow.fade,
@@ -369,7 +372,7 @@ class _BudgetsState extends State<Budgets>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "City : ",
+                    "Bid Date : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
@@ -378,7 +381,7 @@ class _BudgetsState extends State<Budgets>{
                   Flexible(
                     fit: FlexFit.loose,
                     child: Text(
-                      mp["city"],
+                      mp["bidDate"],
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       softWrap: false,
                       overflow: TextOverflow.fade,
@@ -393,7 +396,7 @@ class _BudgetsState extends State<Budgets>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Department : ",
+                    "Start Date : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
@@ -402,7 +405,7 @@ class _BudgetsState extends State<Budgets>{
                   Flexible(
                     fit: FlexFit.loose,
                     child: Text(
-                      mp["department"],
+                      mp["startDate"],
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       softWrap: false,
                       overflow: TextOverflow.fade,
@@ -417,7 +420,7 @@ class _BudgetsState extends State<Budgets>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Category : ",
+                    "Submission Date : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
@@ -426,7 +429,31 @@ class _BudgetsState extends State<Budgets>{
                   Flexible(
                     fit: FlexFit.loose,
                     child: Text(
-                      mp["projectCategory"],
+                      mp["submissionDate"],
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "RFP Number : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      mp["rfpNumber"],
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       softWrap: false,
                       overflow: TextOverflow.fade,
@@ -465,7 +492,7 @@ class _BudgetsState extends State<Budgets>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Budget Amount : ",
+                    "Department : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
@@ -474,7 +501,103 @@ class _BudgetsState extends State<Budgets>{
                   Flexible(
                     fit: FlexFit.loose,
                     child: Text(
-                      "\$ ${mp["budgetAmount"]}",
+                      mp["department"],
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Manager : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      mp["managerName"],
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "City : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      mp["city"],
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Province : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      mp["province"],
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Amount : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      "\$ ${mp["amount"]}",
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       softWrap: false,
                       overflow: TextOverflow.fade,

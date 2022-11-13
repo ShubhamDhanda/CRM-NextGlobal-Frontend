@@ -363,10 +363,12 @@ class _ProjectsState extends State<Projects>{
                             },
                             pageBuilder: (context, animation, secondaryAnimation) => updateProjectDialog(mp: mp)
                         ).then((value) {
-                          _getData();
-                          setState(() {
-                            dataLoaded = true;
-                          });
+                          if(value != null){
+                            _getData();
+                            setState(() {
+                              dataLoaded = true;
+                            });
+                          }
                         })
                     ,
                     child: Icon(

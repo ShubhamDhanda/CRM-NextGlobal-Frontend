@@ -9,8 +9,8 @@ class RemoteServices {
 
   Future<dynamic> login(String username, String password) async {
     try {
-      Response resp = await _dio
-          .post(Constants.login, data: {'username': username, 'password': password});
+      Response resp = await _dio.post(Constants.login,
+          data: {'username': username, 'password': password});
 
       return resp.data;
     } on DioError catch (e) {
@@ -18,10 +18,39 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> getAllProjectRfp() async {
+  Future<dynamic> getAllRFP() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.get(Constants.getAllProjectRfp,
+      Response resp = await _dio.get(Constants.getAllRFP,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getBudgetById(id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getBudgetById,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "id": id
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getBudgetProjects() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getBudgets,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
           }));
@@ -222,7 +251,7 @@ class RemoteServices {
       Response resp = await _dio.get(Constants.getAllCustomers,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
-            "offset" : offset
+            "offset": offset
           }));
 
       return resp.data;
@@ -237,8 +266,8 @@ class RemoteServices {
       Response resp = await _dio.get(Constants.searchCustomers,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
-            "offset" : offset,
-            "search" : search
+            "offset": offset,
+            "search": search
           }));
 
       return resp.data;
@@ -253,8 +282,8 @@ class RemoteServices {
       Response resp = await _dio.get(Constants.filterCustomers,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
-            "offset" : offset,
-            "filter" : filter
+            "offset": offset,
+            "filter": filter
           }));
 
       return resp.data;
@@ -269,9 +298,9 @@ class RemoteServices {
       Response resp = await _dio.get(Constants.searchFilterCustomers,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
-            "offset" : offset,
-            "search" : search,
-            "filter" : filter
+            "offset": offset,
+            "search": search,
+            "filter": filter
           }));
 
       return resp.data;
@@ -407,6 +436,61 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> addRFP(departmentId, action, projectManagerId, bidDate,
+      startDate, submissionDate, projectName, rfpNumber, cityId, amount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Response resp = await _dio.post(Constants.addRFP,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "departmentId": departmentId,
+            "action": action,
+            "projectManagerId": projectManagerId,
+            "bidDate": bidDate,
+            "startDate": startDate,
+            "submissionDate": submissionDate,
+            "projectName": projectName,
+            "rfpNumber": rfpNumber,
+            "cityId": cityId,
+            "amount": amount
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateRFP(id, departmentId, action, projectManagerId, bidDate,
+      startDate, submissionDate, projectName, rfpNumber, cityId, amount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Response resp = await _dio.post(Constants.updateRFP,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "id": id,
+            "departmentId": departmentId,
+            "action": action,
+            "projectManagerId": projectManagerId,
+            "bidDate": bidDate,
+            "startDate": startDate,
+            "submissionDate": submissionDate,
+            "projectName": projectName,
+            "rfpNumber": rfpNumber,
+            "cityId": cityId,
+            "amount": amount
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> addCompany(name, category, address, city, province, country,
       businessPhone, fax, email, webpage, notes, attachments) async {
     try {
@@ -435,25 +519,43 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> addBudget(
-      cityId,
-      departmentId,
-      categoryId,
-      projectName,
-      budgetCategory,
-      budgetAmount) async {
+  Future<dynamic> addBudget(cityId, departmentId, categoryId, projectName,
+      budgetCategory, budgetAmount) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addProject,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "cityId" : cityId,
-            "departmentId" : departmentId,
-            "categoryId" : categoryId,
-            "projectName" : projectName,
-            "budgetCategory" : budgetCategory,
-            "budgetAmount" : budgetAmount
+            "cityId": cityId,
+            "departmentId": departmentId,
+            "categoryId": categoryId,
+            "projectName": projectName,
+            "budgetCategory": budgetCategory,
+            "budgetAmount": budgetAmount
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateBudget(id, cityId, departmentId, categoryId,
+      projectName, budgetCategory, budgetAmount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateBudget,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "id": id,
+            "cityId": cityId,
+            "departmentId": departmentId,
+            "categoryId": categoryId,
+            "projectName": projectName,
+            "budgetCategory": budgetCategory,
+            "budgetAmount": budgetAmount
           });
 
       return resp.data;
@@ -513,50 +615,50 @@ class RemoteServices {
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "department" : department,
-            "salutation" : salutation,
-            "firstName" : firstName,
-            "lastName" : lastName,
-            "emailWork" : emailWork,
-            "emailPersonal" : emailPersonal,
-            "directManagerId" : directManagerId,
-            "username" : username,
-            "password" : password,
-            "jobTitleId" : jobTitleId,
-            "joiningDate" : joiningDate,
-            "business" : business,
-            "mobile" : mobile,
-            "address" : address,
-            "city" : city,
-            "state" : state,
-            "zip" : zip,
-            "country" : country,
-            "expertise" : expertise,
-            "resume" : resume,
-            "softwarePrivilege" : softwarePrivilege,
-            "webpage" : webpage,
-            "notes" : notes,
-            "attachments" : attachments,
-            "proficiency" : proficiency,
-            "interest" : interest,
-            "cocurricular" : cocurricular,
-            "training" : training,
-            "birthday" : birthday,
-            "anniversary" : anniversary,
-            "sports" : sports,
-            "activities" : activities,
-            "beverage" : beverage,
-            "alcohol" : alcohol,
-            "travelDestination" : travelDestination,
-            "spouseName" : spouseName,
-            "children" : children,
-            "tvShow" : tvShow,
-            "movies" : movies,
-            "actor" : actor,
-            "dislikes" : dislikes,
-            "strengths" : strengths,
-            "weaknesses" : weaknesses,
-            "socialActiveIndex" : socialActiveIndex
+            "department": department,
+            "salutation": salutation,
+            "firstName": firstName,
+            "lastName": lastName,
+            "emailWork": emailWork,
+            "emailPersonal": emailPersonal,
+            "directManagerId": directManagerId,
+            "username": username,
+            "password": password,
+            "jobTitleId": jobTitleId,
+            "joiningDate": joiningDate,
+            "business": business,
+            "mobile": mobile,
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip,
+            "country": country,
+            "expertise": expertise,
+            "resume": resume,
+            "softwarePrivilege": softwarePrivilege,
+            "webpage": webpage,
+            "notes": notes,
+            "attachments": attachments,
+            "proficiency": proficiency,
+            "interest": interest,
+            "cocurricular": cocurricular,
+            "training": training,
+            "birthday": birthday,
+            "anniversary": anniversary,
+            "sports": sports,
+            "activities": activities,
+            "beverage": beverage,
+            "alcohol": alcohol,
+            "travelDestination": travelDestination,
+            "spouseName": spouseName,
+            "children": children,
+            "tvShow": tvShow,
+            "movies": movies,
+            "actor": actor,
+            "dislikes": dislikes,
+            "strengths": strengths,
+            "weaknesses": weaknesses,
+            "socialActiveIndex": socialActiveIndex
           });
 
       return resp.data;
@@ -856,7 +958,6 @@ class RemoteServices {
     }
   }
 
-
   Future<dynamic> addProposal(
       cityId,
       departmentId,
@@ -877,8 +978,7 @@ class RemoteServices {
       bidderPrice,
       bidStatus,
       winningPrice,
-      winningBidderId
-      ) async {
+      winningBidderId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addProposal,
@@ -894,7 +994,7 @@ class RemoteServices {
             "status": status,
             "ProjectManagerId": projectManagerId,
             "team": team,
-            "designPrice":designPrice,
+            "designPrice": designPrice,
             "provisionalItems": provisionalItems,
             "contractAdminPrice": contractAdminPrice,
             "subConsultantPrice": subConsultantPrice,
@@ -934,8 +1034,7 @@ class RemoteServices {
       bidderPrice,
       bidStatus,
       winningPrice,
-      winningBidderId
-      ) async {
+      winningBidderId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.updateProposal,
@@ -953,7 +1052,7 @@ class RemoteServices {
             "status": status,
             "ProjectManagerId": projectManagerId,
             "team": team,
-            "designPrice":designPrice,
+            "designPrice": designPrice,
             "provisionalItems": provisionalItems,
             "contractAdminPrice": contractAdminPrice,
             "subConsultantPrice": subConsultantPrice,
@@ -1073,29 +1172,23 @@ class RemoteServices {
     }
   }
 
-  Future<dynamic> addTask(
-      title,
-      priority,
-      assignedToId,
-      description,
-      startDate,
-      dueDate,
-      attachments) async {
+  Future<dynamic> addTask(title, priority, assignedToId, description, startDate,
+      dueDate, attachments) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addTask,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "title" : title,
-            "priority" : priority,
-            "completedPercent" : "0",
-            "assignedTo" : assignedToId,
-            "description" : description,
-            "startDate" : startDate,
-            "dueDate" : dueDate,
-            "completedOn" : "",
-            "attachments" : attachments
+            "title": title,
+            "priority": priority,
+            "completedPercent": "0",
+            "assignedTo": assignedToId,
+            "description": description,
+            "startDate": startDate,
+            "dueDate": dueDate,
+            "completedOn": "",
+            "attachments": attachments
           });
 
       return resp.data;
@@ -1199,7 +1292,7 @@ class RemoteServices {
     }
   }
 
-  Future <dynamic> updateProject(
+  Future<dynamic> updateProject(
       projectId,
       projectName,
       dueDate,
@@ -1214,15 +1307,14 @@ class RemoteServices {
       projectManager,
       teamMembers,
       status,
-      projectCategory
-      ) async {
+      projectCategory) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.updateProject,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "projectId" : projectId,
+            "projectId": projectId,
             "projectName": projectName,
             "dateCreated": DateFormat("yyyy-MM-dd HH:mm:ss")
                 .format(DateTime.now())
@@ -1302,50 +1394,50 @@ class RemoteServices {
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
             "id": id,
-            "department" : department,
-            "salutation" : salutation,
-            "firstName" : firstName,
-            "lastName" : lastName,
-            "emailWork" : emailWork,
-            "emailPersonal" : emailPersonal,
-            "directManagerId" : directManagerId,
-            "username" : username,
-            "password" : password,
-            "jobTitleId" : jobTitleId,
-            "joiningDate" : joiningDate,
-            "business" : business,
-            "mobile" : mobile,
-            "address" : address,
-            "city" : city,
-            "state" : state,
-            "zip" : zip,
-            "country" : country,
-            "expertise" : expertise,
-            "resume" : resume,
-            "softwarePrivilege" : softwarePrivilege,
-            "webpage" : webpage,
-            "notes" : notes,
-            "attachments" : attachments,
-            "proficiency" : proficiency,
-            "interest" : interest,
-            "cocurricular" : cocurricular,
-            "training" : training,
-            "birthday" : birthday,
-            "anniversary" : anniversary,
-            "sports" : sports,
-            "activities" : activities,
-            "beverage" : beverage,
-            "alcohol" : alcohol,
-            "travelDestination" : travelDestination,
-            "spouseName" : spouseName,
-            "children" : children,
-            "tvShow" : tvShow,
-            "movies" : movies,
-            "actor" : actor,
-            "dislikes" : dislikes,
-            "strengths" : strengths,
-            "weaknesses" : weaknesses,
-            "socialActiveIndex" : socialActiveIndex
+            "department": department,
+            "salutation": salutation,
+            "firstName": firstName,
+            "lastName": lastName,
+            "emailWork": emailWork,
+            "emailPersonal": emailPersonal,
+            "directManagerId": directManagerId,
+            "username": username,
+            "password": password,
+            "jobTitleId": jobTitleId,
+            "joiningDate": joiningDate,
+            "business": business,
+            "mobile": mobile,
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip,
+            "country": country,
+            "expertise": expertise,
+            "resume": resume,
+            "softwarePrivilege": softwarePrivilege,
+            "webpage": webpage,
+            "notes": notes,
+            "attachments": attachments,
+            "proficiency": proficiency,
+            "interest": interest,
+            "cocurricular": cocurricular,
+            "training": training,
+            "birthday": birthday,
+            "anniversary": anniversary,
+            "sports": sports,
+            "activities": activities,
+            "beverage": beverage,
+            "alcohol": alcohol,
+            "travelDestination": travelDestination,
+            "spouseName": spouseName,
+            "children": children,
+            "tvShow": tvShow,
+            "movies": movies,
+            "actor": actor,
+            "dislikes": dislikes,
+            "strengths": strengths,
+            "weaknesses": weaknesses,
+            "socialActiveIndex": socialActiveIndex
           });
 
       return resp.data;
@@ -1389,10 +1481,7 @@ class RemoteServices {
       Response resp = await _dio.post(Constants.updateTask,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
-          data: {
-            "id": id,
-            "completedPercent" : completedPercent
-          });
+          data: {"id": id, "completedPercent": completedPercent});
 
       return resp.data;
     } on DioError catch (e) {

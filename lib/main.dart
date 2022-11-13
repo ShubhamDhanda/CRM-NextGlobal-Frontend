@@ -9,6 +9,7 @@ import 'package:crm/admin/pending_requests.dart';
 import 'package:crm/admin/projects.dart';
 import 'package:crm/admin/proposals.dart';
 import 'package:crm/admin/requests.dart';
+import 'package:crm/admin/rfp.dart';
 import 'package:crm/engineers/engineers_dashboard.dart';
 import 'package:crm/engineers/projects.dart' as engineer_projects;
 import 'package:crm/finances/finances_dashboard.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         '/projects' : (context) => const Projects(),
         '/employees' : (context) => const Employees(),
         '/budgets' : (context) => const Budgets(),
+        '/rfps' : (context) => const Rfp(),
         '/requests' : (context) => const Requests(),
         '/pendingRequests' : (context) => const PendingRequests(),
         '/assets' : (context) => const Assets(),
