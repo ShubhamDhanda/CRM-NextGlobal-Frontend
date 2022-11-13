@@ -1,6 +1,7 @@
 import 'package:crm/admin/drawer.dart';
 import 'package:crm/dialogs/filter_employee_dialog.dart';
 import 'package:crm/dialogs/filter_project_dialog.dart';
+import 'package:crm/dialogs/update_budget_dialog.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +38,8 @@ class _BudgetsState extends State<Budgets>{
       });
       dynamic res = await apiClient.getBudgets();
       budgets.clear();
+      search.clear();
+      filtered.clear();
 
       for (var i = 0; i < res["res"].length; i++) {
         var e = res["res"][i];
@@ -49,7 +52,7 @@ class _BudgetsState extends State<Budgets>{
         mp["projectCatId"] = e["Project_Cat_ID"];
         mp["projectName"] = e["Project_Name"] ?? "";
         mp["budgetCategory"] = e["Budget_Category"] ?? "";
-        mp["budgetAmount"] = e["Budget_Amount"] ?? "0";
+        mp["budgetAmount"] = e["Budget_Amount"] ?? "";
         mp["city"] = e["City"];
         mp["province"] = e["Province"];
         mp["country"] = e["Country"];
@@ -303,7 +306,32 @@ class _BudgetsState extends State<Budgets>{
                   ],
                 ),
                 GestureDetector(
-                  onTap: () => null,
+                  onTap: () =>
+                      showGeneralDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          transitionDuration: Duration(milliseconds: 500),
+                          transitionBuilder: (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0);
+                            const end = Offset.zero;
+                            const curve = Curves.ease;
+
+                            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          },
+                          pageBuilder: (context, animation, secondaryAnimation) => UpdateBudgetDialog(mp : mp)
+                      ).then((value) {
+                        if(value != null){
+                          _getData();
+                          setState(() {
+                            dataLoaded = true;
+                          });
+                        }
+                      }),
                   child: Icon(
                     Icons.edit,
                     color: Color.fromRGBO(134, 97, 255, 1),

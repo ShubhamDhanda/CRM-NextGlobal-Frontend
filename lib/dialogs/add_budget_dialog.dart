@@ -89,7 +89,7 @@ class _AddBudgetDialogState extends State<AddBudgetDialog>{
     try{
       if(validate() == true){
         dynamic res = await apiClient.addBudget(cityId.toString(), departmentId.toString(), categoryId.toString(), projectName.text, budgetCategory.toString(), budgetAmount.text);
-print(res);
+
         if(res["success"] == true){
           Navigator.pop(context, true);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
@@ -112,6 +112,9 @@ print(res);
   }
 
   bool validate() {
+    if(city.text == "" || department.text == "" || category.text =="" || projectName.text =="" || budgetAmount.text == "" || budgetCategory.toString() == ""){
+      return false;
+    }
     return true;
   }
 

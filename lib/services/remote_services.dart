@@ -18,6 +18,49 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getAllRFP() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllRFP,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getBudgetById(id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getBudgetById,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "id" : id
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getBudgetProjects() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getBudgets,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> getAllCustomerNames() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -379,6 +422,80 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> addRFP(
+      departmentId,
+      action,
+      projectManagerId,
+      bidDate,
+      startDate,
+      submissionDate,
+      projectName,
+      rfpNumber,
+      cityId,
+      amount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Response resp = await _dio.post(Constants.addRFP,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "departmentId" : departmentId,
+            "action" : action,
+            "projectManagerId" : projectManagerId,
+            "bidDate" : bidDate,
+            "startDate" : startDate,
+            "submissionDate" : submissionDate,
+            "projectName" : projectName,
+            "rfpNumber" : rfpNumber,
+            "cityId" : cityId,
+            "amount" : amount
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateRFP(
+      id,
+      departmentId,
+      action,
+      projectManagerId,
+      bidDate,
+      startDate,
+      submissionDate,
+      projectName,
+      rfpNumber,
+      cityId,
+      amount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Response resp = await _dio.post(Constants.updateRFP,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "id" : id,
+            "departmentId" : departmentId,
+            "action" : action,
+            "projectManagerId" : projectManagerId,
+            "bidDate" : bidDate,
+            "startDate" : startDate,
+            "submissionDate" : submissionDate,
+            "projectName" : projectName,
+            "rfpNumber" : rfpNumber,
+            "cityId" : cityId,
+            "amount" : amount
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> addCompany(name, category, address, city, province, country,
       businessPhone, fax, email, webpage, notes, attachments) async {
     try {
@@ -420,6 +537,35 @@ class RemoteServices {
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
+            "cityId" : cityId,
+            "departmentId" : departmentId,
+            "categoryId" : categoryId,
+            "projectName" : projectName,
+            "budgetCategory" : budgetCategory,
+            "budgetAmount" : budgetAmount
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateBudget(
+      id,
+      cityId,
+      departmentId,
+      categoryId,
+      projectName,
+      budgetCategory,
+      budgetAmount) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateBudget,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "id" : id,
             "cityId" : cityId,
             "departmentId" : departmentId,
             "categoryId" : categoryId,

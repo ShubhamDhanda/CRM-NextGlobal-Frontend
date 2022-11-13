@@ -5,8 +5,7 @@ import 'package:crm/dialogs/add_company_dialog.dart';
 import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/dialogs/add_project_dialog.dart';
-import 'package:crm/dialogs/add_quote_dialog.dart';
-import 'package:crm/dialogs/add_ship_sup_dialog.dart';
+import 'package:crm/dialogs/add_rfp_dialog.dart';
 import 'package:flutter/material.dart';
 
 import '../dialogs/new_order_dialog.dart';
@@ -94,7 +93,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
         ),
         SizedBox(
           width: double.maxFinite,
-          height: 370,
+          height: 408,
           child: TabBarView(
             controller: tabController,
             children: [
@@ -131,16 +130,18 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
                   onClick: () => onRequest(2)),
               requestCard(text: "Add Budget",
                   onClick: () => onRequest(3)),
-              requestCard(text: "Add Client",
+              requestCard(text: "Add RFP",
                   onClick: () => onRequest(4)),
-              requestCard(text: "Add Order",
+              requestCard(text: "Add Client",
                   onClick: () => onRequest(5)),
-              requestCard(text: "Add Asset",
+              requestCard(text: "Add Order",
                   onClick: () => onRequest(6)),
-              requestCard(text: "Track Shipment",
+              requestCard(text: "Add Asset",
                   onClick: () => onRequest(7)),
-              requestCard(text: "New Design request",
+              requestCard(text: "Track Shipment",
                   onClick: () => onRequest(8)),
+              requestCard(text: "New Design request",
+                  onClick: () => onRequest(9)),
             ],
           ),
         ),
@@ -333,7 +334,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
                 child: child,
               );
             },
-            pageBuilder: (context, animation, secondaryAnimation) => const AddPeopleDialog());
+            pageBuilder: (context, animation, secondaryAnimation) => const AddRfpDialog());
         break;
       case 5:
         showGeneralDialog(
@@ -352,9 +353,28 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
                 child: child,
               );
             },
-            pageBuilder: (context, animation, secondaryAnimation) => const NewOrderDialog());
+            pageBuilder: (context, animation, secondaryAnimation) => const AddPeopleDialog());
         break;
       case 6:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) => const NewOrderDialog());
+        break;
+      case 7:
         showGeneralDialog(
             context: context,
             barrierDismissible: false,

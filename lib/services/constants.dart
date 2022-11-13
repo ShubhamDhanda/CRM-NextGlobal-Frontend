@@ -19,10 +19,12 @@ class Constants {
   static String getAllSuppliers = "/api/get/suppliers";
   static String getAllEmployees = "/api/get/employees";
   static String getAllProjects = "/api/get/projects";
+  static String getAllRFP = "/api/get/rfp";
   static String getAllBudgets = "/api/get/budgets";
   static String getAllAssets = "/api/get/assets";
   static String getAllSoftware = "/api/get/softwares";
   static String getTasksById= "/api/get/tasksById";
+  static String getBudgetById= "/api/get/budget/id";
 
   static String getAllProjectNames = "/api/get/projectNames";
   static String getAllCompanyNames = "/api/get/companyNames";
@@ -34,6 +36,7 @@ class Constants {
   static String getAllTimesheet = "/api/get/timesheet";
   static String getAllJobTitles = "/api/get/jobTitles";
   static String getCities = "/api/get/list/cities";
+  static String getBudgets = "/api/get/list/budgets";
   static String getDepartments = "/api/get/list/departments";
   static String getProjectCategories = "/api/get/list/projectCategories";
 
@@ -44,6 +47,7 @@ class Constants {
   static String newOrder = "/api/add/order";
   static String addProject = "/api/add/project";
   static String addBudget = "/api/add/budget";
+  static String addRFP = "/api/add/rfp";
   static String addCompany = "/api/add/company";
   static String addToTimeSheet = "/api/add/timesheet";
   static String addTask = "/api/add/task";
@@ -56,6 +60,8 @@ class Constants {
   static String updateEmployee = "/api/update/employee";
   static String updateProject = "/api/update/project";
   static String updateTask = "/api/update/task";
+  static String updateBudget = "/api/update/budget";
+  static String updateRFP = "/api/update/rfp";
 
   static List<String> cities = <String>[
     "Airdrie",
