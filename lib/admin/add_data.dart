@@ -5,6 +5,7 @@ import 'package:crm/dialogs/add_company_dialog.dart';
 import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/dialogs/add_project_dialog.dart';
+import 'package:crm/dialogs/add_proposal_dialog.dart';
 import 'package:crm/dialogs/add_quote_dialog.dart';
 import 'package:crm/dialogs/add_ship_sup_dialog.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +95,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
         ),
         SizedBox(
           width: double.maxFinite,
-          height: 370,
+          height: 410,
           child: TabBarView(
             controller: tabController,
             children: [
@@ -137,8 +138,10 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
                   onClick: () => onRequest(5)),
               requestCard(text: "Add Asset",
                   onClick: () => onRequest(6)),
-              requestCard(text: "Track Shipment",
+              requestCard(text: "Add Proposal",
                   onClick: () => onRequest(7)),
+              requestCard(text: "Track Shipment",
+                  onClick: () => onRequest(8)),
               requestCard(text: "New Design request",
                   onClick: () => onRequest(8)),
             ],
@@ -372,6 +375,25 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
               );
             },
             pageBuilder: (context, animation, secondaryAnimation) => const AddAssetDialog());
+        break;
+      case 7:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) => const AddProposalDialog());
         break;
     }
   }

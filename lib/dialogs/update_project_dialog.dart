@@ -81,7 +81,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
 
   var apiClient = RemoteServices();
   bool dataLoaded = false;
-  var projectStageVal, dept;
+  var projectStageVal="", dept;
   List<String> cities = Constants.cities;
   List<String> provinces = Constants.provinces;
   List<String> distributors = <String>[];
@@ -135,15 +135,7 @@ class _updateProjectDialogState extends State<updateProjectDialog>{
     dynamic res3 = await apiClient.getAllEmployeeNames();
     // dynamic res4 = await apiClient.getAllContractors();
 
-    // if(res?["success"] == true && res2?["success"] == true && res3?["success"] == true && res4?["success"]){
     if(res3?["success"] == true ){
-      // for(var e in res["res"]){
-      //   distributors.add(e["Full_Name"].toString());
-      // }
-      //
-      // for(var e in res2["res"]){
-      //   consultants.add(e["Full_Name"].toString());
-      // }
 
       for(var e in res3["res"]){
         employees.add(e["Full_Name"].toString());

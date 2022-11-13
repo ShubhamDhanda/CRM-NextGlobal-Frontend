@@ -7,6 +7,7 @@ import 'package:crm/admin/customers.dart';
 import 'package:crm/admin/employees.dart';
 import 'package:crm/admin/pending_requests.dart';
 import 'package:crm/admin/projects.dart';
+import 'package:crm/admin/proposals.dart';
 import 'package:crm/admin/requests.dart';
 import 'package:crm/engineers/engineers_dashboard.dart';
 import 'package:crm/engineers/projects.dart' as engineer_projects;
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         '/pendingRequests' : (context) => const PendingRequests(),
         '/assets' : (context) => const Assets(),
         '/companies' : (context) => const Companies(),
+        '/proposals' : (context) => const Proposals(),
 
         //Other Dashboards
         '/supplier' : (context) => const SupplierDashboard(),

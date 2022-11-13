@@ -18,6 +18,20 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getAllProjectRfp() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllProjectRfp,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> getAllCustomerNames() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -150,6 +164,20 @@ class RemoteServices {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.get(Constants.getAllProjects,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getAllProposals() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllProposals,
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
           }));
@@ -416,7 +444,7 @@ class RemoteServices {
       budgetAmount) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      Response resp = await _dio.post(Constants.addBudget,
+      Response resp = await _dio.post(Constants.addProject,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
@@ -827,6 +855,180 @@ class RemoteServices {
       return e.response;
     }
   }
+
+
+  Future<dynamic> addProposal(
+      cityId,
+      departmentId,
+      projectName,
+      questionDeadline,
+      closingDeadline,
+      resultDate,
+      status,
+      projectManagerId,
+      team,
+      designPrice,
+      provisionalItems,
+      contractAdminPrice,
+      subConsultantPrice,
+      totalBid,
+      planTakers,
+      bidders,
+      bidderPrice,
+      bidStatus,
+      winningPrice,
+      winningBidderId
+      ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addProposal,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "cityId": cityId,
+            "departmentId": departmentId,
+            "projectName": projectName,
+            "questionDeadline": questionDeadline,
+            "closingDeadline": closingDeadline,
+            "resultDate": resultDate,
+            "status": status,
+            "ProjectManagerId": projectManagerId,
+            "team": team,
+            "designPrice":designPrice,
+            "provisionalItems": provisionalItems,
+            "contractAdminPrice": contractAdminPrice,
+            "subConsultantPrice": subConsultantPrice,
+            "totalBid": totalBid,
+            "planTakers": planTakers,
+            "bidders": bidders,
+            "bidderPrice": bidderPrice,
+            "bidStatus": bidStatus,
+            "winningPrice": winningPrice,
+            "winningBidderId": winningBidderId
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateProposal(
+      id,
+      cityId,
+      departmentId,
+      projectName,
+      questionDeadline,
+      closingDeadline,
+      resultDate,
+      status,
+      projectManagerId,
+      team,
+      designPrice,
+      provisionalItems,
+      contractAdminPrice,
+      subConsultantPrice,
+      totalBid,
+      planTakers,
+      bidders,
+      bidderPrice,
+      bidStatus,
+      winningPrice,
+      winningBidderId
+      ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateProposal,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            // "id": prefs.getInt("id"),
+            "id": id,
+            "cityId": cityId,
+            "departmentId": departmentId,
+            "projectName": projectName,
+            "questionDeadline": questionDeadline,
+            "closingDeadline": closingDeadline,
+            "resultDate": resultDate,
+            "status": status,
+            "ProjectManagerId": projectManagerId,
+            "team": team,
+            "designPrice":designPrice,
+            "provisionalItems": provisionalItems,
+            "contractAdminPrice": contractAdminPrice,
+            "subConsultantPrice": subConsultantPrice,
+            "totalBid": totalBid,
+            "planTakers": planTakers,
+            "bidders": bidders,
+            "bidderPrice": bidderPrice,
+            "bidStatus": bidStatus,
+            "winningPrice": winningPrice,
+            "winningBidderId": winningBidderId
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  // Future<dynamic> addProposal(
+  //     cityId,
+  //     departmentId,
+  //     projectName,
+  //     questionDeadline,
+  //     closingDeadline,
+  //     resultDate,
+  //     status,
+  //     projectManagerId,
+  //     team,
+  //     designPrice,
+  //     provisionalItems,
+  //     contractAdminPrice,
+  //     subConsultantPrice,
+  //     totalBid,
+  //     planTakers,
+  //     bidders,
+  //     bidderPrice,
+  //     bidStatus,
+  //     winningPrice,
+  //     winningBidderId) async {
+  //   try {
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //
+  //     Response resp = await _dio.post(Constants.addProposal,
+  //         options: Options(
+  //             headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+  //         data: {
+  //           "id": prefs.getInt("id"),
+  //           "cityId": cityId,
+  //           "departmentId": departmentId,
+  //           "projectName": projectName,
+  //           "questionDeadline": questionDeadline,
+  //           "closingDeadline": closingDeadline,
+  //           "resultDate": resultDate,
+  //           "status": status,
+  //           "ProjectManagerId": projectManagerId,
+  //           "team": team,
+  //           "designPrice":designPrice,
+  //           "provisionalItems": provisionalItems,
+  //           "contractAdminPrice": contractAdminPrice,
+  //           "subConsultantPrice": subConsultantPrice,
+  //           "totalBid": totalBid,
+  //           "planTakers": planTakers,
+  //           "bidders": bidders,
+  //           "bidderPrice": bidderPrice,
+  //           "bidStatus": bidStatus,
+  //           "winningPrice": winningPrice,
+  //           "winningBidderId": winningBidderId
+  //         });
+  //
+  //     return resp.data;
+  //
+  //   } on DioError catch (e) {
+  //     return e.response;
+  //   }
+  // }
 
   Future<dynamic> addOrder(
       customerId,

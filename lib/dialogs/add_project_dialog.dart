@@ -142,6 +142,8 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
+
+
   void postData() async {
     setState(() {
       dataLoaded = false;
@@ -506,48 +508,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
             height: 20,
           ),
 
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              city.text = suggestion==null ? "" : suggestion.toString();
-            },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = [];
 
-              for (var e in cities) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: city,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "City*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               province.text = suggestion==null ? "" : suggestion.toString();
