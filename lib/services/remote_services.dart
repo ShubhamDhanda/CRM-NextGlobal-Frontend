@@ -1,5 +1,6 @@
 import 'package:crm/services/constants.dart';
 import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -1033,7 +1034,7 @@ class RemoteServices {
   }
 
   Future<dynamic> updateProposal(
-      id,
+      proposalId,
       cityId,
       departmentId,
       projectName,
@@ -1055,13 +1056,38 @@ class RemoteServices {
       winningPrice,
       winningBidderId) async {
     try {
-      print(id);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // var response = await http.post(Uri.parse(Constants.baseURL + Constants.updateProposal), headers: {
+      //   "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+      // }, body: {
+      //   "id": proposalId,
+      //   "cityId": cityId,
+      //   "departmentId": departmentId,
+      //   "projectName": projectName,
+      //   "questionDeadline": questionDeadline,
+      //   "closingDeadline": closingDeadline,
+      //   "resultDate": resultDate,
+      //   "status": status,
+      //   "ProjectManagerId": projectManagerId,
+      //   "team": team,
+      //   "designPrice": designPrice,
+      //   "provisionalItems": provisionalItems,
+      //   "contractAdminPrice": contractAdminPrice,
+      //   "subConsultantPrice": subConsultantPrice,
+      //   "totalBid": totalBid,
+      //   "planTakers": planTakers,
+      //   "bidders": bidders,
+      //   "bidderPrice": bidderPrice,
+      //   "bidStatus": bidStatus,
+      //   "winningPrice": winningPrice,
+      //   "winningBidderId": winningBidderId
+      // });
       Response resp = await _dio.post(Constants.updateProposal,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
-          data: {
-            "id": id,
+              data: {
+            "id": proposalId,
             "cityId": cityId,
             "departmentId": departmentId,
             "projectName": projectName,
@@ -1083,6 +1109,7 @@ class RemoteServices {
             "winningPrice": winningPrice,
             "winningBidderId": winningBidderId
           });
+      // print(response);
       return resp.data;
     } on DioError catch (e) {
       return e.response;

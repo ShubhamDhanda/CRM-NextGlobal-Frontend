@@ -109,9 +109,11 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
       }
 
       for(var e in res3["res"]){
-        employees.add(e["Full_Name"].toString());
+        employees.add(e["Full_Name"]);
         employeeMap[e["Full_Name"]] = e["Employee_ID"];
-        // employeeMap[e["Employee_ID"]] = e["Full_Name"];
+        print(e["Full_Name"]);
+        print(e["Employee_ID"]);
+
       }
       for(var e in res4["res"]){
         companies.add(e["Name"]);
@@ -160,36 +162,68 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
   }
 
   void postData() async {
-    setState(() {
-      dataLoaded = false;
-    });
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
 
-    if (validate() == true) {
-      print("Validated");
+      if (validate() == true) {
 
-
-
-      dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice, status.toString(), winnerPrice.text, companyMap[winningBidder.text]);
-      if(res?["success"]==true) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString()??"",  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus??"", winnerPrice.text, companyMap[winningBidder.text]);
+        // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
+        if(res?["success"]==true) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        }else{
+          throw "Negative";
+        }
       }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-      }
-
+    } catch(e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    }finally{
       setState(() {
         dataLoaded = true;
       });
 
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 2));
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
 
+  // void postData() async {
+  //   setState(() {
+  //     dataLoaded = false;
+  //   });
+  //
+  //   if (validate() == true) {
+  //     print("Validated");
+  //
+  //     dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString()??"",  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus??"", winnerPrice.text, companyMap[winningBidder.text]);
+  //     // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
+  //     if(res?["success"]==true) {
+  //       Navigator.pop(context);
+  //       ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+  //     }
+  //     else {
+  //       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+  //     }
+  //
+  //     setState(() {
+  //       dataLoaded = true;
+  //     });
+  //
+  //     await Future.delayed(const Duration(seconds: 2));
+  //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //   }
+  // }
+
 
   bool validate() {
-
+    if(projectController.text=="" || city.text=="" || department.text=="" || status==null || projectManager.text == "" ){
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      return false;
+    }
     return true;
   }
 
@@ -393,7 +427,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Question Deadline*",
+                hintText: "Question Deadline",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -791,7 +825,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
             onChanged: (String? value) {
               // This is called when the user selects an item.
               setState(() {
-                bidStatus = value!;
+                bidStatus = value??"";
               });
             },
             items: Status.map<DropdownMenuItem<String>>((String value) {

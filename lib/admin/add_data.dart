@@ -131,7 +131,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
               requestCard(text: "Add Client", onClick: () => onRequest(5)),
               requestCard(text: "Add Order", onClick: () => onRequest(6)),
               requestCard(text: "Add Proposal", onClick: () => onRequest(7)),
-              requestCard(text: "Track Shipment", onClick: () => onRequest(7)),
+              requestCard(text: "Track Shipment", onClick: () => onRequest(8)),
               requestCard(
                   text: "New Design request", onClick: () => onRequest(9)),
             ],

@@ -171,26 +171,6 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
     }
   }
 
-  void _onSearchChanged(String text) async {
-    setState(() {
-      dataLoaded = false;
-    });
-    search.clear();
-
-    if(text.isEmpty){
-      search.addAll(filtered);
-    }else{
-      search.forEach((e) {
-        if(e["firstName"].toString().toLowerCase().contains(text.toLowerCase()) || e["lastName"].toString().toLowerCase().contains(text.toLowerCase()) || (e["firstName"] + " " + e["lastName"]).toString().toLowerCase().contains(text.toLowerCase()) || (int.tryParse(text)!=null && e["id"] == int.parse(text))  || e["company"].toString().toLowerCase().contains(text.toLowerCase())){
-          search.add(e);
-        }
-      });
-    }
-
-    setState(() {
-      dataLoaded = true;
-    });
-  }
 
   bool validate() {
     if(projectController.text=="" ||projectCategory.text=="" || dueDate.text=="" || projectStageVal.toString() == "" || tentClosing.text == "" || projectValue.text == "" || projectManager.text == "" || stringList.toString() == "" ||status.toString() ==""){
@@ -642,7 +622,6 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
             },
             textFieldConfiguration: TextFieldConfiguration(
                 cursorColor: Colors.white,
-                onChanged: _onSearchChanged,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
                 controller: projectManager,

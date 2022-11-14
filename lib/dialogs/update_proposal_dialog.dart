@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
-class updateProposalDialog extends StatefulWidget{
+class updateProposalDialog extends StatefulWidget {
   final Map<String, dynamic> mp;
   const updateProposalDialog({Key? key, required this.mp}) : super(key: key);
 
@@ -15,7 +15,7 @@ class updateProposalDialog extends StatefulWidget{
   State<StatefulWidget> createState() => _updateProposalDialogState(mp: mp);
 }
 
-const List<String> Status = <String>["Go", "No Go","Review"];
+const List<String> Status = <String>["Go", "No Go", "Review"];
 const List<String> list = <String>[
   'New Project',
   'Modifications',
@@ -25,8 +25,7 @@ const List<String> list = <String>[
   'Dead'
 ];
 
-
-class _updateProposalDialogState extends State<updateProposalDialog>{
+class _updateProposalDialogState extends State<updateProposalDialog> {
   late Map<String, dynamic> mp;
   TextEditingController projectController = TextEditingController();
   TextEditingController questionDeadline = TextEditingController();
@@ -71,17 +70,20 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
   List<String> provinces = Constants.provinces;
   List<String> employees = <String>[];
   List<String> prevCat = [];
-  List<String> prevDep= [];
-  List<String> prevMember = [],prevPlan = [],prevBid = [];
+  List<String> prevDep = [];
+  List<String> prevMember = [], prevPlan = [], prevBid = [];
   List<String> clients = [];
   Map<String, String> empMap = {}, clientMap = {};
   Map<String, int> projectManagerMap = {};
-  var stringList,empId,Team;
-  var status="",bidStatus="";
+  var stringList, empId, Team;
+  var status, bidStatus,projectManagerId;
   List<Map<String, dynamic>> customers = [];
   List<String> Departments = [];
   List<String> cities = [], departments = [], companies = [];
-  Map<String, int> cityMap = {}, departmentMap = {}, companyMap = {},employeeMap={};
+  Map<String, int> cityMap = {},
+      departmentMap = {},
+      companyMap = {},
+      employeeMap = {};
   var ProjectManager;
 
   _updateProposalDialogState({required this.mp}) {
@@ -100,24 +102,26 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
     contractAdminPrice.text = mp["contractAdminPrice"];
     subConsultantPrice.text = mp["subConsultantPrice"];
     totalBid.text = mp["totalBid"];
-    planTakers.text =mp["planTakers"];
+    planTakers.text = mp["planTakers"];
     bidders.text = mp["bidders"];
     bidderPrice.text = mp["bidderPrice"];
     winnerPrice.text = mp["winningPrice"];
     winningBidder.text = mp["winningBidderName"];
-    prevMember = teamMember.text.split(",");
-    prevPlan = planTakers.text.split(",");
-    prevBid = bidders.text.split(",");
-    bidStatus = mp["bidStatus"]=="" ? "No Go" : mp["bidStatus"];
-    status = mp["status"]=="" ? "No Go" : mp["status"];
-
-    if(mp["status"]!="") {
-      status = mp["status"];
-    }
-    if(mp["bidStatus"]!=""){
+    if(teamMember.text!="")prevMember = teamMember.text.split(",");
+    if(planTakers.text!="")prevPlan = planTakers.text.split(",");
+    if(bidders.text!="")prevBid = bidders.text.split(",");
+    if(mp["bidStatus"]!="") {
+      print(mp["bidStatus"]);
       bidStatus = mp["bidStatus"];
     }
+    status = mp["status"] == "" ? "No Go" : mp["status"];
 
+    if (mp["status"] != "") {
+      status = mp["status"];
+    }
+    if (mp["bidStatus"] != "") {
+      bidStatus = mp["bidStatus"];
+    }
   }
 
   @override
@@ -128,58 +132,42 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
   }
 
   void _getData() async {
-    setState(() {
-      dataLoaded = false;
-    });
-    dynamic res1 = await apiClient.getCities();
-    dynamic res2 = await apiClient.getDepartments();
-    dynamic res3 = await apiClient.getAllEmployeeNames();
-    dynamic res4 = await apiClient.getAllCompanyNames();
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
+      dynamic res1 = await apiClient.getCities();
+      dynamic res2 = await apiClient.getDepartments();
+      dynamic res3 = await apiClient.getAllEmployeeNames();
+      dynamic res4 = await apiClient.getAllCompanyNames();
 
-
-
-    if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]) {
-      for(var e in res1["res"]){
+      for (var e in res1["res"]) {
         cities.add(e["City"]);
         cityMap[e["City"]] = e["City_ID"];
       }
 
-      for(var e in res2["res"]){
+      for (var e in res2["res"]) {
         departments.add(e["Department"]);
         departmentMap[e["Department"]] = e["Department_ID"];
       }
 
-      for(var e in res3["res"]){
+      for (var e in res3["res"]) {
         employees.add(e["Full_Name"].toString());
-        employeeMap[e["Full_Name"]] = e["Employee_ID"];
+        employeeMap[e["Full_Name"].toString()] = e["Employee_ID"];
+        print(e["Full_Name"]);
+        print(e["Employee_ID"]);
       }
-      for(var e in res4["res"]){
+      for (var e in res4["res"]) {
         companies.add(e["Name"]);
         cityMap[e["Name"]] = e["ID"];
       }
       print(employees);
-    }else{
+    } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-    }
-    setState(() {
-      dataLoaded = true;
-    });
-
-    await Future.delayed(Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  }
-
-  void postData() async {
-    setState(() {
-      dataLoaded = false;
-    });
-
-    if (validate() == true) {
-      print("validated");
-       dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice, status.toString(), winnerPrice.text, companyMap[winningBidder.text]);
-
+    } finally {
       setState(() {
-        dataLoaded = false;
+        dataLoaded = true;
       });
 
       await Future.delayed(Duration(seconds: 2));
@@ -187,12 +175,40 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
     }
   }
 
+  void postData() async {
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
+
+      if (validate() == true) {
+        dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, companyMap[winningBidder.text]);
+
+        if(res["success"] == true){
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar3);
+        }else{
+          throw "Negative";
+        }
+      }
+      } catch(e) {
+        print(e);
+        ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    }finally{
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
 
   bool validate() {
-    // if(projectController.text=="" || dueDate.text=="" || projectStageVal.toString() == "" || tentClosing.text == "" || projectValue.text == "" ||stringList == ""|| projectManager.text==""){
-    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    //   return false;
-    // }
+    if(projectController.text=="" || city.text=="" || department.text=="" || status=="" || projectManager.text == "" ){
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      return false;
+    }
 
     return true;
   }
@@ -206,10 +222,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
           onTap: () => Navigator.pop(context),
         ),
         title: Text("Update Proposal"),
-        titleTextStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 24
-        ),
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
         backgroundColor: Colors.black,
       ),
       backgroundColor: const Color.fromRGBO(41, 41, 41, 1),
@@ -236,7 +249,10 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(
+                  suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
                 tileColor: Colors.black,
               );
             },
@@ -247,7 +263,10 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
               var curList = [];
 
               for (var e in cities) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                if (e
+                    .toString()
+                    .toLowerCase()
+                    .startsWith(pattern.toLowerCase())) {
                   curList.add(e);
                 }
               }
@@ -265,26 +284,27 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     hintText: "City*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
           ),
           const SizedBox(
             height: 20,
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion != null) {
-                if(suggestion == "+ Add Department"){
-
-                }else{
+              if (suggestion != null) {
+                if (suggestion == "+ Add Department") {
+                } else {
                   department.text = suggestion.toString();
                 }
               }
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(
+                  suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
                 tileColor: Colors.black,
               );
             },
@@ -295,9 +315,11 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
               // var curList = ["+ Add Department"];
               var curList = [];
 
-
               for (var e in departments) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                if (e
+                    .toString()
+                    .toLowerCase()
+                    .startsWith(pattern.toLowerCase())) {
                   curList.add(e);
                 }
               }
@@ -315,54 +337,29 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     hintText: "Department*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
           ),
           const SizedBox(
             height: 20,
           ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              projectManager.text = suggestion==null ? "" : suggestion.toString();
-            },
-
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = [];
-
-              for (var e in employees) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: projectController,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Project Name*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+          TextField(
+            cursorColor: Colors.white,
+            style: const TextStyle(color: Colors.white),
+            keyboardType: TextInputType.text,
+            controller: projectController,
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
+                hintText: "Project Name*",
+                hintStyle:
+                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -386,7 +383,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                           onSurface: Colors.white,
                         ),
                         dialogBackgroundColor:
-                        const Color.fromRGBO(41, 41, 41, 1),
+                            const Color.fromRGBO(41, 41, 41, 1),
                       ),
                       child: child!,
                     );
@@ -404,9 +401,9 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Question Deadline*",
+                hintText: "Question Deadline",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -434,7 +431,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                           onSurface: Colors.white,
                         ),
                         dialogBackgroundColor:
-                        const Color.fromRGBO(41, 41, 41, 1),
+                            const Color.fromRGBO(41, 41, 41, 1),
                       ),
                       child: child!,
                     );
@@ -454,7 +451,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Closing Deadline",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -482,7 +479,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                           onSurface: Colors.white,
                         ),
                         dialogBackgroundColor:
-                        const Color.fromRGBO(41, 41, 41, 1),
+                            const Color.fromRGBO(41, 41, 41, 1),
                       ),
                       child: child!,
                     );
@@ -502,7 +499,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Result Date",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -540,15 +537,17 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
           const SizedBox(
             height: 20,
           ),
-
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              projectManager.text = suggestion==null ? "" : suggestion.toString();
-            },
+              projectManager.text = suggestion.toString();
 
+            },
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(
+                  suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
                 tileColor: Colors.black,
               );
             },
@@ -559,7 +558,10 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
               var curList = [];
 
               for (var e in employees) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                if (e
+                    .toString()
+                    .toLowerCase()
+                    .startsWith(pattern.toLowerCase())) {
                   curList.add(e);
                 }
               }
@@ -577,27 +579,26 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     hintText: "Project Manager*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
           ),
-          const SizedBox(height: 20,),
-
+          const SizedBox(
+            height: 20,
+          ),
           DropdownSearch<String>.multiSelection(
             items: employees,
             selectedItems: prevMember,
             dropdownButtonProps: const DropdownButtonProps(
-                color: Color.fromRGBO(255, 255, 255, 0.5)
-            ),
+                color: Color.fromRGBO(255, 255, 255, 0.5)),
             dropdownDecoratorProps: const DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
-
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
                     hintText: "Team Members",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
             // dropdownBuilder: (context, distributors) {
             //   return
             // },
@@ -605,10 +606,9 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                 showSelectedItems: true,
                 menuProps: MenuProps(
                   backgroundColor: Colors.white,
-                )
-            ),
+                )),
             onChanged: (value) {
-              List<String> member=[];
+              List<String> member = [];
               member = value;
               member.sort((a, b) => a.toString().compareTo(b.toString()));
               teamMember.text = member.join(",");
@@ -630,7 +630,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Design Price*",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -645,9 +645,9 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Provisional Items*",
+                hintText: "Provisional Items",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -664,7 +664,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Contract Admin Price",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -681,7 +681,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Sub Consultant Price",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -696,9 +696,9 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Total Bid*",
+                hintText: "Total Bid",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -707,17 +707,16 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
             items: companies,
             selectedItems: prevPlan,
             dropdownButtonProps: const DropdownButtonProps(
-                color: Color.fromRGBO(255, 255, 255, 0.5)
-            ),
+                color: Color.fromRGBO(255, 255, 255, 0.5)),
             dropdownDecoratorProps: const DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
-
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
                     hintText: "Plan Takers",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
             // dropdownBuilder: (context, distributors) {
             //   return
             // },
@@ -725,10 +724,9 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                 showSelectedItems: true,
                 menuProps: MenuProps(
                   backgroundColor: Colors.white,
-                )
-            ),
+                )),
             onChanged: (value) {
-              List<String> member=[];
+              List<String> member = [];
               member = value;
               member.sort((a, b) => a.toString().compareTo(b.toString()));
               planTakers.text = member.join(",");
@@ -742,17 +740,16 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
             items: companies,
             selectedItems: prevBid,
             dropdownButtonProps: const DropdownButtonProps(
-                color: Color.fromRGBO(255, 255, 255, 0.5)
-            ),
+                color: Color.fromRGBO(255, 255, 255, 0.5)),
             dropdownDecoratorProps: const DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
-
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
                     hintText: "Bidders",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
             // dropdownBuilder: (context, distributors) {
             //   return
             // },
@@ -760,10 +757,9 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                 showSelectedItems: true,
                 menuProps: MenuProps(
                   backgroundColor: Colors.white,
-                )
-            ),
+                )),
             onChanged: (value) {
-              List<String> member=[];
+              List<String> member = [];
               member = value;
               member.sort((a, b) => a.toString().compareTo(b.toString()));
               bidders.text = member.join(",");
@@ -773,7 +769,6 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
           const SizedBox(
             height: 20,
           ),
-
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -784,20 +779,19 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Bidder Price*",
+                hintText: "Bidder Price",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
           ),
-
           DropdownButton<String>(
             value: bidStatus,
             isExpanded: true,
             dropdownColor: Colors.black,
             hint: const Text(
-              "Bid Status*",
+              "Bid Status",
               style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
             ),
             icon: null,
@@ -825,7 +819,6 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
           const SizedBox(
             height: 20,
           ),
-
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -838,19 +831,22 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Winning Price",
                 hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+                    TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              winningBidder.text = suggestion==null ? "" : suggestion.toString();
+              winningBidder.text =
+              suggestion == null ? "" : suggestion.toString();
             },
-
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(
+                  suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
                 tileColor: Colors.black,
               );
             },
@@ -861,7 +857,10 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
               var curListed = [];
 
               for (var e in companies) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                if (e
+                    .toString()
+                    .toLowerCase()
+                    .startsWith(pattern.toLowerCase())) {
                   curListed.add(e);
                 }
               }
@@ -870,9 +869,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
             },
             textFieldConfiguration: TextFieldConfiguration(
                 cursorColor: Colors.white,
-                onChanged: (text){
-
-                },
+                onChanged: (text) {},
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
                 controller: winningBidder,
@@ -882,22 +879,23 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     hintText: "Winning Bidder",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
+                    hintStyle:
+                        TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           Container(
             padding: EdgeInsets.fromLTRB(100, 0, 100, 0),
-            child: ElevatedButton(onPressed: () {
-              postData();
-            } ,
-              style: ElevatedButton.styleFrom(primary: const Color.fromRGBO(134, 97, 255, 1)),
-              child: const Text("Submit",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16
-                ),
+            child: ElevatedButton(
+              onPressed: () {
+                postData();
+              },
+              style: ElevatedButton.styleFrom(
+                  primary: const Color.fromRGBO(134, 97, 255, 1)),
+              child: const Text(
+                "Submit",
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           )
