@@ -73,7 +73,7 @@ class _ProposalsState extends State<Proposals>{
         mp["department"] = e["Department"]==null ? "" : e["Department"].toString();
         mp["departmentId"] = e["Department_ID"]==null ? "" : e["Department_ID"].toString();
         mp["team"] = e["Team"]==null ? "" : e["Team"].toString();
-        print(mp["city"]);
+        print(e["Manager_Name"]);
         proposals.add(mp);
         projectManager?.insert(i,mp["projectName"]);
       }

@@ -225,7 +225,6 @@ class RemoteServices {
           options: Options(headers: {
             "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
           }));
-
       return resp.data;
     } on DioError catch (e) {
       return e.response;
@@ -1056,33 +1055,10 @@ class RemoteServices {
       winningPrice,
       winningBidderId) async {
     try {
+      print(projectManagerId);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      // var response = await http.post(Uri.parse(Constants.baseURL + Constants.updateProposal), headers: {
-      //   "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
-      // }, body: {
-      //   "id": proposalId,
-      //   "cityId": cityId,
-      //   "departmentId": departmentId,
-      //   "projectName": projectName,
-      //   "questionDeadline": questionDeadline,
-      //   "closingDeadline": closingDeadline,
-      //   "resultDate": resultDate,
-      //   "status": status,
-      //   "ProjectManagerId": projectManagerId,
-      //   "team": team,
-      //   "designPrice": designPrice,
-      //   "provisionalItems": provisionalItems,
-      //   "contractAdminPrice": contractAdminPrice,
-      //   "subConsultantPrice": subConsultantPrice,
-      //   "totalBid": totalBid,
-      //   "planTakers": planTakers,
-      //   "bidders": bidders,
-      //   "bidderPrice": bidderPrice,
-      //   "bidStatus": bidStatus,
-      //   "winningPrice": winningPrice,
-      //   "winningBidderId": winningBidderId
-      // });
+
       Response resp = await _dio.post(Constants.updateProposal,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
@@ -1095,7 +1071,7 @@ class RemoteServices {
             "closingDeadline": closingDeadline,
             "resultDate": resultDate,
             "status": status,
-            "ProjectManagerId": projectManagerId,
+            "projectManagerId": projectManagerId,
             "team": team,
             "designPrice": designPrice,
             "provisionalItems": provisionalItems,

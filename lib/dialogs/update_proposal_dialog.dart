@@ -15,7 +15,7 @@ class updateProposalDialog extends StatefulWidget {
   State<StatefulWidget> createState() => _updateProposalDialogState(mp: mp);
 }
 
-const List<String> Status = <String>["Go", "No Go", "Review"];
+const List<String> Status = <String>["Go", "NoGo", "Review"];
 const List<String> list = <String>[
   'New Project',
   'Modifications',
@@ -110,15 +110,11 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
     if(teamMember.text!="")prevMember = teamMember.text.split(",");
     if(planTakers.text!="")prevPlan = planTakers.text.split(",");
     if(bidders.text!="")prevBid = bidders.text.split(",");
-    if(mp["bidStatus"]!="") {
-      print(mp["bidStatus"]);
-      bidStatus = mp["bidStatus"];
-    }
-    status = mp["status"] == "" ? "No Go" : mp["status"];
 
-    if (mp["status"] != "") {
+    if(mp["status"]!=""){
       status = mp["status"];
     }
+
     if (mp["bidStatus"] != "") {
       bidStatus = mp["bidStatus"];
     }
@@ -159,7 +155,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
       }
       for (var e in res4["res"]) {
         companies.add(e["Name"]);
-        cityMap[e["Name"]] = e["ID"];
+        companyMap[e["Name"]] = e["ID"];
       }
       print(employees);
     } catch (e) {
@@ -182,7 +178,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
       });
 
       if (validate() == true) {
-        dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, companyMap[winningBidder.text]);
+        dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus ?? "", winnerPrice.text, companyMap[winningBidder.text]);
 
         if(res["success"] == true){
           Navigator.pop(context);
@@ -510,7 +506,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
             dropdownColor: Colors.black,
             hint: const Text(
               "Status*",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16),
             ),
             icon: null,
             style: const TextStyle(color: Colors.white),
@@ -540,6 +536,8 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               projectManager.text = suggestion.toString();
+              // projectManager.text =
+              // suggestion == null ? "" : suggestion.toString();
 
             },
             itemBuilder: (context, suggestion) {
@@ -628,7 +626,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Design Price*",
+                hintText: "Design Price",
                 hintStyle:
                     TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -763,7 +761,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
               member = value;
               member.sort((a, b) => a.toString().compareTo(b.toString()));
               bidders.text = member.join(",");
-              print(bidders.text);
+              // print(bidders.text);
             },
           ),
           const SizedBox(
@@ -792,7 +790,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
             dropdownColor: Colors.black,
             hint: const Text(
               "Bid Status",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16),
             ),
             icon: null,
             style: const TextStyle(color: Colors.white),
@@ -803,7 +801,7 @@ class _updateProposalDialogState extends State<updateProposalDialog> {
             onChanged: (String? value) {
               // This is called when the user selects an item.
               setState(() {
-                bidStatus = value!;
+                bidStatus = value;
               });
             },
             items: Status.map<DropdownMenuItem<String>>((String value) {

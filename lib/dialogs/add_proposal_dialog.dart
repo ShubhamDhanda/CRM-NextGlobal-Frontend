@@ -68,7 +68,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
   Map<String, int> cityIdMap = {}, departmentIdMap = {}, employeeIdMap = {},projectsIdMap={},companyIdMap = {};
   List<String> projects = [];
   bool dataLoaded = false;
-  var projectStageVal;
+  var projectManagerId;
   List<String> provinces = Constants.provinces;
   List<String> countries = Constants.countries;
   var status,bidStatus,Team;
@@ -105,7 +105,6 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
       for(var e in res2["res"]){
         departments.add(e["Department"]);
         departmentMap[e["Department"]] = e["Department_ID"];
-        // departmentIdMap[e["Department_ID"]] = e["Department"];
       }
 
       for(var e in res3["res"]){
@@ -169,7 +168,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
 
       if (validate() == true) {
 
-        dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString()??"",  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus??"", winnerPrice.text, companyMap[winningBidder.text]);
+        dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus ?? "", winnerPrice.text, companyMap[winningBidder.text]);
         // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
         if(res?["success"]==true) {
           Navigator.pop(context);
@@ -190,33 +189,6 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
-
-  // void postData() async {
-  //   setState(() {
-  //     dataLoaded = false;
-  //   });
-  //
-  //   if (validate() == true) {
-  //     print("Validated");
-  //
-  //     dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString()??"",  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus??"", winnerPrice.text, companyMap[winningBidder.text]);
-  //     // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
-  //     if(res?["success"]==true) {
-  //       Navigator.pop(context);
-  //       ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-  //     }
-  //     else {
-  //       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-  //     }
-  //
-  //     setState(() {
-  //       dataLoaded = true;
-  //     });
-  //
-  //     await Future.delayed(const Duration(seconds: 2));
-  //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  //   }
-  // }
 
 
   bool validate() {
@@ -536,7 +508,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
             dropdownColor: Colors.black,
             hint: const Text(
               "Status*",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16),
             ),
             icon: null,
             style: const TextStyle(color: Colors.white),
@@ -566,6 +538,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               projectManager.text = suggestion==null ? "" : suggestion.toString();
+              projectManagerId = employeeMap[projectManager.text];
             },
 
             itemBuilder: (context, suggestion) {
@@ -648,7 +621,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Design Price*",
+                hintText: "Design Price",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -665,7 +638,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Provisional Items*",
+                hintText: "Provisional Items",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -716,7 +689,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Total Bid*",
+                hintText: "Total Bid",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -801,7 +774,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Bidder Price*",
+                hintText: "Bidder Price",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -814,7 +787,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
             dropdownColor: Colors.black,
             hint: const Text(
               "Bid Status*",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16),
             ),
             icon: null,
             style: const TextStyle(color: Colors.white),
