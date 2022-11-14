@@ -8,6 +8,7 @@ import 'package:crm/dialogs/add_project_dialog.dart';
 import 'package:crm/dialogs/add_rfp_dialog.dart';
 import 'package:flutter/material.dart';
 
+import '../dialogs/add_proposal_dialog.dart';
 import '../dialogs/new_order_dialog.dart';
 
 class AddData extends StatefulWidget {
@@ -386,27 +387,6 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
             },
             pageBuilder: (context, animation, secondaryAnimation) =>
                 const NewOrderDialog());
-        break;
-      case 7:
-        showGeneralDialog(
-            context: context,
-            barrierDismissible: false,
-            transitionDuration: Duration(milliseconds: 500),
-            transitionBuilder: (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 1.0);
-              const end = Offset.zero;
-              const curve = Curves.ease;
-
-              var tween =
-                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-              return SlideTransition(
-                position: animation.drive(tween),
-                child: child,
-              );
-            },
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const AddAssetDialog());
         break;
       case 7:
         showGeneralDialog(

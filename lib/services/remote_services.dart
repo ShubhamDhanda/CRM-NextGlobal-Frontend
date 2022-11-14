@@ -46,6 +46,20 @@ class RemoteServices {
       return e.response;
     }
   }
+  Future<dynamic> getRFPById(id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getRFPById,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "id": id
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
 
   Future<dynamic> getBudgetProjects() async {
     try {
@@ -980,6 +994,11 @@ class RemoteServices {
       winningPrice,
       winningBidderId) async {
     try {
+      // print(cityId);
+      // print(departmentId);
+      // print(winningBidderId);
+      // print(team);
+      // print(planTakers);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addProposal,
           options: Options(
@@ -1036,12 +1055,12 @@ class RemoteServices {
       winningPrice,
       winningBidderId) async {
     try {
+      print(id);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.updateProposal,
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            // "id": prefs.getInt("id"),
             "id": id,
             "cityId": cityId,
             "departmentId": departmentId,
@@ -1064,7 +1083,6 @@ class RemoteServices {
             "winningPrice": winningPrice,
             "winningBidderId": winningBidderId
           });
-
       return resp.data;
     } on DioError catch (e) {
       return e.response;

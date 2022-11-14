@@ -28,6 +28,7 @@ class Constants {
   static String getAllProposals = "/api/get/proposals";
   static String getTasksById = "/api/get/tasksById";
   static String getBudgetById = "/api/get/budget/id";
+  static String getRFPById = "/api/get/rfp/id";
 
   static String getAllProjectNames = "/api/get/projectNames";
   static String getAllCompanyNames = "/api/get/companyNames";
@@ -67,6 +68,7 @@ class Constants {
   static String updateTask = "/api/update/task";
   static String updateBudget = "/api/update/budget";
   static String updateRFP = "/api/update/rfp";
+  static String updateProposal = "/api/update/proposal";
 
   static List<String> cities = <String>[
     "Airdrie",

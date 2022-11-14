@@ -72,7 +72,7 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
   List<String> employees = <String>[];
   List<String> prevCat = [];
   List<String> prevDep= [];
-  List<String> prevMember = [];
+  List<String> prevMember = [],prevPlan = [],prevBid = [];
   List<String> clients = [];
   Map<String, String> empMap = {}, clientMap = {};
   Map<String, int> projectManagerMap = {};
@@ -106,6 +106,8 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
     winnerPrice.text = mp["winningPrice"];
     winningBidder.text = mp["winningBidderName"];
     prevMember = teamMember.text.split(",");
+    prevPlan = planTakers.text.split(",");
+    prevBid = bidders.text.split(",");
     bidStatus = mp["bidStatus"]=="" ? "No Go" : mp["bidStatus"];
     status = mp["status"]=="" ? "No Go" : mp["status"];
 
@@ -173,7 +175,8 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
     });
 
     if (validate() == true) {
-       dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice, status.toString(), winnerPrice.text, winningBidder.text);
+      print("validated");
+       dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice, status.toString(), winnerPrice.text, companyMap[winningBidder.text]);
 
       setState(() {
         dataLoaded = false;
@@ -608,8 +611,8 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
               List<String> member=[];
               member = value;
               member.sort((a, b) => a.toString().compareTo(b.toString()));
-              Team = member.join(",");
-              print(Team);
+              teamMember.text = member.join(",");
+              print(teamMember.text);
             },
           ),
           const SizedBox(
@@ -700,94 +703,77 @@ class _updateProposalDialogState extends State<updateProposalDialog>{
           const SizedBox(
             height: 20,
           ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              planTakers.text = suggestion==null ? "" : suggestion.toString();
-            },
+          DropdownSearch<String>.multiSelection(
+            items: companies,
+            selectedItems: prevPlan,
+            dropdownButtonProps: const DropdownButtonProps(
+                color: Color.fromRGBO(255, 255, 255, 0.5)
+            ),
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
 
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curListed = [];
-
-              for (var e in companies) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curListed.add(e);
-                }
-              }
-
-              return curListed;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                onChanged: (text){
-
-                },
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: planTakers,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                     hintText: "Plan Takers",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
+            // dropdownBuilder: (context, distributors) {
+            //   return
+            // },
+            popupProps: const PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                menuProps: MenuProps(
+                  backgroundColor: Colors.white,
+                )
+            ),
+            onChanged: (value) {
+              List<String> member=[];
+              member = value;
+              member.sort((a, b) => a.toString().compareTo(b.toString()));
+              planTakers.text = member.join(",");
+              print(planTakers.text);
+            },
           ),
-          const SizedBox(height: 20,),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              bidders.text = suggestion==null ? "" : suggestion.toString();
-            },
+          const SizedBox(
+            height: 20,
+          ),
+          DropdownSearch<String>.multiSelection(
+            items: companies,
+            selectedItems: prevBid,
+            dropdownButtonProps: const DropdownButtonProps(
+                color: Color.fromRGBO(255, 255, 255, 0.5)
+            ),
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
 
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curListed = [];
-
-              for (var e in companies) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curListed.add(e);
-                }
-              }
-
-              return curListed;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                onChanged: (text){
-
-                },
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: bidders,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                     hintText: "Bidders",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
+            // dropdownBuilder: (context, distributors) {
+            //   return
+            // },
+            popupProps: const PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                menuProps: MenuProps(
+                  backgroundColor: Colors.white,
+                )
+            ),
+            onChanged: (value) {
+              List<String> member=[];
+              member = value;
+              member.sort((a, b) => a.toString().compareTo(b.toString()));
+              bidders.text = member.join(",");
+              print(bidders.text);
+            },
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
+
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),

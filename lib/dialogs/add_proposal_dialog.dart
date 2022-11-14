@@ -1,5 +1,3 @@
-
-import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -66,21 +64,17 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
 
   var apiClient = RemoteServices();
   List<String> cities = [], departments = [], categories = [];
-  Map<String, int> cityMap = {}, departmentMap = {}, categoryMap = {};
-  Map<int,String> cityIdMap = {}, departmentIdMap = {}, categoryIdMap = {};
-  List<Map<String, dynamic>> projects = [];
+  Map<String, int> cityMap = {}, departmentMap = {}, employeeMap = {},projectsMap={},companyMap = {};
+  Map<String, int> cityIdMap = {}, departmentIdMap = {}, employeeIdMap = {},projectsIdMap={},companyIdMap = {};
+  List<String> projects = [];
   bool dataLoaded = false;
   var projectStageVal;
   List<String> provinces = Constants.provinces;
   List<String> countries = Constants.countries;
-  List<String> clients = [];
-  Map<String, String> empMap = {}, clientMap = {};
-  Map<String, int> projectManagerMap = {};
-  var stringList,empId,status,bidStatus,Team;
-  List<Map<String, dynamic>> customers = [];
-  List<String> Departments = [];
+  var status,bidStatus,Team;
   List<String> employees = <String>[];
   List<String> companies = [];
+  var RFPId;
   var ProjectManager;
 
   @override
@@ -98,48 +92,36 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
     dynamic res2 = await apiClient.getDepartments();
     dynamic res3 = await apiClient.getAllEmployeeNames();
     dynamic res4 = await apiClient.getAllCompanyNames();
-    dynamic res5 = await apiClient.getAllProjectRfp();
+    dynamic res5 = await apiClient.getAllRFP();
 
-
-    // if(res?["success"] == true && res2?["success"] == true && res3?["success"] == true && res4?["success"]){
     if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]&& res5?["success"]==true) {
+
       for(var e in res1["res"]){
         cities.add(e["City"]);
         cityMap[e["City"]] = e["City_ID"];
+        // cityIdMap[e["City_ID"]] = e["City"];
       }
 
       for(var e in res2["res"]){
         departments.add(e["Department"]);
         departmentMap[e["Department"]] = e["Department_ID"];
+        // departmentIdMap[e["Department_ID"]] = e["Department"];
       }
 
       for(var e in res3["res"]){
         employees.add(e["Full_Name"].toString());
+        employeeMap[e["Full_Name"]] = e["Employee_ID"];
+        // employeeMap[e["Employee_ID"]] = e["Full_Name"];
       }
       for(var e in res4["res"]){
         companies.add(e["Name"]);
-        cityMap[e["Name"]] = e["ID"];
+        companyMap[e["Name"]] = e["ID"];
+        // companyIdMap[e["ID"]] = e["Name"];
       }
-      for (var i = 0; i < res5["res"].length; i++) {
-        var e = res5["res"][i];
-
-        Map<String, dynamic> mp = {};
-        mp["departmentId"] = e["Department_ID"];
-        mp["action"] = e["Action"];
-        mp["projectManagerId"] = e["Project_Manager_ID"];
-        mp["projectManagerId"] = e["Project_Manager_ID"];
-        mp["bidDate"] = e["Bid_Date"];
-        mp["startDate"] = e["Start_Date"];
-        mp["submissionDate"] = e["Submission_Date"];
-        mp["projectName"] = e["Project_Name"];
-        mp["amount"] = e["Amount"];
-        mp["cityId"] = e["City_ID"];
-        projects.add(mp);
-        var first = mp["firstName"];
-        var second = mp["lastName"];
-        var name = '$first $second';
+      for(var e in res5["res"]){
+        projects.add(e["Project_Name"]);
+        projectsMap[e["Project_Name"]] = e["RFP_ID"];
       }
-      print(employees);
     }else{
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
     }
@@ -153,6 +135,29 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
   }
 
 
+  void _getBudgetData() async {
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
+
+      dynamic res = await apiClient.getRFPById(RFPId);
+
+      department.text = res["res"][0]["Department"];
+      projectManager.text = res["res"][0]["Manager_Name"];
+      city.text = res["res"][0]["City"];
+
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
 
   void postData() async {
     setState(() {
@@ -164,7 +169,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
 
 
 
-      dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice, status.toString(), winnerPrice.text, winningBidder.text);
+      dynamic res = await apiClient.addProposal(cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice, status.toString(), winnerPrice.text, companyMap[winningBidder.text]);
       if(res?["success"]==true) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(snackBar3);
@@ -263,12 +268,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               if(suggestion != null) {
-                if(suggestion == "+ Add Department"){
-
-                }else{
                   department.text = suggestion.toString();
-                  // departmentId = departmentMap[department.text];
-                }
               }
             },
             itemBuilder: (context, suggestion) {
@@ -313,6 +313,8 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               projectController.text = suggestion==null ? "" : suggestion.toString();
+              RFPId = projectsMap[projectController.text];
+              _getBudgetData();
             },
 
             itemBuilder: (context, suggestion) {
@@ -327,7 +329,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
             suggestionsCallback: (pattern) {
               var curList = [];
 
-              for (var e in employees) {if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+              for (var e in projects) {if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                   curList.add(e);
                 }
               }
@@ -549,7 +551,6 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
                   curList.add(e);
                 }
               }
-
               return curList;
             },
             textFieldConfiguration: TextFieldConfiguration(
@@ -596,8 +597,8 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
               List<String> member=[];
               member = value;
               member.sort((a, b) => a.toString().compareTo(b.toString()));
-              Team = member.join(",");
-              print(Team);
+              teamMember.text = member.join(",");
+              print(teamMember.text);
             },
           ),
           const SizedBox(
@@ -688,94 +689,74 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
           const SizedBox(
             height: 20,
           ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              planTakers.text = suggestion==null ? "" : suggestion.toString();
-            },
+          DropdownSearch<String>.multiSelection(
+            items: companies,
+            dropdownButtonProps: const DropdownButtonProps(
+                color: Color.fromRGBO(255, 255, 255, 0.5)
+            ),
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
 
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curListed = [];
-
-              for (var e in companies) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curListed.add(e);
-                }
-              }
-
-              return curListed;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                onChanged: (text){
-
-                },
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: planTakers,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                     hintText: "Plan Takers",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
+            // dropdownBuilder: (context, distributors) {
+            //   return
+            // },
+            popupProps: const PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                menuProps: MenuProps(
+                  backgroundColor: Colors.white,
+                )
+            ),
+            onChanged: (value) {
+              List<String> member=[];
+              member = value;
+              member.sort((a, b) => a.toString().compareTo(b.toString()));
+              planTakers.text = member.join(",");
+              print(planTakers.text);
+            },
           ),
-          const SizedBox(height: 20,),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              bidders.text = suggestion==null ? "" : suggestion.toString();
-            },
+          const SizedBox(
+            height: 20,
+          ),
+          DropdownSearch<String>.multiSelection(
+            items: companies,
+            dropdownButtonProps: const DropdownButtonProps(
+                color: Color.fromRGBO(255, 255, 255, 0.5)
+            ),
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
 
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curListed = [];
-
-              for (var e in companies) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curListed.add(e);
-                }
-              }
-
-              return curListed;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                onChanged: (text){
-
-                },
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: bidders,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                     hintText: "Bidders",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
+            // dropdownBuilder: (context, distributors) {
+            //   return
+            // },
+            popupProps: const PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                menuProps: MenuProps(
+                  backgroundColor: Colors.white,
+                )
+            ),
+            onChanged: (value) {
+              List<String> member=[];
+              member = value;
+              member.sort((a, b) => a.toString().compareTo(b.toString()));
+              bidders.text = member.join(",");
+              print(bidders.text);
+            },
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
