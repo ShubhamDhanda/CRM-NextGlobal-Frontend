@@ -67,9 +67,14 @@ class NavDrawerWidget extends StatelessWidget {
                 onClick: () => onItemSelected(context, '/assets')
             ),
             MenuItem(
-                text: "Proposals",
+                text: "Competitors",
                 iconData: Icons.local_shipping,
-                onClick: () => onItemSelected(context, '/proposals')
+                onClick: () => onItemSelected(context, '/competitor')
+            ),
+            MenuItem(
+                text: "Inventory",
+                iconData: Icons.local_shipping,
+                onClick: () => onItemSelected(context, '/inventory')
             ),
             MenuItem(
                 text: "Data",
@@ -80,6 +85,11 @@ class NavDrawerWidget extends StatelessWidget {
                 text: "Logout",
                 iconData: Icons.logout,
                 onClick: () => onItemSelected(context, '/login')
+            ),
+            MenuItem(
+                text: "Proposals",
+                iconData: Icons.local_shipping,
+                onClick: () => onItemSelected(context, '/proposals')
             ),
           ],
         ),

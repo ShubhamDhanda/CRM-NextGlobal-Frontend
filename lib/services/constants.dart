@@ -5,7 +5,7 @@ class Constants {
       "373756743234-du2ljnfisg6vnr6pucjcq7vhrruhg4tv.apps.googleusercontent.com";
   // static String baseURL = "http://192.168.54.150:8080";
   // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
-  static String baseURL = "http://172.16.172.41:8080";
+  static String baseURL = "http://192.168.0.103:8080";
   static String login = "/api/login";
 
   static String suppliersDashboard = "/api/getDashboard/suppliers";
@@ -44,6 +44,7 @@ class Constants {
   static String getDepartments = "/api/get/list/departments";
   static String getProjectCategories = "/api/get/list/projectCategories";
   static String getAllProjectRfp = "/api/get/list/projectRfp";
+  static String getAllCompetitors = "/api/get/list/competitors";
 
   static String addEmployee = "/api/add/employee";
   static String addContact = "/api/add/contact";
@@ -60,6 +61,7 @@ class Constants {
   static String addAsset = "/api/add/asset";
   static String addSoftware = "/api/add/software";
   static String addJobTitle = "/api/add/jobTitle";
+  static String addCompetitor = "/api/add/competitor";
 
   static String updateCustomer = "/api/update/client";
   static String updateCompany = "/api/update/company";
@@ -69,6 +71,7 @@ class Constants {
   static String updateBudget = "/api/update/budget";
   static String updateRFP = "/api/update/rfp";
   static String updateProposal = "/api/update/proposal";
+  static String updateCompetitor = "/api/update/competitor";
 
   static List<String> cities = <String>[
     "Airdrie",

@@ -3,6 +3,7 @@ import 'package:crm/admin/admin.dart';
 import 'package:crm/admin/assets.dart';
 import 'package:crm/admin/budgets.dart';
 import 'package:crm/admin/companies.dart';
+import 'package:crm/admin/competitor.dart';
 import 'package:crm/admin/customers.dart';
 import 'package:crm/admin/employees.dart';
 import 'package:crm/admin/pending_requests.dart';
@@ -20,6 +21,8 @@ import 'package:crm/manager/manager_dashboard.dart';
 import 'package:crm/suppliers/suppliers_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'admin/inventory.dart';
 
 void main() => runApp(const MyApp());
 
@@ -65,7 +68,9 @@ class MyApp extends StatelessWidget {
         '/engineerProjects' : (context) => const engineer_projects.Projects(),
 
         '/it' : (context) => const ItDashboard(),
-        '/manager' : (context) => const ManagerDashboard()
+        '/manager' : (context) => const ManagerDashboard(),
+        '/competitor' : (context) => const Competitor(),
+        '/inventory' : (context) => const Inventory()
       }
     );
   }

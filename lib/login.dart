@@ -101,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
     return true;
   }
 
+
   @override
   Widget build(BuildContext context) {
     final isInit = isAnimating || state == ButtonState.init;

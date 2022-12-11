@@ -18,6 +18,67 @@ class RemoteServices {
       return e.response;
     }
   }
+  Future<dynamic> addCompetitor(companyId, category, product,
+      approxSales, geographicalCoverage, keyPersonnel, distributedBy) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addCompetitor,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "companyId": companyId,
+            "category": category,
+            "product": product,
+            "approxSales": approxSales,
+            "geographicalCoverage": geographicalCoverage,
+            "keyPersonnel": keyPersonnel,
+            "distributedBy": distributedBy
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateCompetitor(competitorId,companyId, category, product,
+      approxSales, geographicalCoverage, keyPersonnel, distributedBy) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateCompetitor,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "competitorId": competitorId,
+            "companyId": companyId,
+            "category": category,
+            "product": product,
+            "approxSales": approxSales,
+            "geographicalCoverage": geographicalCoverage,
+            "keyPersonnel": keyPersonnel,
+            "distributedBy": distributedBy
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+
+  Future<dynamic> getAllCompetitors() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllCompetitors,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
 
   Future<dynamic> getAllRFP() async {
     try {

@@ -2,13 +2,17 @@ import 'package:crm/admin/drawer.dart';
 import 'package:crm/dialogs/add_asset_dialog.dart';
 import 'package:crm/dialogs/add_budget_dialog.dart';
 import 'package:crm/dialogs/add_company_dialog.dart';
+import 'package:crm/dialogs/add_competitor_dialog.dart';
 import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/dialogs/add_project_dialog.dart';
 import 'package:crm/dialogs/add_rfp_dialog.dart';
 import 'package:flutter/material.dart';
 
+
+import '../dialogs/add_inventory_dialog.dart';
 import '../dialogs/add_proposal_dialog.dart';
+import '../dialogs/add_takeoff_dialog.dart';
 import '../dialogs/new_order_dialog.dart';
 
 class AddData extends StatefulWidget {
@@ -97,7 +101,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
         ),
         SizedBox(
           width: double.maxFinite,
-          height: 408,
+          height: 542,
           child: TabBarView(
             controller: tabController,
             children: [requests(), forms()],
@@ -131,9 +135,13 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
               requestCard(text: "Add Client", onClick: () => onRequest(5)),
               requestCard(text: "Add Order", onClick: () => onRequest(6)),
               requestCard(text: "Add Proposal", onClick: () => onRequest(7)),
-              requestCard(text: "Track Shipment", onClick: () => onRequest(8)),
+              requestCard(text: "Add Competitor", onClick: () => onRequest(8)),
+              requestCard(text: "Add Inventory", onClick: () => onRequest(9)),
+              requestCard(text: "Add TakeOff", onClick: () => onRequest(10)),
+
+              requestCard(text: "Track Shipment", onClick: () => onRequest(11)),
               requestCard(
-                  text: "New Design request", onClick: () => onRequest(9)),
+                  text: "New Design request", onClick: () => onRequest(12)),
             ],
           ),
         ),
@@ -408,6 +416,69 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
             },
             pageBuilder: (context, animation, secondaryAnimation) =>
                 const AddProposalDialog());
+        break;
+      case 8:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            const AddCompetitorDialog());
+        break;
+      case 9:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            const AddInventoryDialog());
+        break;
+      case 10:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            const AddTakeoffDialog());
         break;
     }
   }

@@ -42,12 +42,12 @@ class GoogleCalendar{
       event.summary = "${title} : ${project} : ${comments}";
       event.description = description;
 
-      List<EventAttendee> list = [];
-      attendees.forEach((element) {
-        EventAttendee att = EventAttendee(email: element);
-        list.add(att);
-      });
-      event.attendees = list;
+      // List<EventAttendee> list = [];
+      // attendees.forEach((element) {
+      //   EventAttendee att = EventAttendee(email: element);
+      //   list.add(att);
+      // });
+      // event.attendees = list;
 
       EventDateTime start = EventDateTime(); //Setting start time
       start.dateTime = startTime;
@@ -93,13 +93,13 @@ class GoogleCalendar{
   //     includeItemsFromAllDrives: true,
   //     driveId: "0APYPWGSmZLhfUk9PVA",
   //     corpora: "drive",
-  //     // supportsAllDrives: true,s
-  //     // q: "not 'me' in owners",s
+  //     supportsAllDrives: true,
+  //     q: "not 'me' in owners",
   //     supportsTeamDrives: true,
-  //       // orderBy: "createdTime",
-  //       // q: "mimeType = 'application/vnd.google-apps.folder'",
-  //       // q: "'TODO' in CRM",
-  //   );
+  //       orderBy: "createdTime",
+        // q: "mimeType = 'application/vnd.google-apps.folder'",
+        // q: "'TODO' in CRM",
+    // );
   //   dynamic response = await driveApi.files.get("1cuhA05QnAHgTASeD0P935tKzHCMBzra8",downloadOptions: drive.DownloadOptions.fullMedia);
   //
   //   List<int> dataStore = [];
