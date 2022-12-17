@@ -47,15 +47,20 @@ class NavDrawerWidget extends StatelessWidget {
                 onClick: () => onItemSelected(context, '/budgets')
             ),
             MenuItem(
-                text: "RFPs",
-                iconData: Icons.request_quote,
-                onClick: () => onItemSelected(context, '/rfps')
+                text: "Data Mining",
+                iconData: Icons.local_shipping,
+                onClick: () => onItemSelected(context, '/mining')
             ),
-            MenuItem(
-                text: "Projects",
-                iconData: Icons.account_balance,
-                onClick: () => onItemSelected(context, '/projects')
-            ),
+            // MenuItem(
+            //     text: "RFPs",
+            //     iconData: Icons.request_quote,
+            //     onClick: () => onItemSelected(context, '/rfps')
+            // ),
+            // MenuItem(
+            //     text: "Projects",
+            //     iconData: Icons.account_balance,
+            //     onClick: () => onItemSelected(context, '/projects')
+            // ),
             MenuItem(
                 text: "Employees",
                 iconData: Icons.emoji_people,
@@ -72,9 +77,9 @@ class NavDrawerWidget extends StatelessWidget {
                 onClick: () => onItemSelected(context, '/competitor')
             ),
             MenuItem(
-                text: "Inventory",
+                text: "Products",
                 iconData: Icons.local_shipping,
-                onClick: () => onItemSelected(context, '/inventory')
+                onClick: () => onItemSelected(context, '/products')
             ),
             MenuItem(
                 text: "Data",
@@ -86,11 +91,11 @@ class NavDrawerWidget extends StatelessWidget {
                 iconData: Icons.logout,
                 onClick: () => onItemSelected(context, '/login')
             ),
-            MenuItem(
-                text: "Proposals",
-                iconData: Icons.local_shipping,
-                onClick: () => onItemSelected(context, '/proposals')
-            ),
+            // MenuItem(
+            //     text: "Proposals",
+            //     iconData: Icons.local_shipping,
+            //     onClick: () => onItemSelected(context, '/proposals')
+            // ),
           ],
         ),
       ),

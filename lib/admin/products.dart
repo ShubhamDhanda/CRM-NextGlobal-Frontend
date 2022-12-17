@@ -6,16 +6,16 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
 import '../dialogs/update_competitor_dialog.dart';
-import '../dialogs/update_inventory_dialog.dart';
+import '../dialogs/update_product_dialog.dart';
 
-class Inventory extends StatefulWidget{
-  const Inventory({super.key});
+class Products extends StatefulWidget{
+  const Products({super.key});
 
   @override
-  State<StatefulWidget> createState() => _InventoryState();
+  State<StatefulWidget> createState() => _ProductState();
 }
 
-class _InventoryState extends State<Inventory>{
+class _ProductState extends State<Products>{
   TextEditingController companyController = TextEditingController();
   TextEditingController category = TextEditingController();
   TextEditingController product = TextEditingController();
@@ -31,8 +31,7 @@ class _InventoryState extends State<Inventory>{
     backgroundColor: Colors.red,
   );
 
-  List<Map<String, dynamic>> competitors = [];
-  List<String> companies = [];
+  List<Map<String, dynamic>> products = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
   List<String> cat = [];
@@ -44,8 +43,8 @@ class _InventoryState extends State<Inventory>{
   }
 
   void _getData() async {
-    dynamic res = await apiClient.getAllCompanies();
-    companies.clear();
+    dynamic res = await apiClient.getAllProducts();
+    products.clear();
     search.clear();
     filtered.clear();
 
@@ -54,19 +53,23 @@ class _InventoryState extends State<Inventory>{
         var e = res["res"][i];
 
         Map<String, dynamic> mp = {};
-        // mp["competitorId"] = e["Competitor_ID"].toString();
-        // mp["company"] = e["Company"].toString();
-        // mp["category"] = e["Category"];
-        // mp["product"] = e["Product"] ?? "";
-        // mp["approxSales"] = e["Approx_Sales"].toString();
-        // mp["geographicalCoverage"] = e["Geographical_Coverage"].toString();
-        // mp["keyPersonnel"] = e["KeyPersonnel"];
-        // mp["distributedBy"] = e["DistributedBy"] ?? "";
-        // competitors.add(mp);
+        mp["productId"] = e["Product_ID"]==null? "": e["Product_ID"].toString();
+        mp["productCode"] = e["Product_Code"]==null? "": e["Product_Code"].toString();
+        mp["productName"] = e["Product_Name"]==null? "": e["Product_Name"]??"";
+        mp["description"] = e["Description"]== null? "": e["Description"]??"";
+        mp["standardCost"] = e["Standard_Cost"]==null? "": e["Standard_Cost"].toString();
+        mp["listPrice"] = e["List_Price"]==null? "": e["List_Price"].toString();
+        mp["reorderLevel"] = e["Reorder_Level"]==null? "": e["Reorder_Level"].toString();
+        mp["targetLevel"] = e["Target_Level"] == null? "" : e["Target_Level"].toString();
+        mp["quantityPerUnit"] = e["Quantity_Per_Unit"]==null? "": e["Quantity_Per_Unit"].toString();
+        mp["discontinued"] = e["Discontinued"]==null? "": e["Discontinued"]??"";
+        mp["minimumReorderQuantity"] = e["Minimum_Reorder_Quantity"]==null? "": e["Minimum_Reorder_Quantity"].toString();
+        mp["category"] = e["Category"]==null? "": e["Category"]??"";
+        products.add(mp);
       }
 
-      search.addAll(competitors);
-      filtered.addAll(competitors);
+      search.addAll(products);
+      filtered.addAll(products);
     }else {
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
     }
@@ -103,12 +106,12 @@ class _InventoryState extends State<Inventory>{
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Inventory"),
+          title: Text("Products"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         drawer: const NavDrawerWidget(
-          name: '/inventory',
+          name: '/products',
         ),
         body: dashboard());
   }
@@ -142,7 +145,7 @@ class _InventoryState extends State<Inventory>{
                     child: search.isEmpty
                         ? const Center(
                       child: Text(
-                        "No Inventory Found",
+                        "No Products Found",
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -217,9 +220,9 @@ class _InventoryState extends State<Inventory>{
             filtered.clear();
             cat = value as List<String>;
             if(cat.isEmpty){
-              filtered.addAll(competitors);
+              filtered.addAll(products);
             }else{
-              competitors.forEach((e) {
+              products.forEach((e) {
                 if(cat.contains(e["category"])){
                   filtered.add(e);
                 }
@@ -249,7 +252,7 @@ class _InventoryState extends State<Inventory>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 280,
+        height: 290,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -266,14 +269,14 @@ class _InventoryState extends State<Inventory>{
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Company ID : ",
+                      "Product ID : ",
                       style: TextStyle(
                           color: Color.fromRGBO(134, 97, 255, 1),
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      mp["id"].toString(),
+                      mp["productId"].toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -299,11 +302,17 @@ class _InventoryState extends State<Inventory>{
                             );
                           },
                           pageBuilder: (context, animation, secondaryAnimation) =>
-                              updateInventoryDialog(
+                              updateProductDialog(
                                 mp: mp,
                               )).then((value) {
-                        if(value! == true){
+                        if(value==true){
+                          setState(() {
+                            dataLoaded = false;
+                          });
                           _getData();
+                          setState(() {
+                            dataLoaded = true;
+                          });
                         }
                       }),
                   child: Icon(
@@ -319,14 +328,117 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Company Name : ",
+                    "Product Code : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["name"],
+                    mp["productCode"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Product Name : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["productName"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Standard Cost : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    mp["standardCost"],
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Target Level : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["targetLevel"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Reorder Level : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["reorderLevel"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Minimum Reorder Quantity : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["minimumReorderQuantity"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -346,27 +458,8 @@ class _InventoryState extends State<Inventory>{
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Text(
+                  Flexible(fit: FlexFit.loose,child: Text(
                     mp["category"],
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Address : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["address"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -380,14 +473,14 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "City : ",
+                    "Discontinued : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["city"],
+                    mp["discontinued"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -401,14 +494,14 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Province : ",
+                    "Description : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["province"],
+                    mp["description"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -418,87 +511,7 @@ class _InventoryState extends State<Inventory>{
               const SizedBox(
                 height: 5,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Country : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["country"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Phone : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["businessPhone"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Email : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["email"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Webpage : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["webpage"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
+
             ],
           ),
         ),

@@ -174,7 +174,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
           child: Icon(Icons.close),
           onTap: () => Navigator.pop(context),
         ),
-        title: Text("Update Proposal"),
+        title: Text("Update Competitor"),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
         backgroundColor: Colors.black,
       ),

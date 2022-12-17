@@ -185,7 +185,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget buildButton() => ElevatedButton(
+
+
+
+Widget buildButton() => ElevatedButton(
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all(const Color.fromRGBO(134, 97, 255, 1))
         ),

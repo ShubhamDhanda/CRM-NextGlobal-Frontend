@@ -21,8 +21,8 @@ import 'package:crm/manager/manager_dashboard.dart';
 import 'package:crm/suppliers/suppliers_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'admin/inventory.dart';
+import 'admin/data_mining.dart';
+import 'admin/products.dart';
 
 void main() => runApp(const MyApp());
 
@@ -70,7 +70,8 @@ class MyApp extends StatelessWidget {
         '/it' : (context) => const ItDashboard(),
         '/manager' : (context) => const ManagerDashboard(),
         '/competitor' : (context) => const Competitor(),
-        '/inventory' : (context) => const Inventory()
+        '/products' : (context) => const Products(),
+        '/mining' : (context) => const Mining()
       }
     );
   }
@@ -97,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen> {
         backgroundColor: Colors.black,
         body: Container(
           alignment: Alignment.center,
-          child: const Text("Concept Dash", style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),),
+          child: const Text("NextGlobal", style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),),
         ),
       );
   }

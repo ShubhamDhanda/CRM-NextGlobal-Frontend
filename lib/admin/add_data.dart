@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 
 import '../dialogs/add_inventory_dialog.dart';
+import '../dialogs/add_product_dialog.dart';
 import '../dialogs/add_proposal_dialog.dart';
 import '../dialogs/add_takeoff_dialog.dart';
 import '../dialogs/new_order_dialog.dart';
@@ -136,7 +137,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
               requestCard(text: "Add Order", onClick: () => onRequest(6)),
               requestCard(text: "Add Proposal", onClick: () => onRequest(7)),
               requestCard(text: "Add Competitor", onClick: () => onRequest(8)),
-              requestCard(text: "Add Inventory", onClick: () => onRequest(9)),
+              requestCard(text: "Add Product", onClick: () => onRequest(9)),
               requestCard(text: "Add TakeOff", onClick: () => onRequest(10)),
 
               requestCard(text: "Track Shipment", onClick: () => onRequest(11)),
@@ -457,7 +458,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
               );
             },
             pageBuilder: (context, animation, secondaryAnimation) =>
-            const AddInventoryDialog());
+            const AddProductDialog());
         break;
       case 10:
         showGeneralDialog(

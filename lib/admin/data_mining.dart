@@ -6,16 +6,17 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
 import '../dialogs/update_competitor_dialog.dart';
+import '../dialogs/update_product_dialog.dart';
+import '../dialogs/update_takeoff_dialog.dart';
 
-class Competitor extends StatefulWidget{
-  const Competitor({super.key});
+class Mining extends StatefulWidget{
+  const Mining({super.key});
 
   @override
-  State<StatefulWidget> createState() => _CompetitorState();
+  State<StatefulWidget> createState() => _MiningState();
 }
 
-class _CompetitorState extends State<Competitor>{
-
+class _MiningState extends State<Mining>{
   TextEditingController companyController = TextEditingController();
   TextEditingController category = TextEditingController();
   TextEditingController product = TextEditingController();
@@ -23,7 +24,6 @@ class _CompetitorState extends State<Competitor>{
   TextEditingController geographicalCoverage = TextEditingController();
   TextEditingController distributedBy = TextEditingController();
   TextEditingController keyPersonnel = TextEditingController();
-  TextEditingController searchController = TextEditingController();
 
   var apiClient = RemoteServices();
   bool dataLoaded = false;
@@ -32,8 +32,7 @@ class _CompetitorState extends State<Competitor>{
     backgroundColor: Colors.red,
   );
 
-  List<Map<String, dynamic>> competitors = [];
-  // List<String> companies = [];
+  List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
   List<String> cat = [];
@@ -45,41 +44,59 @@ class _CompetitorState extends State<Competitor>{
   }
 
   void _getData() async {
-    dynamic res = await apiClient.getAllCompetitors();
-    competitors.clear();
-    search.clear();
-    filtered.clear();
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
+      dynamic res = await apiClient.getAllDataMining();
+      data.clear();
+      search.clear();
+      filtered.clear();
 
-    if(res?["success"] == true){
-      print(1);
-      for (var i = 0; i < res["res"].length; i++) {
-        var e = res["res"][i];
+      if (res?["success"] == true) {
+        for (var i = 0; i < res["res"].length; i++) {
+          var e = res["res"][i];
 
-        Map<String, dynamic> mp = {};
-        mp["competitorId"] = e["Competitor_ID"]==null? "": e["Competitor_ID"].toString() ;
-        // print(mp["competitorId"]);
-        mp["company"] = e["Company_ID"]==null? "": e["Competitor_ID"].toString();
-        mp["category"] = e["Category"]==null? "": e["Category"].toString();
-        mp["product"] = e["Product"]==null? "": e["Product"].toString();
-        mp["approxSales"] = e["Approx_Sales"]==null? "": e["Approx_Sales"].toString();
-        mp["geographicalCoverage"] = e["Geographical_Coverage"]==null? "": e["Geographical_Coverage"].toString();
-        mp["keyPersonnel"] = e["Key_Personnel"]==null? "": e["Key_Personnel"].toString();
-        mp["distributedBy"] = e["Distributed_By"]==null? "": e["Distributed_By"].toString();
-        competitors.add(mp);
+          Map<String, dynamic> mp = {};
+          mp["dataId"] =
+          e["Data_ID"] == null ? "" : e["Data_ID"].toString();
+          mp["productsName"] =
+          e["Products_ID"] == null ? "" : e["Products_ID"] ?? "";
+          mp["salesPerson"] =
+          e["Sales_Person"] == null ? "" : e["Sales_Person"] ?? "";
+          mp["action"] =
+          e["Action"] == null ? "" : e["Action"] ?? "";
+          mp["manager"] =
+          e["Manager"] == null ? "" : e["Manager"] ?? "";
+          mp["generalContractor"] =
+          e["General_Contractor"] == null ? "" : e["General_Contractor"] ?? "";
+          mp["contractor"] =
+          e["Contractor"] == null ? "" : e["Contractor"] ?? "";
+          mp["projectSource"] =
+          e["Project_Source"] == null ? "" : e["Project_Source"] ?? "";
+          mp["projectName"] =
+          e["Project_Name"] == null ? "" : e["Project_Name"] ?? "";
+          mp["takeoffId"] =
+          e["Takeoff_ID"] == null ? "" : e["Takeoff_ID"].toString();
+          mp["projectValue"] =
+          e["Project_Value"] == null ? "" : e["Project_Value"].toString();
+
+          data.add(mp);
+        }
+
+        search.addAll(data);
+        filtered.addAll(data);
       }
-
-      search.addAll(competitors);
-      filtered.addAll(competitors);
-    }else {
-      print(0);
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    }
+    } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally {
     setState(() {
-      dataLoaded = true;
+    dataLoaded = true;
     });
 
     await Future.delayed(Duration(seconds: 2));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
   }
 
   void _onSearchChanged(String text) async {
@@ -107,12 +124,12 @@ class _CompetitorState extends State<Competitor>{
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Competitor"),
+          title: Text("Data Mining"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         drawer: const NavDrawerWidget(
-          name: '/competitor',
+          name: '/mining',
         ),
         body: dashboard());
   }
@@ -146,7 +163,7 @@ class _CompetitorState extends State<Competitor>{
                     child: search.isEmpty
                         ? const Center(
                       child: Text(
-                        "No Competitors Found",
+                        "No Data Mining Found",
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -170,7 +187,7 @@ class _CompetitorState extends State<Competitor>{
       width: 300,
       child: TextField(
           cursorColor: Colors.white,
-          controller: searchController,
+          // controller: searchController,
           onChanged: _onSearchChanged,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
@@ -194,7 +211,7 @@ class _CompetitorState extends State<Competitor>{
     );
   }
 
-   Widget filterButton() {
+  Widget filterButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
       child: ElevatedButton(
@@ -221,16 +238,16 @@ class _CompetitorState extends State<Competitor>{
             filtered.clear();
             cat = value as List<String>;
             if(cat.isEmpty){
-              filtered.addAll(competitors);
+              filtered.addAll(data);
             }else{
-              competitors.forEach((e) {
+              data.forEach((e) {
                 if(cat.contains(e["category"])){
                   filtered.add(e);
                 }
               });
             }
 
-            _onSearchChanged(searchController.text);
+            // _onSearchChanged(searchController.text);
           });
         },
         style: ButtonStyle(
@@ -253,7 +270,7 @@ class _CompetitorState extends State<Competitor>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 236,
+        height: 290,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -270,14 +287,14 @@ class _CompetitorState extends State<Competitor>{
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Competitor ID : ",
+                      "Data ID : ",
                       style: TextStyle(
                           color: Color.fromRGBO(134, 97, 255, 1),
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      mp["competitorId"].toString(),
+                      mp["dataId"].toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -303,11 +320,17 @@ class _CompetitorState extends State<Competitor>{
                             );
                           },
                           pageBuilder: (context, animation, secondaryAnimation) =>
-                              updateCompetitorDialog(
+                              UpdateTakeoffDialog(
                                 mp: mp,
                               )).then((value) {
-                        if(value! == true){
+                        if(value==true){
+                          setState(() {
+                            dataLoaded = false;
+                          });
                           _getData();
+                          setState(() {
+                            dataLoaded = true;
+                          });
                         }
                       }),
                   child: Icon(
@@ -323,14 +346,14 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Company Name : ",
+                    "Products : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["company"],
+                    mp["productsName"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -344,14 +367,35 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Category : ",
+                    "Action : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["action"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Sales Person : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    mp["category"],
+                    mp["salesPerson"],
                     style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
                 ],
@@ -363,14 +407,14 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Product : ",
+                    "Manager : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["product"],
+                    mp["manager"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -384,14 +428,14 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Approx Sales : ",
+                    "General Contractor : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["approxSales"],
+                    mp["generalContractor"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -405,14 +449,14 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Goegraphical Coverage : ",
+                    "Contractor : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["geographicalCoverage"],
+                    mp["contractor"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -426,14 +470,14 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Key Personnel : ",
+                    "Project Source : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["keyPersonnel"],
+                    mp["projectSource"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -447,14 +491,14 @@ class _CompetitorState extends State<Competitor>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Distributed By : ",
+                    "Project Value : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["distributedBy"],
+                    mp["projectValue"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -463,7 +507,29 @@ class _CompetitorState extends State<Competitor>{
               ),
               const SizedBox(
                 height: 5,
-              )
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Project Name : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["projectName"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+
             ],
           ),
         ),

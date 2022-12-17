@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:crm/dialogs/add_jobtitle_dialog.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
@@ -31,64 +33,34 @@ const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"],
       "MMA",
       "Others"
     ],
-    activities = ["Running", "Walking", "Travelling"],
+    activities = ["Running", "Walking", "Travelling"],companies = [],
     beverages = ["Coffee", "Tea", "Ice Cap"],
     alcohols = ["Vodka", "Scotch", "Beer", "Tequila", "Rum", "Cocktail"],
 projectManagers = [];
 
 class _AddTakeoffDialogState extends State {
 
-  List<TextEditingController>? _controllers = [];
-  TextEditingController teamMember = TextEditingController();
-  TextEditingController projectManager = TextEditingController();
-  List <String> salutation = ["Mr.", "Mr.", "Mr.", "Mr.", "Mr.", "Mr."];
-  TextEditingController firstName = TextEditingController();
-  TextEditingController lastName = TextEditingController();
-  TextEditingController jobTitle = TextEditingController();
-  var jobTitleId;
-  var department;
-  TextEditingController directManager = TextEditingController();
-  var directManagerID;
-  TextEditingController emailWork = TextEditingController();
-  TextEditingController emailPersonal = TextEditingController();
-  TextEditingController businessPhone = TextEditingController();
-  TextEditingController mobilePhone = TextEditingController();
-  TextEditingController address = TextEditingController();
-  TextEditingController city = TextEditingController();
-  TextEditingController state = TextEditingController();
-  TextEditingController zip = TextEditingController();
-  TextEditingController country = TextEditingController(text: "Canada");
-  TextEditingController joiningDate = TextEditingController();
-  TextEditingController expertise = TextEditingController();
-  TextEditingController resume = TextEditingController();
-  TextEditingController webpage = TextEditingController();
-  TextEditingController notes = TextEditingController();
-  TextEditingController attachment = TextEditingController();
-  TextEditingController softwarePrivilege = TextEditingController();
+  List<TextEditingController>? productCategory = [];
+  List<TextEditingController>? productMaterial = [];
+  List<TextEditingController>? productSubcategory = [];
+  List<TextEditingController>? itemName = [];
+  List<TextEditingController>? productName = [];
+  List<TextEditingController>? specifiedProduct = [];
+  List<TextEditingController>? proposedProduct = [];
+  List<TextEditingController>? unit = [];
+  List<TextEditingController>? quantity = [];
+  List<TextEditingController>? price = [];
+  TextEditingController action = TextEditingController();
+  TextEditingController salesPerson = TextEditingController();
+  TextEditingController manager = TextEditingController();
+  TextEditingController projectSource = TextEditingController();
+  TextEditingController products = TextEditingController();
+  TextEditingController generalContractors = TextEditingController();
+  TextEditingController contractors = TextEditingController();
+  TextEditingController projectName = TextEditingController();
+  TextEditingController projectValue = TextEditingController();
 
-  TextEditingController username = TextEditingController();
-  TextEditingController password = TextEditingController();
-  TextEditingController confirmPassword = TextEditingController();
 
-  TextEditingController birthday = TextEditingController();
-  TextEditingController anniversary = TextEditingController();
-  var sport, activity, beverage, alcohol;
-  TextEditingController travel = TextEditingController();
-  TextEditingController spouse = TextEditingController();
-  TextEditingController children = TextEditingController();
-  TextEditingController tv = TextEditingController();
-  TextEditingController movie = TextEditingController();
-  TextEditingController actor = TextEditingController();
-  TextEditingController dislikes = TextEditingController();
-
-  TextEditingController proficiency = TextEditingController();
-  TextEditingController interest = TextEditingController();
-  TextEditingController cocurricular = TextEditingController();
-  TextEditingController trainings = TextEditingController();
-
-  TextEditingController strengths = TextEditingController();
-  TextEditingController weaknesses = TextEditingController();
-  TextEditingController socialActiveIndex = TextEditingController();
 
   final snackBar1 = const SnackBar(
     content: Text('Please fill all the Required fields!'),
@@ -121,10 +93,11 @@ class _AddTakeoffDialogState extends State {
   List<String> countries = Constants.countries,
       jobTitles = [],
       directManagers = [],
-      products = ["HII", "Shubham", "Dhanda", "Jatt"],
+      Products = [],
       selectedProducts = [];
   Map<String, int> jobTitleMap = {},
       directManagerMap = {};
+  List<String> GeneralContractors =[],Contractors = [];
 
   @override
   void initState() {
@@ -139,13 +112,13 @@ class _AddTakeoffDialogState extends State {
         loading = true;
       });
 
-      // dynamic res = await apiClient.getAllEmployeeNames();
+      dynamic res = await apiClient.getAllProducts();
       // dynamic res4 = await apiClient.getAllCompanyNames();
       //
-      // for (var e in res["res"]) {
-      //   directManagers.add(e["Full_Name"]);
-      //   directManagerMap[e["Full_Name"]] = e["Employee_ID"];
-      // }
+      for (var e in res["res"]) {
+        Products.add(e["Product_Name"]);
+        // directManagerMap[e["Full_Name"]] = e["Employee_ID"];
+      }
       // for (var e in res4["res"]) {
       //   products.add(e["Name"]);
       //   // companyMap[e["Name"]] = e["ID"];
@@ -164,33 +137,6 @@ class _AddTakeoffDialogState extends State {
     }
   }
 
-  void getJobTitles() async {
-    try {
-      setState(() {
-        loading = true;
-      });
-
-      dynamic res = await apiClient.getAllJobTitles(department.toString());
-
-      jobTitles.clear();
-      jobTitleMap.clear();
-
-      for (var e in res["res"]) {
-        jobTitles.add(e["Title"]);
-        jobTitleMap[e["Title"]] = e["Title_ID"];
-      }
-    } catch (err) {
-      print(err);
-      ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-    } finally {
-      setState(() {
-        loading = false;
-      });
-
-      await Future.delayed(const Duration(seconds: 2));
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    }
-  }
 
   void postData() async {
     try {
@@ -199,15 +145,29 @@ class _AddTakeoffDialogState extends State {
       });
 
       if (validate() == true) {
-        // dynamic res = await apiClient.addEmployee();
+        List<List<String>> row = [];
+        for(var i=0;i<selectedProducts.length;i++){
+          List<String> data = [];
+          data.add(productCategory![i].text);
+          data.add(productMaterial![i].text);
+          data.add(productSubcategory![i].text);
+          data.add(itemName![i].text);
+          data.add(productName![i].text);
+          data.add(specifiedProduct![i].text);
+          data.add(proposedProduct![i].text);
+          data.add(unit![i].text);
+          data.add(quantity![i].text);
+          data.add(price![i].text);
+          row.add(data);
+        }
+        String jsonString = json.encode(row);
+        dynamic res = await apiClient.addTakeoff(products.text, action.text, salesPerson.text, manager.text, generalContractors.text, contractors.text, projectSource.text,projectName.text,projectValue.text, jsonString);
 
-        // if (res["success"] == true) {
-        if (true) {
+        if (res["success"] == true) {
           Navigator.pop(context, true);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-          // } else if (res['code'] == 409) {
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(snackBar5);
+          throw "Negative";
         }
       }
     } catch (e) {
@@ -224,19 +184,10 @@ class _AddTakeoffDialogState extends State {
   }
 
   bool validate() {
-    if (firstName.text == "" || department.toString() == "" ||
-        password.text == "" || confirmPassword.text == "" ||
-        jobTitle.text == "" || emailWork.text == "" ||
-        directManager.text == "" || businessPhone.text == "" ||
-        city.text == "") {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-      return false;
-    }
-    if (password.text != confirmPassword.text) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar2);
-      return false;
-    }
-
+    // if (true) {
+    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    //   return false;
+    // }
     return true;
   }
 
@@ -345,7 +296,7 @@ class _AddTakeoffDialogState extends State {
       children: [
         const Center(
           child: Text(
-            "Product Name",
+            "Data Mining",
             style: TextStyle(
                 color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
@@ -354,7 +305,7 @@ class _AddTakeoffDialogState extends State {
           height: 20,
         ),
         DropdownSearch<String>.multiSelection(
-          items: products,
+          items: Products,
           dropdownButtonProps: const DropdownButtonProps(
               color: Color.fromRGBO(255, 255, 255, 0.5)
           ),
@@ -363,7 +314,7 @@ class _AddTakeoffDialogState extends State {
 
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                  hintText: "Team Members",
+                  hintText: "Products",
                   hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
               )
           ),
@@ -379,8 +330,7 @@ class _AddTakeoffDialogState extends State {
           onChanged: (value) {
             selectedProducts = value;
             selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
-            teamMember.text = selectedProducts.join(",");
-            print(teamMember.text);
+            products.text = selectedProducts.join(",");
           },
         ),
         const SizedBox(
@@ -388,7 +338,7 @@ class _AddTakeoffDialogState extends State {
         ),
         TypeAheadFormField(
           onSuggestionSelected: (suggestion) {
-            projectManager.text = suggestion==null ? "" : suggestion.toString();
+            action.text = suggestion==null ? "" : suggestion.toString();
           },
 
           itemBuilder: (context, suggestion) {
@@ -415,7 +365,7 @@ class _AddTakeoffDialogState extends State {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: projectManager,
+              controller: action,
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
@@ -426,9 +376,10 @@ class _AddTakeoffDialogState extends State {
               )
           ),
         ),
-        const SizedBox(height: 20,), TypeAheadFormField(
+        const SizedBox(height: 20,),
+        TypeAheadFormField(
           onSuggestionSelected: (suggestion) {
-            projectManager.text = suggestion==null ? "" : suggestion.toString();
+            salesPerson.text = suggestion==null ? "" : suggestion.toString();
           },
 
           itemBuilder: (context, suggestion) {
@@ -455,7 +406,7 @@ class _AddTakeoffDialogState extends State {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: projectManager,
+              controller: salesPerson,
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
@@ -468,7 +419,7 @@ class _AddTakeoffDialogState extends State {
         ),
         const SizedBox(height: 20,), TypeAheadFormField(
           onSuggestionSelected: (suggestion) {
-            projectManager.text = suggestion==null ? "" : suggestion.toString();
+            manager.text = suggestion==null ? "" : suggestion.toString();
           },
 
           itemBuilder: (context, suggestion) {
@@ -495,7 +446,7 @@ class _AddTakeoffDialogState extends State {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: projectManager,
+              controller: manager,
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
@@ -508,7 +459,7 @@ class _AddTakeoffDialogState extends State {
         ),
         const SizedBox(height: 20,), TypeAheadFormField(
           onSuggestionSelected: (suggestion) {
-            projectManager.text = suggestion==null ? "" : suggestion.toString();
+            generalContractors.text = suggestion==null ? "" : suggestion.toString();
           },
 
           itemBuilder: (context, suggestion) {
@@ -535,7 +486,7 @@ class _AddTakeoffDialogState extends State {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: projectManager,
+              controller: generalContractors,
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
@@ -546,9 +497,10 @@ class _AddTakeoffDialogState extends State {
               )
           ),
         ),
-        const SizedBox(height: 20,), TypeAheadFormField(
+        const SizedBox(height: 20,),
+        TypeAheadFormField(
           onSuggestionSelected: (suggestion) {
-            projectManager.text = suggestion==null ? "" : suggestion.toString();
+            contractors.text = suggestion==null ? "" : suggestion.toString();
           },
 
           itemBuilder: (context, suggestion) {
@@ -575,7 +527,7 @@ class _AddTakeoffDialogState extends State {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: projectManager,
+              controller: contractors,
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
@@ -586,9 +538,10 @@ class _AddTakeoffDialogState extends State {
               )
           ),
         ),
-        const SizedBox(height: 20,), TypeAheadFormField(
+        const SizedBox(height: 20,),
+        TypeAheadFormField(
           onSuggestionSelected: (suggestion) {
-            projectManager.text = suggestion==null ? "" : suggestion.toString();
+            projectSource.text = suggestion==null ? "" : suggestion.toString();
           },
 
           itemBuilder: (context, suggestion) {
@@ -615,7 +568,7 @@ class _AddTakeoffDialogState extends State {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: projectManager,
+              controller: projectSource,
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
@@ -631,7 +584,7 @@ class _AddTakeoffDialogState extends State {
           cursorColor: Colors.white,
           style: const TextStyle(color: Colors.white),
           keyboardType: TextInputType.text,
-          controller: projectManager,
+          controller: projectName,
           decoration: const InputDecoration(
               enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.white)),
@@ -665,7 +618,17 @@ class _AddTakeoffDialogState extends State {
         ListView.builder(
           shrinkWrap: true,
           itemBuilder: (buider, index) {
-            _controllers!.add(TextEditingController());
+            productCategory!.add(TextEditingController());
+            productMaterial!.add(TextEditingController());
+            productSubcategory!.add(TextEditingController());
+            itemName!.add(TextEditingController());
+            proposedProduct!.add(TextEditingController());
+            unit!.add(TextEditingController());
+            quantity!.add(TextEditingController());
+            price!.add(TextEditingController());
+            productName!.add(TextEditingController());
+            specifiedProduct!.add(TextEditingController());
+            productName![index].text = selectedProducts[index];
             return Column(
               children: [
                 const Center(
@@ -679,52 +642,267 @@ class _AddTakeoffDialogState extends State {
                 const SizedBox(
                   height: 20,
                 ),
+                TypeAheadFormField(
+                  onSuggestionSelected: (suggestion) {
+                    productCategory?[index].text = suggestion==null ? "" : suggestion.toString();
+                  },
+
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                      tileColor: Colors.black,
+                    );
+                  },
+                  transitionBuilder: (context, suggestionsBox, controller) {
+                    return suggestionsBox;
+                  },
+                  suggestionsCallback: (pattern) {
+                    var curListed = [];
+
+                    for (var e in companies) {
+                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                        curListed.add(e);
+                      }
+                    }
+
+                    return curListed;
+                  },
+                  textFieldConfiguration: TextFieldConfiguration(
+                      cursorColor: Colors.white,
+                      onChanged: (text){
+
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text,
+                      controller: productCategory?[index],
+                      decoration: const InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          hintText: "Product Category",
+                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                      )
+                  ),
+                ),
+                const SizedBox(height: 20,),
+                TypeAheadFormField(
+                  onSuggestionSelected: (suggestion) {
+                    productMaterial?[index].text = suggestion==null ? "" : suggestion.toString();
+                  },
+
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                      tileColor: Colors.black,
+                    );
+                  },
+                  transitionBuilder: (context, suggestionsBox, controller) {
+                    return suggestionsBox;
+                  },
+                  suggestionsCallback: (pattern) {
+                    var curListed = [];
+
+                    for (var e in companies) {
+                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                        curListed.add(e);
+                      }
+                    }
+
+                    return curListed;
+                  },
+                  textFieldConfiguration: TextFieldConfiguration(
+                      cursorColor: Colors.white,
+                      onChanged: (text){
+
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text,
+                      controller: productMaterial?[index],
+                      decoration: const InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          hintText: "Product Material",
+                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                      )
+                  ),
+                ),
+
+                const SizedBox(height: 20,),
                 TextField(
                   cursorColor: Colors.white,
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.text,
-                  controller: _controllers![index],
+                  controller: productSubcategory![index],
                   decoration: const InputDecoration(
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                       focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "First Name*",
+                      hintText: "Product SubCategory",
                       hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                   ),
                 ),
                 const SizedBox(height: 20,),
-                DropdownButton<String>(
-                  value: salutation[index],
-                  isExpanded: true,
-                  dropdownColor: Colors.black,
-                  hint: const Text(
-                    "Salutation*",
-                    style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
-                  ),
-                  icon: null,
+                TextField(
+                  cursorColor: Colors.white,
                   style: const TextStyle(color: Colors.white),
-                  underline: Container(
-                    height: 1,
-                    color: Colors.white,
+                  keyboardType: TextInputType.text,
+                  controller: itemName![index],
+                  decoration: const InputDecoration(
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      hintText: "Item Name",
+                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                   ),
-                  onChanged: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      salutation[index]= value!;
-                    });
+                ),
+                const SizedBox(height: 20,),
+                TypeAheadFormField(
+                  onSuggestionSelected: (suggestion) {
+                    productName?[index].text = suggestion==null ? "" : suggestion.toString();
                   },
-                  items: sals.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: const TextStyle(),
-                      ),
+
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                      tileColor: Colors.black,
                     );
-                  }).toList(),
+                  },
+                  transitionBuilder: (context, suggestionsBox, controller) {
+                    return suggestionsBox;
+                  },
+                  suggestionsCallback: (pattern) {
+                    var curListed = [];
+
+                    for (var e in companies) {
+                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                        curListed.add(e);
+                      }
+                    }
+
+                    return curListed;
+                  },
+                  textFieldConfiguration: TextFieldConfiguration(
+                      cursorColor: Colors.white,
+                      onChanged: (text){
+
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text,
+                      controller: productName?[index],
+                      decoration: const InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          hintText: "Product Name",
+                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                      )
+                  ),
                 ),
-                const SizedBox(
-                  height: 20,
+
+                const SizedBox(height: 20,),
+                TypeAheadFormField(
+                  onSuggestionSelected: (suggestion) {
+                    specifiedProduct?[index].text = suggestion==null ? "" : suggestion.toString();
+                  },
+
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                      tileColor: Colors.black,
+                    );
+                  },
+                  transitionBuilder: (context, suggestionsBox, controller) {
+                    return suggestionsBox;
+                  },
+                  suggestionsCallback: (pattern) {
+                    var curListed = [];
+
+                    for (var e in companies) {
+                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                        curListed.add(e);
+                      }
+                    }
+
+                    return curListed;
+                  },
+                  textFieldConfiguration: TextFieldConfiguration(
+                      cursorColor: Colors.white,
+                      onChanged: (text){
+
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.text,
+                      controller: specifiedProduct?[index],
+                      decoration: const InputDecoration(
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          hintText: "Specified Product",
+                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                      )
+                  ),
                 ),
+
+                const SizedBox(height: 20,),
+
+
+
+                TextField(
+                  cursorColor: Colors.white,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.text,
+                  controller: proposedProduct![index],
+                  decoration: const InputDecoration(
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      hintText: "Proposed Product",
+                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  ),
+                ),
+                const SizedBox(height: 20,),
+                TextField(
+                  cursorColor: Colors.white,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.text,
+                  controller: unit![index],
+                  decoration: const InputDecoration(
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      hintText: "Unit",
+                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  ),
+                ),
+                const SizedBox(height: 20,),
+                TextField(
+                  cursorColor: Colors.white,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.text,
+                  controller: quantity![index],
+                  decoration: const InputDecoration(
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      hintText: "Quantity",
+                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  ),
+                ),
+                const SizedBox(height: 20,),
+                TextField(
+                  cursorColor: Colors.white,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.text,
+                  controller: price![index],
+                  decoration: const InputDecoration(
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      hintText: "Price",
+                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  ),
+                ),
+                const SizedBox(height: 20,),
+
               ],
             );
           },

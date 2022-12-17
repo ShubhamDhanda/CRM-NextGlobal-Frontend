@@ -18,6 +18,223 @@ class RemoteServices {
       return e.response;
     }
   }
+
+  Future<dynamic> updateTakeoff(
+      dataId,
+      takeoffId,
+      productId,
+      action,
+      salesPerson,
+      manager,
+      generalContractor,
+      contractor,
+      projectSource,
+      projectName,
+      projectValue,
+      rows,
+      deleted) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print(deleted);
+      Response resp = await _dio.post(Constants.updateTakeoff,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "dataId": dataId,
+            "takeoffId": takeoffId,
+            "productId": productId,
+            "action": action,
+            "salesPerson": salesPerson,
+            "manager": manager,
+            "generalContractor": generalContractor,
+            "contractor": contractor,
+            "projectSource": projectSource,
+            "projectName": projectName,
+            "projectValue": projectValue,
+            "rows": rows,
+            "deleted": deleted
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+
+  Future<dynamic> getAllTakeoffItems(
+        takeoffid
+      ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllTakeoffItems,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "takeoffid": takeoffid
+          }));
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getAllDataMining() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllDataMining,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+      );
+          // options: Options(headers: {
+          //   "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          // }),
+          // data: {
+          //   "takeoffId":takeoffId
+          // }
+      // );
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getAllProducts() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllProducts,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> addTakeoff(
+      productId,
+      action,
+      salesPerson,
+      manager,
+      generalContractor,
+      contractor,
+      projectSource,
+      projectName,
+      projectValue,
+      rows) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      // print(rows);
+      Response resp = await _dio.post(Constants.addTakeoff,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "productId": productId,
+            "action": action,
+            "salesPerson": salesPerson,
+            "manager": manager,
+            "generalContractor": generalContractor,
+            "contractor": contractor,
+            "projectSource": projectSource,
+            "projectName": projectName,
+            "projectValue": projectValue,
+            "rows": rows
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+
+  Future<dynamic> addProduct(
+      companyId,
+      productCode,
+      productName,
+      description,
+      standardCost,
+      listPrice,
+      reorderLevel,
+      targetLevel,
+      quantityPerUnit,
+      discontinued,
+      minimumReorderQuantity,
+      category,
+      attachments) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print(discontinued);
+      Response resp = await _dio.post(Constants.addProduct,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "companyId": companyId,
+            "productCode": productCode,
+            "productName": productName,
+            "description": description,
+            "standardCost": standardCost,
+            "listPrice": listPrice,
+            "reorderLevel": reorderLevel,
+            "targetLevel": targetLevel,
+            "quantityPerUnit": quantityPerUnit,
+            "discontinued": discontinued,
+            "minimumReorderQuantity": minimumReorderQuantity,
+            "category": category,
+            "attachments": attachments
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateProduct(
+      productId,
+      productCode,
+      productName,
+      description,
+      standardCost,
+      listPrice,
+      reorderLevel,
+      targetLevel,
+      quantityPerUnit,
+      discontinued,
+      minimumReorderQuantity,
+      category,
+      attachments) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print(discontinued);
+      Response resp = await _dio.post(Constants.updateProduct,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "productId": productId,
+            "productCode": productCode,
+            "productName": productName,
+            "description": description,
+            "standardCost": standardCost,
+            "listPrice": listPrice,
+            "reorderLevel": reorderLevel,
+            "targetLevel": targetLevel,
+            "quantityPerUnit": quantityPerUnit,
+            "discontinued": discontinued,
+            "minimumReorderQuantity": minimumReorderQuantity,
+            "category": category,
+            "attachments": attachments
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+
   Future<dynamic> addCompetitor(companyId, category, product,
       approxSales, geographicalCoverage, keyPersonnel, distributedBy) async {
     try {
@@ -294,6 +511,7 @@ class RemoteServices {
 
   Future<dynamic> getBudgets() async {
     try {
+      print(0);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.get(Constants.getAllBudgets,
           options: Options(headers: {
