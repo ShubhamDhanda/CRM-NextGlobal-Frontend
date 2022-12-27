@@ -22,6 +22,7 @@ import 'package:crm/suppliers/suppliers_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'admin/data_mining.dart';
+import 'admin/inventory.dart';
 import 'admin/products.dart';
 
 void main() => runApp(const MyApp());
@@ -71,7 +72,8 @@ class MyApp extends StatelessWidget {
         '/manager' : (context) => const ManagerDashboard(),
         '/competitor' : (context) => const Competitor(),
         '/products' : (context) => const Products(),
-        '/mining' : (context) => const Mining()
+        '/mining' : (context) => const Mining(),
+        '/inventory' : (context) => const Inventory()
       }
     );
   }

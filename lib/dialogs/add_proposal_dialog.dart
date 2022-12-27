@@ -95,6 +95,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
     dynamic res5 = await apiClient.getAllRFP();
 
     if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]&& res5?["success"]==true) {
+    // if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]) {
 
       for(var e in res1["res"]){
         cities.add(e["City"]);

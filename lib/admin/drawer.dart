@@ -51,16 +51,11 @@ class NavDrawerWidget extends StatelessWidget {
                 iconData: Icons.local_shipping,
                 onClick: () => onItemSelected(context, '/mining')
             ),
-            // MenuItem(
-            //     text: "RFPs",
-            //     iconData: Icons.request_quote,
-            //     onClick: () => onItemSelected(context, '/rfps')
-            // ),
-            // MenuItem(
-            //     text: "Projects",
-            //     iconData: Icons.account_balance,
-            //     onClick: () => onItemSelected(context, '/projects')
-            // ),
+            MenuItem(
+                text: "Inventory",
+                iconData: Icons.account_balance,
+                onClick: () => onItemSelected(context, '/inventory')
+            ),
             MenuItem(
                 text: "Employees",
                 iconData: Icons.emoji_people,

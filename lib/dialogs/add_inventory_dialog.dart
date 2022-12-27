@@ -81,9 +81,8 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
     dynamic res2 = await apiClient.getDepartments();
     dynamic res3 = await apiClient.getAllEmployeeNames();
     dynamic res4 = await apiClient.getAllCompanyNames();
-    dynamic res5 = await apiClient.getAllRFP();
 
-    if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]&& res5?["success"]==true) {
+    if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]) {
 
       for(var e in res1["res"]){
         cities.add(e["City"]);
@@ -108,10 +107,10 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
         companyMap[e["Name"]] = e["ID"];
         // companyIdMap[e["ID"]] = e["Name"];
       }
-      for(var e in res5["res"]){
-        projects.add(e["Project_Name"]);
-        projectsMap[e["Project_Name"]] = e["RFP_ID"];
-      }
+      // for(var e in res5["res"]){
+      //   projects.add(e["Project_Name"]);
+      //   projectsMap[e["Project_Name"]] = e["RFP_ID"];
+      // }
     }else{
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
     }

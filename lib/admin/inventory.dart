@@ -6,17 +6,16 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
 import '../dialogs/update_competitor_dialog.dart';
-import '../dialogs/update_product_dialog.dart';
-import '../dialogs/update_takeoff_dialog.dart';
+import '../dialogs/update_inventory_dialog.dart';
 
-class Mining extends StatefulWidget{
-  const Mining({super.key});
+class Inventory extends StatefulWidget{
+  const Inventory({super.key});
 
   @override
-  State<StatefulWidget> createState() => _MiningState();
+  State<StatefulWidget> createState() => _InventoryState();
 }
 
-class _MiningState extends State<Mining>{
+class _InventoryState extends State<Inventory>{
   TextEditingController companyController = TextEditingController();
   TextEditingController category = TextEditingController();
   TextEditingController product = TextEditingController();
@@ -32,7 +31,8 @@ class _MiningState extends State<Mining>{
     backgroundColor: Colors.red,
   );
 
-  List<Map<String, dynamic>> data = [];
+  List<Map<String, dynamic>> competitors = [];
+  List<String> companies = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
   List<String> cat = [];
@@ -44,59 +44,38 @@ class _MiningState extends State<Mining>{
   }
 
   void _getData() async {
-    try {
-      setState(() {
-        dataLoaded = false;
-      });
-      dynamic res = await apiClient.getAllDataMining();
-      data.clear();
-      search.clear();
-      filtered.clear();
+    dynamic res = await apiClient.getAllCompanies();
+    companies.clear();
+    search.clear();
+    filtered.clear();
 
-      if (res?["success"] == true) {
-        for (var i = 0; i < res["res"].length; i++) {
-          var e = res["res"][i];
+    if(res?["success"] == true){
+      for (var i = 0; i < res["res"].length; i++) {
+        var e = res["res"][i];
 
-          Map<String, dynamic> mp = {};
-          mp["dataId"] =
-          e["Data_ID"] == null ? "" : e["Data_ID"].toString();
-          mp["productsName"] =
-          e["Products_ID"] == null ? "" : e["Products_ID"] ?? "";
-          mp["salesPerson"] =
-          e["Sales_Person"] == null ? "" : e["Sales_Person"] ?? "";
-          mp["action"] =
-          e["Action"] == null ? "" : e["Action"] ?? "";
-          mp["manager"] =
-          e["Manager"] == null ? "" : e["Manager"] ?? "";
-          mp["generalContractor"] =
-          e["General_Contractor"] == null ? "" : e["General_Contractor"] ?? "";
-          mp["contractor"] =
-          e["Contractor"] == null ? "" : e["Contractor"] ?? "";
-          mp["projectSource"] =
-          e["Project_Source"] == null ? "" : e["Project_Source"] ?? "";
-          mp["projectName"] =
-          e["Project_Name"] == null ? "" : e["Project_Name"] ?? "";
-          mp["takeoffId"] =
-          e["Takeoff_ID"] == null ? "" : e["Takeoff_ID"].toString();
-          mp["projectValue"] =
-          e["Project_Value"] == null ? "" : e["Project_Value"].toString();
-
-          data.add(mp);
-        }
-
-        search.addAll(data);
-        filtered.addAll(data);
+        Map<String, dynamic> mp = {};
+        // mp["competitorId"] = e["Competitor_ID"].toString();
+        // mp["company"] = e["Company"].toString();
+        // mp["category"] = e["Category"];
+        // mp["product"] = e["Product"] ?? "";
+        // mp["approxSales"] = e["Approx_Sales"].toString();
+        // mp["geographicalCoverage"] = e["Geographical_Coverage"].toString();
+        // mp["keyPersonnel"] = e["KeyPersonnel"];
+        // mp["distributedBy"] = e["DistributedBy"] ?? "";
+        // competitors.add(mp);
       }
-    } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    } finally {
+
+      search.addAll(competitors);
+      filtered.addAll(competitors);
+    }else {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    }
     setState(() {
-    dataLoaded = true;
+      dataLoaded = true;
     });
 
     await Future.delayed(Duration(seconds: 2));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    }
   }
 
   void _onSearchChanged(String text) async {
@@ -124,12 +103,12 @@ class _MiningState extends State<Mining>{
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Data Mining"),
+          title: Text("Inventory"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         drawer: const NavDrawerWidget(
-          name: '/mining',
+          name: '/inventory',
         ),
         body: dashboard());
   }
@@ -163,7 +142,7 @@ class _MiningState extends State<Mining>{
                     child: search.isEmpty
                         ? const Center(
                       child: Text(
-                        "No Data Mining Found",
+                        "No Inventory Found",
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -238,9 +217,9 @@ class _MiningState extends State<Mining>{
             filtered.clear();
             cat = value as List<String>;
             if(cat.isEmpty){
-              filtered.addAll(data);
+              filtered.addAll(competitors);
             }else{
-              data.forEach((e) {
+              competitors.forEach((e) {
                 if(cat.contains(e["category"])){
                   filtered.add(e);
                 }
@@ -270,7 +249,7 @@ class _MiningState extends State<Mining>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 180,
+        height: 280,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -287,14 +266,14 @@ class _MiningState extends State<Mining>{
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Data ID : ",
+                      "Company ID : ",
                       style: TextStyle(
                           color: Color.fromRGBO(134, 97, 255, 1),
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      mp["dataId"].toString(),
+                      mp["id"].toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -320,17 +299,11 @@ class _MiningState extends State<Mining>{
                             );
                           },
                           pageBuilder: (context, animation, secondaryAnimation) =>
-                              UpdateTakeoffDialog(
+                              updateInventoryDialog(
                                 mp: mp,
                               )).then((value) {
-                        if(value==true){
-                          setState(() {
-                            dataLoaded = false;
-                          });
+                        if(value! == true){
                           _getData();
-                          setState(() {
-                            dataLoaded = true;
-                          });
                         }
                       }),
                   child: Icon(
@@ -346,96 +319,14 @@ class _MiningState extends State<Mining>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Products : ",
+                    "Company Name : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["productsName"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     const Text(
-              //       "Action : ",
-              //       style: TextStyle(
-              //           color: Color.fromRGBO(134, 97, 255, 1),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold),
-              //     ),
-              //     Flexible(fit: FlexFit.loose,child: Text(
-              //       mp["action"],
-              //       style: const TextStyle(color: Colors.white, fontSize: 16),
-              //       softWrap: false,
-              //       overflow: TextOverflow.fade,
-              //     ),)
-              //   ],
-              // ),
-              // const SizedBox(
-              //   height: 5,
-              // ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     const Text(
-              //       "Sales Person : ",
-              //       style: TextStyle(
-              //           color: Color.fromRGBO(134, 97, 255, 1),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold),
-              //     ),
-              //     Text(
-              //       mp["salesPerson"],
-              //       style: const TextStyle(color: Colors.white, fontSize: 18),
-              //     ),
-              //   ],
-              // ),
-              // const SizedBox(
-              //   height: 5,
-              // ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     const Text(
-              //       "Manager : ",
-              //       style: TextStyle(
-              //           color: Color.fromRGBO(134, 97, 255, 1),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold),
-              //     ),
-              //     Flexible(fit: FlexFit.loose,child: Text(
-              //       mp["manager"],
-              //       style: const TextStyle(color: Colors.white, fontSize: 16),
-              //       softWrap: false,
-              //       overflow: TextOverflow.fade,
-              //     ),)
-              //   ],
-              // ),
-              // const SizedBox(
-              //   height: 5,
-              // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "General Contractor : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["generalContractor"],
+                    mp["name"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -449,56 +340,33 @@ class _MiningState extends State<Mining>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Contractor : ",
+                    "Category : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["contractor"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
+                  Text(
+                    mp["category"],
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                  ),
                 ],
               ),
               const SizedBox(
                 height: 5,
               ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     const Text(
-              //       "Project Source : ",
-              //       style: TextStyle(
-              //           color: Color.fromRGBO(134, 97, 255, 1),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold),
-              //     ),
-              //     Flexible(fit: FlexFit.loose,child: Text(
-              //       mp["projectSource"],
-              //       style: const TextStyle(color: Colors.white, fontSize: 16),
-              //       softWrap: false,
-              //       overflow: TextOverflow.fade,
-              //     ),)
-              //   ],
-              // ),
-              // const SizedBox(
-              //   height: 5,
-              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Project Value : ",
+                    "Address : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["projectValue"],
+                    mp["address"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -512,14 +380,14 @@ class _MiningState extends State<Mining>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Project Name : ",
+                    "City : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["projectName"],
+                    mp["city"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -529,7 +397,108 @@ class _MiningState extends State<Mining>{
               const SizedBox(
                 height: 5,
               ),
-
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Province : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["province"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Country : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["country"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Phone : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["businessPhone"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Email : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["email"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Webpage : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["webpage"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
             ],
           ),
         ),

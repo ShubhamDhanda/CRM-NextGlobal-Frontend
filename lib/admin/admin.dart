@@ -100,6 +100,26 @@ class _AdminHome extends State<AdminHome> {
 
   Widget dashboard() {
     return Container(
+      // constraints: BoxConstraints(
+      //   maxWidth: MediaQuery
+      //       .of(context)
+      //       .size
+      //       .width,
+      //   maxHeight: MediaQuery
+      //       .of(context)
+      //       .size
+      //       .height,
+      // ),
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     colors: [
+      //       Colors.blue[800]!,
+      //       Colors.blue[400]!,
+      //     ],
+      //     begin: Alignment.topLeft,
+      //     end: Alignment.centerRight,
+      //   ),
+      // ),
       color: const Color.fromRGBO(0, 0, 0, 1),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),

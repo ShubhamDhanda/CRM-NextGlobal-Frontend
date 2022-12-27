@@ -47,7 +47,7 @@ class _updateProductDialogState extends State<updateProductDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    content: Text('Project Updated Successfully'),
+    content: Text('Product Updated Successfully'),
     backgroundColor: Colors.green,
   );
 

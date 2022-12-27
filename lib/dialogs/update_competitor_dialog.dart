@@ -41,7 +41,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    content: Text('Project Updated Successfully'),
+    content: Text('Competitor Updated Successfully'),
     backgroundColor: Colors.green,
   );
 

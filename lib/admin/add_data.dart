@@ -139,8 +139,9 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
               requestCard(text: "Add Competitor", onClick: () => onRequest(8)),
               requestCard(text: "Add Product", onClick: () => onRequest(9)),
               requestCard(text: "Add TakeOff", onClick: () => onRequest(10)),
+              requestCard(text: "Add Inventory", onClick: () => onRequest(11)),
 
-              requestCard(text: "Track Shipment", onClick: () => onRequest(11)),
+              // requestCard(text: "Track Shipment", onClick: () => onRequest(11)),
               requestCard(
                   text: "New Design request", onClick: () => onRequest(12)),
             ],
@@ -480,6 +481,27 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
             },
             pageBuilder: (context, animation, secondaryAnimation) =>
             const AddTakeoffDialog());
+        break;
+      case 11:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            const AddInventoryDialog());
         break;
     }
   }

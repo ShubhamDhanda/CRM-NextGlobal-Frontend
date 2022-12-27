@@ -1,4 +1,5 @@
-import 'package:crm/dialogs/add_company_dialog.dart';
+import 'package:crm/dialogs/add_employee_dialog.dart';
+import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -6,17 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
-class AddCompetitorDialog extends StatefulWidget {
-  const AddCompetitorDialog({Key? key}) : super(key: key);
+class updateInventoryDialog extends StatefulWidget {
+  final Map<String, dynamic> mp;
+  const updateInventoryDialog({Key? key, required this.mp}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _AddCompetitorDialogState();
+  State<StatefulWidget> createState() => _updateInventoryDialogState(mp: mp);
 }
 
-const List<String> Status = <String>["Go", "NoGo","Review"];
-
-
-
+const List<String> Status = <String>["Go", "NoGo", "Review"];
 const List<String> list = <String>[
   'New Project',
   'Modifications',
@@ -26,8 +25,8 @@ const List<String> list = <String>[
   'Dead'
 ];
 
-
-class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
+class _updateInventoryDialogState extends State<updateInventoryDialog> {
+  late Map<String, dynamic> mp;
   TextEditingController companyController = TextEditingController();
   TextEditingController category = TextEditingController();
   TextEditingController product = TextEditingController();
@@ -35,7 +34,6 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   TextEditingController geographicalCoverage = TextEditingController();
   TextEditingController distributedBy = TextEditingController();
   TextEditingController keyPersonnel = TextEditingController();
-  TextEditingController products = TextEditingController();
 
   final snackBar1 = const SnackBar(
     content: Text('Please fill all the Required fields!'),
@@ -43,8 +41,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    // content: Text('Competitor Added Successfully'),
-    content: Text('Competitor Added Successfully'),
+    content: Text('Project Updated Successfully'),
     backgroundColor: Colors.green,
   );
 
@@ -54,65 +51,111 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   );
 
   var apiClient = RemoteServices();
-  List<String> cities = [], departments = [], categories = [];
-  Map<String, int> cityMap = {}, departmentMap = {}, employeeMap = {},projectsMap={},companyMap = {};
-  Map<String, int> cityIdMap = {}, departmentIdMap = {}, employeeIdMap = {},projectsIdMap={},companyIdMap = {};
-  List<String> projects = [];
   bool dataLoaded = false;
-  var companyId;
+  var projectStageVal, dept;
   List<String> provinces = Constants.provinces;
-  List<String> countries = Constants.countries;
-  var status,bidStatus,Team;
   List<String> employees = <String>[];
-  List<String> companies = [];
-  List<String> contacts = [],Products = [],
-  selectedProducts = [];
-  var RFPId;
+  List<String> prevCat = [];
+  List<String> prevDep = [];
+  var companyId;
+  List<String> prevMember = [], prevPlan = [], prevBid = [];
+  List<String> clients = [];
+  Map<String, String> empMap = {}, clientMap = {};
+  Map<String, int> projectManagerMap = {};
+  var stringList, empId, Team;
+  var status, bidStatus,projectManagerId;
+  List<Map<String, dynamic>> customers = [];
+  List<String> Departments = [];
+  List<String> cities = [], departments = [], companies = [],contacts = [];
+  Map<String, int> cityMap = {},
+      departmentMap = {},
+      companyMap = {},
+      employeeMap = {};
   var ProjectManager;
+
+  _updateInventoryDialogState({required this.mp}) {
+    // projectController.text = mp["projectName"];
+    // department.text = mp["department"];
+    // closingDeadline.text = mp["closingDeadline"];
+    // resultDate.text = mp["resultDate"];
+    // projectManager.text = mp["managerName"];
+    // questionDeadline.text = mp["questionDeadline"];
+    // city.text = mp["city"];
+    // province.text = mp["province"];
+    // department.text = mp["department"];
+    // teamMember.text = mp["team"];
+    // designPrice.text = mp["designPrice"];
+    // provisionalItems.text = mp["provisionalItems"];
+    // contractAdminPrice.text = mp["contractAdminPrice"];
+    // subConsultantPrice.text = mp["subConsultantPrice"];
+    // totalBid.text = mp["totalBid"];
+    // planTakers.text = mp["planTakers"];
+    // bidders.text = mp["bidders"];
+    // bidderPrice.text = mp["bidderPrice"];
+    // winnerPrice.text = mp["winningPrice"];
+    // winningBidder.text = mp["winningBidderName"];
+    // if(teamMember.text!="")prevMember = teamMember.text.split(",");
+    // if(planTakers.text!="")prevPlan = planTakers.text.split(",");
+    // if(bidders.text!="")prevBid = bidders.text.split(",");
+
+    // if(mp["status"]!=""){
+    //   status = mp["status"];
+    // }
+    //
+    // if (mp["bidStatus"] != "") {
+    //   bidStatus = mp["bidStatus"];
+    // }
+  }
 
   @override
   void initState() {
     super.initState();
+
     _getData();
   }
 
   void _getData() async {
-    setState(() {
-      dataLoaded = false;
-    });
-    dynamic res = await apiClient.getAllProducts();
-    // dynamic res1 = await apiClient.getCities();
-    dynamic res2 = await apiClient.getDepartments();
-    // dynamic res3 = await apiClient.getAllEmployeeNames();
-    dynamic res4 = await apiClient.getAllCompanyNames();
-    // dynamic res5 = await apiClient.getAllRFP();
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
+      dynamic res1 = await apiClient.getCities();
+      dynamic res2 = await apiClient.getDepartments();
+      dynamic res3 = await apiClient.getAllEmployeeNames();
+      dynamic res4 = await apiClient.getAllCompanyNames();
 
-    if (res?["success"]==true&&res2?["success"]==true&& res4?["success"]) {
-
-      for (var e in res["res"]) {
-        Products.add(e["Product_Name"]);
-        // directManagerMap[e["Full_Name"]] = e["Employee_ID"];
+      for (var e in res1["res"]) {
+        cities.add(e["City"]);
+        cityMap[e["City"]] = e["City_ID"];
       }
-      for(var e in res2["res"]){
+
+      for (var e in res2["res"]) {
         departments.add(e["Department"]);
         departmentMap[e["Department"]] = e["Department_ID"];
       }
 
-      for(var e in res4["res"]){
+      for (var e in res3["res"]) {
+        employees.add(e["Full_Name"].toString());
+        employeeMap[e["Full_Name"].toString()] = e["Employee_ID"];
+        print(e["Full_Name"]);
+        print(e["Employee_ID"]);
+      }
+      for (var e in res4["res"]) {
         companies.add(e["Name"]);
         companyMap[e["Name"]] = e["ID"];
-        // companyIdMap[e["ID"]] = e["Name"];
       }
-    }else{
+      print(employees);
+    } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally {
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      dataLoaded = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void postData() async {
@@ -122,11 +165,10 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
       });
 
       if (validate() == true) {
+        // dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus ?? "", winnerPrice.text, companyMap[winningBidder.text]);
 
-        dynamic res = await apiClient.addCompetitor(companyMap[companyController.text], departmentMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributedBy.text,keyPersonnel.text);
-        // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
-        if(res?["success"]==true) {
-        // if(true) {
+        // if(res["success"] == true){
+        if(true){
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
         }else{
@@ -146,12 +188,12 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
     }
   }
 
-
   bool validate() {
-    if(companyController.text=="" || category.text=="" || approxSales.text=="" ){
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-      return false;
-    }
+    // if(projectController.text=="" || city.text=="" || department.text=="" || status=="" || projectManager.text == "" ){
+    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    //   return false;
+    // }
+
     return true;
   }
 
@@ -160,10 +202,10 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-          child: const Icon(Icons.close),
+          child: Icon(Icons.close),
           onTap: () => Navigator.pop(context),
         ),
-        title: const Text("Add Competitor"),
+        title: Text("Update Proposal"),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
         backgroundColor: Colors.black,
       ),
@@ -271,51 +313,52 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
           const SizedBox(
             height: 20,
           ),
-          DropdownSearch<String>.multiSelection(
-            items: Products,
-            dropdownButtonProps: const DropdownButtonProps(
-                color: Color.fromRGBO(255, 255, 255, 0.5)
+          TextField(
+            cursorColor: Colors.white,
+            style: const TextStyle(color: Colors.white),
+            keyboardType: TextInputType.text,
+            controller: product,
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                hintText: "Product",
+                hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
             ),
-            selectedItems: selectedProducts,
-            // showSearchBox: true,
-            filterFn: (searchText, option) {
-              // Return true if the option should be included in the filtered list,
-              // based on the search text
-              print(option);
-              return option.toLowerCase().startsWith(searchText.toLowerCase());
-            },
-            dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Products",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
+          ),
+          const SizedBox(height: 20,),
+          DropdownButton<String>(
+            value: status,
+            isExpanded: true,
+            dropdownColor: Colors.black,
+            hint: const Text(
+              "Status",
+              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16),
             ),
-            // dropdownBuilder: (context, distributors) {
-            //   return
-            // },
-            popupProps: const PopupPropsMultiSelection.menu(
-                showSelectedItems: true,
-                menuProps: MenuProps(
-                  backgroundColor: Colors.black,
-                )
+            icon: null,
+            style: const TextStyle(color: Colors.white),
+            underline: Container(
+              height: 1,
+              color: Colors.white,
             ),
-            onChanged: (value) {
-              // selectedProducts = value;
-              // selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
               setState(() {
-                selectedProducts = value;
-                selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
-                products.text = selectedProducts.join(",");
+                status = value!;
               });
             },
+            items: Status.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: const TextStyle(),
+                ),
+              );
+            }).toList(),
           ),
           const SizedBox(
             height: 20,
           ),
-
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -384,7 +427,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
                         borderSide: BorderSide(color: Colors.white)),
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Key Personnel",
+                    hintText: "Distributed By",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
@@ -426,7 +469,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
                         borderSide: BorderSide(color: Colors.white)),
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Distributed By",
+                    hintText: "Key Personnel",
                     hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
@@ -435,9 +478,11 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
             height: 20,
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(100, 0, 100, 0),
+            padding: EdgeInsets.fromLTRB(100, 0, 100, 0),
             child: ElevatedButton(
-              onPressed: () => postData(),
+              onPressed: () {
+                postData();
+              },
               style: ElevatedButton.styleFrom(
                   primary: const Color.fromRGBO(134, 97, 255, 1)),
               child: const Text(

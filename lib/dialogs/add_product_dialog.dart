@@ -47,7 +47,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    content: Text('Project Added Successfully'),
+    content: Text('Product Added Successfully'),
     backgroundColor: Colors.green,
   );
 

@@ -61,7 +61,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    content: Text('Employee Added Successfully'),
+    content: Text('Data Mining Updated Successfully'),
     backgroundColor: Colors.green,
   );
 
@@ -146,6 +146,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         mp["quantity"] = e["Quantity"]??"";
         mp["productName"] = e["Product_Name"]??"";
         mp["specifiedProduct"] = e["Specified_Product"]??"";
+        String name = e["Product_Name"] + " " + e["Product_Code"].toString();
         availableProducts.add(mp["productName"]);
         availableProductsMap[mp["productName"]]=index;
         items.add(mp);

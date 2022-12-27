@@ -5,6 +5,7 @@ import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
@@ -33,7 +34,7 @@ const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"],
       "MMA",
       "Others"
     ],
-    activities = ["Running", "Walking", "Travelling"],companies = [],
+    activities = ["Running", "Walking", "Travelling"],
     beverages = ["Coffee", "Tea", "Ice Cap"],
     alcohols = ["Vodka", "Scotch", "Beer", "Tequila", "Rum", "Cocktail"],
 projectManagers = [];
@@ -73,7 +74,7 @@ class _AddTakeoffDialogState extends State {
   );
 
   final snackBar3 = const SnackBar(
-    content: Text('Employee Added Successfully'),
+    content: Text('Data Mining Added Successfully'),
     backgroundColor: Colors.green,
   );
 
@@ -94,10 +95,13 @@ class _AddTakeoffDialogState extends State {
       jobTitles = [],
       directManagers = [],
       Products = [],
-      selectedProducts = [];
+      selectedProducts = [],companies = [],selectedItems = [];
   Map<String, int> jobTitleMap = {},
-      directManagerMap = {};
+      directManagerMap = {},companyMap = {};
+  Map<String,String> ProductMap = {};
   List<String> GeneralContractors =[],Contractors = [];
+  Map<String,Map<String, dynamic>> info = {};
+
 
   @override
   void initState() {
@@ -113,11 +117,34 @@ class _AddTakeoffDialogState extends State {
       });
 
       dynamic res = await apiClient.getAllProducts();
+      dynamic res1 = await apiClient.getAllCompanyNames();
       // dynamic res4 = await apiClient.getAllCompanyNames();
       //
       for (var e in res["res"]) {
-        Products.add(e["Product_Name"]);
+        Map<String, dynamic> mp = {};
+        mp["productId"] = e["Product_ID"]==null? "": e["Product_ID"].toString();
+        mp["productCode"] = e["Product_Code"]==null? "": e["Product_Code"].toString();
+        mp["productName"] = e["Product_Name"]==null? "": e["Product_Name"]??"";
+        mp["description"] = e["Description"]== null? "": e["Description"]??"";
+        mp["standardCost"] = e["Standard_Cost"]==null? "": e["Standard_Cost"].toString();
+        mp["listPrice"] = e["List_Price"]==null? "": e["List_Price"].toString();
+        mp["reorderLevel"] = e["Reorder_Level"]==null? "": e["Reorder_Level"].toString();
+        mp["targetLevel"] = e["Target_Level"] == null? "" : e["Target_Level"].toString();
+        mp["quantityPerUnit"] = e["Quantity_Per_Unit"]==null? "": e["Quantity_Per_Unit"].toString();
+        mp["discontinued"] = e["Discontinued"]==null? "": e["Discontinued"]??"";
+        mp["minimumReorderQuantity"] = e["Minimum_Reorder_Quantity"]==null? "": e["Minimum_Reorder_Quantity"].toString();
+        mp["category"] = e["Category"]==null? "": e["Category"]??"";
+        String name = e["Product_Name"] + " " + e["Product_Code"].toString();
+        info[e["Product_Name"]] = mp;
+        print(name);
+        Products.add(name);
+        ProductMap[name] = e["Product_Name"];
         // directManagerMap[e["Full_Name"]] = e["Employee_ID"];
+      }
+      for(var e in res1["res"]){
+        companies.add(e["Name"]);
+        companyMap[e["Name"]] = e["ID"];
+        // companyIdMap[e["ID"]] = e["Name"];
       }
       // for (var e in res4["res"]) {
       //   products.add(e["Name"]);
@@ -304,11 +331,29 @@ class _AddTakeoffDialogState extends State {
         const SizedBox(
           height: 20,
         ),
+        TextField(
+          cursorColor: Colors.white,
+          style: const TextStyle(color: Colors.white),
+          keyboardType: TextInputType.text,
+          controller: projectName,
+          decoration: const InputDecoration(
+              enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
+              hintText: "Project Name*",
+              hintStyle:
+              TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
         DropdownSearch<String>.multiSelection(
           items: Products,
           dropdownButtonProps: const DropdownButtonProps(
               color: Color.fromRGBO(255, 255, 255, 0.5)
           ),
+          selectedItems: selectedItems,
           dropdownDecoratorProps: const DropDownDecoratorProps(
               dropdownSearchDecoration: InputDecoration(
 
@@ -328,7 +373,13 @@ class _AddTakeoffDialogState extends State {
               )
           ),
           onChanged: (value) {
-            selectedProducts = value;
+            selectedItems = value;
+            print(selectedItems);
+            selectedProducts.clear();
+            for(int i=0;i<selectedItems.length;i++){
+              String? s = selectedItems[i];
+              selectedProducts.add(ProductMap[s]!);
+            }
             selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
             products.text = selectedProducts.join(",");
           },
@@ -579,38 +630,9 @@ class _AddTakeoffDialogState extends State {
               )
           ),
         ),
-        const SizedBox(height: 20,),
-        TextField(
-          cursorColor: Colors.white,
-          style: const TextStyle(color: Colors.white),
-          keyboardType: TextInputType.text,
-          controller: projectName,
-          decoration: const InputDecoration(
-              enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white)),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white)),
-              hintText: "Project Name*",
-              hintStyle:
-              TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-        ),
-
-
-
       ],
     );
   }
-
-
-
-
-
-
-
-
-
-
-
 
 
   Widget step2() {
@@ -629,6 +651,8 @@ class _AddTakeoffDialogState extends State {
             productName!.add(TextEditingController());
             specifiedProduct!.add(TextEditingController());
             productName![index].text = selectedProducts[index];
+            price![index].text = info[selectedProducts[index]]!["listPrice"];
+            productCategory![index].text = info[selectedProducts[index]]!["category"];
             return Column(
               children: [
                 const Center(
@@ -847,9 +871,6 @@ class _AddTakeoffDialogState extends State {
                 ),
 
                 const SizedBox(height: 20,),
-
-
-
                 TextField(
                   cursorColor: Colors.white,
                   style: const TextStyle(color: Colors.white),
