@@ -19,6 +19,21 @@ class RemoteServices {
     }
   }
 
+
+  Future<dynamic> getAllInventory() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllInventory,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
   Future<dynamic> updateTakeoff(
       dataId,
       takeoffId,

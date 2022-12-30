@@ -16,24 +16,23 @@ class updateInventoryDialog extends StatefulWidget {
 }
 
 const List<String> Status = <String>["Go", "NoGo", "Review"];
-const List<String> list = <String>[
-  'New Project',
-  'Modifications',
-  'Quote',
-  'Negotiation',
-  'Closed',
-  'Dead'
-];
 
+const List<String> type = <String>[
+  'Purchased',
+  'Sold',
+  'On Hold',
+  'Waste'
+];
 class _updateInventoryDialogState extends State<updateInventoryDialog> {
   late Map<String, dynamic> mp;
-  TextEditingController companyController = TextEditingController();
-  TextEditingController category = TextEditingController();
+  TextEditingController transactionType = TextEditingController();
+  TextEditingController transactionDateCreated = TextEditingController();
+  TextEditingController transactionModifiedDate = TextEditingController();
   TextEditingController product = TextEditingController();
-  TextEditingController approxSales = TextEditingController();
-  TextEditingController geographicalCoverage = TextEditingController();
-  TextEditingController distributedBy = TextEditingController();
-  TextEditingController keyPersonnel = TextEditingController();
+  TextEditingController quantity = TextEditingController();
+  TextEditingController order = TextEditingController();
+  TextEditingController comments = TextEditingController();
+
 
   final snackBar1 = const SnackBar(
     content: Text('Please fill all the Required fields!'),
@@ -51,26 +50,30 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   );
 
   var apiClient = RemoteServices();
-  bool dataLoaded = false;
-  var projectStageVal, dept;
-  List<String> provinces = Constants.provinces;
-  List<String> employees = <String>[];
-  List<String> prevCat = [];
-  List<String> prevDep = [];
-  var companyId;
-  List<String> prevMember = [], prevPlan = [], prevBid = [];
-  List<String> clients = [];
-  Map<String, String> empMap = {}, clientMap = {};
-  Map<String, int> projectManagerMap = {};
-  var stringList, empId, Team;
-  var status, bidStatus,projectManagerId;
-  List<Map<String, dynamic>> customers = [];
-  List<String> Departments = [];
-  List<String> cities = [], departments = [], companies = [],contacts = [];
+  List<String> cities = [],
+      departments = [],
+      categories = [],
+      products = [];
   Map<String, int> cityMap = {},
       departmentMap = {},
-      companyMap = {},
-      employeeMap = {};
+      employeeMap = {},
+      projectsMap = {},
+      companyMap = {};
+  Map<String, int> cityIdMap = {},
+      departmentIdMap = {},
+      employeeIdMap = {},
+      productIdMap = {},
+      transactionIdMap = {};
+  List<String> projects = [];
+  bool dataLoaded = false;
+  var transactionId;
+  List<String> provinces = Constants.provinces;
+  List<String> countries = Constants.countries;
+  var status, bidStatus, Team;
+  List<String> employees = <String>[];
+  List<String> companies = [];
+  List<String> contacts = [];
+  var productId;
   var ProjectManager;
 
   _updateInventoryDialogState({required this.mp}) {
@@ -159,7 +162,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   }
 
   void postData() async {
-    try{
+    try {
       setState(() {
         dataLoaded = false;
       });
@@ -168,17 +171,17 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
         // dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus ?? "", winnerPrice.text, companyMap[winningBidder.text]);
 
         // if(res["success"] == true){
-        if(true){
+        if (true) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
-        }else{
+        } else {
           throw "Negative";
         }
       }
-    } catch(e) {
+    } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
-    }finally{
+    } finally {
       setState(() {
         dataLoaded = true;
       });
@@ -229,13 +232,15 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
         children: [
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              companyController.text = suggestion==null ? "" : suggestion.toString();
-              companyId = employeeMap[companyController.text];
+              transactionType.text =
+              suggestion == null ? "" : suggestion.toString();
+              transactionId = transactionIdMap[transactionType.text];
             },
 
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),),
                 tileColor: Colors.black,
               );
             },
@@ -245,8 +250,9 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
             suggestionsCallback: (pattern) {
               var curList = [];
 
-              for (var e in companies) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+              for (var e in type) {
+                if (e.toString().toLowerCase().startsWith(
+                    pattern.toLowerCase())) {
                   curList.add(e);
                 }
               }
@@ -256,27 +262,78 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
                 cursorColor: Colors.white,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: companyController,
+                controller: transactionType,
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Company Name*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    hintText: "Transaction Type*",
+                    hintStyle: TextStyle(
+                        color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
           ),
           const SizedBox(height: 20,),
+          // TextField(
+          //   cursorColor: Colors.white,
+          //   style: const TextStyle(color: Colors.white),
+          //   keyboardType: TextInputType.datetime,
+          //   readOnly: true,
+          //   onTap: () async {
+          //     showDatePicker(
+          //         context: context,
+          //         initialDate: transactionModifiedDate.text == ""
+          //             ? DateTime.now()
+          //             : DateTime.parse(transactionModifiedDate.text),
+          //         firstDate: DateTime(
+          //             2000), //DateTime.now() - not to allow to choose before today.
+          //         lastDate: DateTime(2101),
+          //         builder: (context, child) {
+          //           return Theme(
+          //             data: ThemeData.dark().copyWith(
+          //               colorScheme: const ColorScheme.dark(
+          //                 // primary: Colors.black,
+          //                 onPrimary: Colors.white,
+          //                 surface: Colors.black,
+          //                 onSurface: Colors.white,
+          //               ),
+          //               dialogBackgroundColor:
+          //               const Color.fromRGBO(41, 41, 41, 1),
+          //             ),
+          //             child: child!,
+          //           );
+          //         }).then((value) {
+          //       setState(() {
+          //         transactionModifiedDate.text = value != null
+          //             ? DateFormat('yyyy-MM-dd').format(value)
+          //             : transactionModifiedDate.text;
+          //       });
+          //     });
+          //   },
+          //   controller: transactionModifiedDate,
+          //   decoration: const InputDecoration(
+          //       enabledBorder: UnderlineInputBorder(
+          //           borderSide: BorderSide(color: Colors.white)),
+          //       focusedBorder: UnderlineInputBorder(
+          //           borderSide: BorderSide(color: Colors.white)),
+          //       hintText: "Transaction Created Date",
+          //       hintStyle:
+          //       TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+          // ),
+          // const SizedBox(
+          //   height: 20,
+          // ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion != null) {
-                category.text = suggestion.toString();
-              }
+              product.text = suggestion == null ? "" : suggestion.toString();
+              productId = productIdMap[product.text];
             },
+
             itemBuilder: (context, suggestion) {
               return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                title: Text(suggestion == null ? "" : suggestion.toString(),
+                  style: const TextStyle(color: Colors.white),),
                 tileColor: Colors.black,
               );
             },
@@ -286,29 +343,44 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
             suggestionsCallback: (pattern) {
               var curList = [];
 
-
-              for (var e in departments) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+              for (var e in products) {
+                if (e.toString().toLowerCase().startsWith(
+                    pattern.toLowerCase())) {
                   curList.add(e);
                 }
               }
-
               return curList;
             },
             textFieldConfiguration: TextFieldConfiguration(
                 cursorColor: Colors.white,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: category,
+                controller: transactionType,
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Category*",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    hintText: "Product*",
+                    hintStyle: TextStyle(
+                        color: Color.fromRGBO(255, 255, 255, 0.5))
                 )
             ),
+          ),
+          const SizedBox(height: 20,),
+          TextField(
+            cursorColor: Colors.white,
+            style: const TextStyle(color: Colors.white),
+            keyboardType: TextInputType.number,
+            controller: quantity,
+            decoration: const InputDecoration(
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white)),
+                hintText: "Product Quantity",
+                hintStyle:
+                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
@@ -317,59 +389,13 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.text,
-            controller: product,
-            decoration: const InputDecoration(
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                hintText: "Product",
-                hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-            ),
-          ),
-          const SizedBox(height: 20,),
-          DropdownButton<String>(
-            value: status,
-            isExpanded: true,
-            dropdownColor: Colors.black,
-            hint: const Text(
-              "Status",
-              style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5),fontSize: 16),
-            ),
-            icon: null,
-            style: const TextStyle(color: Colors.white),
-            underline: Container(
-              height: 1,
-              color: Colors.white,
-            ),
-            onChanged: (String? value) {
-              // This is called when the user selects an item.
-              setState(() {
-                status = value!;
-              });
-            },
-            items: Status.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(
-                  value,
-                  style: const TextStyle(),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextField(
-            cursorColor: Colors.white,
-            style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.number,
-            controller: approxSales,
+            controller: order,
             decoration: const InputDecoration(
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Approx Sales*",
+                hintText: "Order Id*",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -379,110 +405,25 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.number,
-            controller: geographicalCoverage,
+            keyboardType: TextInputType.text,
+            controller: comments,
             decoration: const InputDecoration(
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Geographical Coverage",
+                hintText: "Comments",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
           ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              distributedBy.text = suggestion.toString();
-            },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = [];
 
-              for (var e in contacts) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: distributedBy,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Distributed By",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TypeAheadFormField(
-            onSuggestionSelected: (suggestion) {
-              keyPersonnel.text = suggestion.toString();
-            },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                tileColor: Colors.black,
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            suggestionsCallback: (pattern) {
-              var curList = [];
-
-              for (var e in contacts) {
-                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                  curList.add(e);
-                }
-              }
-
-              return curList;
-            },
-            textFieldConfiguration: TextFieldConfiguration(
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.text,
-                controller: keyPersonnel,
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white)),
-                    hintText: "Key Personnel",
-                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                )
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
           Container(
-            padding: EdgeInsets.fromLTRB(100, 0, 100, 0),
+            padding: const EdgeInsets.fromLTRB(100, 0, 100, 0),
             child: ElevatedButton(
-              onPressed: () {
-                postData();
-              },
+              onPressed: () => postData(),
               style: ElevatedButton.styleFrom(
                   primary: const Color.fromRGBO(134, 97, 255, 1)),
               child: const Text(

@@ -31,8 +31,8 @@ class _InventoryState extends State<Inventory>{
     backgroundColor: Colors.red,
   );
 
-  List<Map<String, dynamic>> competitors = [];
-  List<String> companies = [];
+  List<Map<String, dynamic>> inventories = [];
+  // List<String> inventories = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
   List<String> cat = [];
@@ -44,8 +44,8 @@ class _InventoryState extends State<Inventory>{
   }
 
   void _getData() async {
-    dynamic res = await apiClient.getAllCompanies();
-    companies.clear();
+    dynamic res = await apiClient.getAllInventory();
+    inventories.clear();
     search.clear();
     filtered.clear();
 
@@ -54,19 +54,19 @@ class _InventoryState extends State<Inventory>{
         var e = res["res"][i];
 
         Map<String, dynamic> mp = {};
-        // mp["competitorId"] = e["Competitor_ID"].toString();
-        // mp["company"] = e["Company"].toString();
-        // mp["category"] = e["Category"];
-        // mp["product"] = e["Product"] ?? "";
-        // mp["approxSales"] = e["Approx_Sales"].toString();
-        // mp["geographicalCoverage"] = e["Geographical_Coverage"].toString();
-        // mp["keyPersonnel"] = e["KeyPersonnel"];
-        // mp["distributedBy"] = e["DistributedBy"] ?? "";
-        // competitors.add(mp);
+        mp["inventoryId"] = e["Inventory_ID"]==.toString();
+        mp["company"] = e["Company"].toString();
+        mp["category"] = e["Category"];
+        mp["product"] = e["Product"] ?? "";
+        mp["approxSales"] = e["Approx_Sales"].toString();
+        mp["geographicalCoverage"] = e["Geographical_Coverage"].toString();
+        mp["keyPersonnel"] = e["KeyPersonnel"];
+        mp["distributedBy"] = e["DistributedBy"] ?? "";
+        inventories.add(mp);
       }
 
-      search.addAll(competitors);
-      filtered.addAll(competitors);
+      search.addAll(inventories);
+      filtered.addAll(inventories);
     }else {
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
     }

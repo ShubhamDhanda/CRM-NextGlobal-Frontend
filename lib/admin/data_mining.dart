@@ -63,9 +63,9 @@ class _MiningState extends State<Mining>{
           mp["productsName"] =
           e["Products_ID"] == null ? "" : e["Products_ID"] ?? "";
           mp["salesPerson"] =
-          e["Sales_Person"] == null ? "" : e["Sales_Person"] ?? "";
+          e["Sales_Person"] = e["Sales_Person"] ?? "";
           mp["action"] =
-          e["Action"] == null ? "" : e["Action"] ?? "";
+          e["Action"] = e["Action"] ?? "";
           mp["manager"] =
           e["Manager"] == null ? "" : e["Manager"] ?? "";
           mp["generalContractor"] =

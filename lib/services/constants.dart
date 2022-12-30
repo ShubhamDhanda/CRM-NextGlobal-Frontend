@@ -49,6 +49,7 @@ class Constants {
   static String getAllCompetitors = "/api/get/list/competitors";
   static String getAllProducts = "/api/get/list/product";
   static String getAllTakeoffItems = "/api/get/list/takeoffItems";
+  static String getAllInventory = "/api/get/list/inventory";
 
   static String addEmployee = "/api/add/employee";
   static String addContact = "/api/add/contact";
