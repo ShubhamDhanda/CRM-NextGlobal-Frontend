@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
+import 'add_people.dart';
+
 class AddCompetitorDialog extends StatefulWidget {
   const AddCompetitorDialog({Key? key}) : super(key: key);
 
@@ -17,15 +19,6 @@ const List<String> Status = <String>["Go", "NoGo","Review"];
 
 
 
-const List<String> list = <String>[
-  'New Project',
-  'Modifications',
-  'Quote',
-  'Negotiation',
-  'Closed',
-  'Dead'
-];
-
 
 class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   TextEditingController companyController = TextEditingController();
@@ -35,7 +28,6 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   TextEditingController geographicalCoverage = TextEditingController();
   TextEditingController distributedBy = TextEditingController();
   TextEditingController keyPersonnel = TextEditingController();
-  TextEditingController products = TextEditingController();
 
   final snackBar1 = const SnackBar(
     content: Text('Please fill all the Required fields!'),
@@ -43,7 +35,6 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    // content: Text('Competitor Added Successfully'),
     content: Text('Competitor Added Successfully'),
     backgroundColor: Colors.green,
   );
@@ -54,21 +45,12 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   );
 
   var apiClient = RemoteServices();
-  List<String> cities = [], departments = [], categories = [];
-  Map<String, int> cityMap = {}, departmentMap = {}, employeeMap = {},projectsMap={},companyMap = {};
-  Map<String, int> cityIdMap = {}, departmentIdMap = {}, employeeIdMap = {},projectsIdMap={},companyIdMap = {};
-  List<String> projects = [];
+  List<String> cities = [], categories = [];
+  Map<String, int>  categoryMap = {} ,companyMap = {},productMap = {};
   bool dataLoaded = false;
-  var companyId;
-  List<String> provinces = Constants.provinces;
-  List<String> countries = Constants.countries;
-  var status,bidStatus,Team;
-  List<String> employees = <String>[];
   List<String> companies = [];
-  List<String> contacts = [],Products = [],
+  List<String> contacts = [],products = [],
   selectedProducts = [];
-  var RFPId;
-  var ProjectManager;
 
   @override
   void initState() {
@@ -77,43 +59,45 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
   }
 
   void _getData() async {
-    setState(() {
-      dataLoaded = false;
-    });
-    dynamic res = await apiClient.getAllProducts();
-    // dynamic res1 = await apiClient.getCities();
-    dynamic res2 = await apiClient.getDepartments();
-    // dynamic res3 = await apiClient.getAllEmployeeNames();
-    dynamic res4 = await apiClient.getAllCompanyNames();
-    // dynamic res5 = await apiClient.getAllRFP();
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
+      dynamic res = await apiClient.getAllProducts();
+      dynamic res1 = await apiClient.getProductCategory();
+      dynamic res2 = await apiClient.getAllCompanyNames();
 
-    if (res?["success"]==true&&res2?["success"]==true&& res4?["success"]) {
+      if (res?["success"]==true&&res1?["success"]==true&& res2?["success"]) {
+        for (var e in res["res"]) {
+          String name = e["Product_Name"]+" "+ e["Product_Code"].toString();
+          products.add(name);
+          productMap[name] = e["Product_ID"];
+        }
+        for (var e in res1["res"]) {
+          categories.add(e["Product_Category"]);
+          categoryMap[e["Product_Category"]] = e["Category_ID"];
+        }
 
-      for (var e in res["res"]) {
-        Products.add(e["Product_Name"]);
-        // directManagerMap[e["Full_Name"]] = e["Employee_ID"];
+        for(var e in res2["res"]){
+          companies.add(e["Name"]);
+          companyMap[e["Name"]] = e["ID"];
+        }
+      } else {
+        throw "Negative";
       }
-      for(var e in res2["res"]){
-        departments.add(e["Department"]);
-        departmentMap[e["Department"]] = e["Department_ID"];
-      }
-
-      for(var e in res4["res"]){
-        companies.add(e["Name"]);
-        companyMap[e["Name"]] = e["ID"];
-        // companyIdMap[e["ID"]] = e["Name"];
-      }
-    }else{
+    } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally {
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      dataLoaded = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
+
 
   void postData() async {
     try{
@@ -123,8 +107,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
 
       if (validate() == true) {
 
-        dynamic res = await apiClient.addCompetitor(companyMap[companyController.text], departmentMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributedBy.text,keyPersonnel.text);
-        // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
+        dynamic res = await apiClient.addCompetitor(companyMap[companyController.text], categoryMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributedBy.text,keyPersonnel.text);
         if(res?["success"]==true) {
         // if(true) {
           Navigator.pop(context);
@@ -187,8 +170,39 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
         children: [
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              companyController.text = suggestion==null ? "" : suggestion.toString();
-              companyId = employeeMap[companyController.text];
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add Company") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddCompanyDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  companyController.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
+              }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
 
             itemBuilder: (context, suggestion) {
@@ -201,7 +215,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add Company"];
 
               for (var e in companies) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
@@ -245,7 +259,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
               var curList = [];
 
 
-              for (var e in departments) {
+              for (var e in categories) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                   curList.add(e);
                 }
@@ -271,22 +285,23 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
           const SizedBox(
             height: 20,
           ),
+
           DropdownSearch<String>.multiSelection(
-            items: Products,
+            items: products,
             dropdownButtonProps: const DropdownButtonProps(
                 color: Color.fromRGBO(255, 255, 255, 0.5)
             ),
             selectedItems: selectedProducts,
             // showSearchBox: true,
-            filterFn: (searchText, option) {
-              // Return true if the option should be included in the filtered list,
-              // based on the search text
-              print(option);
-              return option.toLowerCase().startsWith(searchText.toLowerCase());
-            },
+            // filterFn: (searchText, option) {
+            //   // Return true if the option should be included in the filtered list,
+            //   // based on the search text
+            //   print(option);
+            //   return option.toLowerCase().startsWith(searchText.toLowerCase());
+            // },
             dropdownDecoratorProps: const DropDownDecoratorProps(
+                baseStyle :TextStyle(color: Colors.white),
                 dropdownSearchDecoration: InputDecoration(
-
                     enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                     hintText: "Products",
@@ -299,17 +314,24 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
             popupProps: const PopupPropsMultiSelection.menu(
                 showSelectedItems: true,
                 menuProps: MenuProps(
-                  backgroundColor: Colors.black,
+                  backgroundColor: Colors.white,
                 )
             ),
             onChanged: (value) {
-              // selectedProducts = value;
-              // selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
-              setState(() {
-                selectedProducts = value;
-                selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
-                products.text = selectedProducts.join(",");
-              });
+              selectedProducts = value;
+              // List<int> val = [];
+              // val.clear();
+              // for(var i in selectedProducts){
+              //   val.add(productMap[i]!);
+              // }
+              selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
+              // val.sort((a, b) => a.compareTo(b));
+              product.text = selectedProducts.join(",");
+              // setState(() {
+              //   selectedProducts = value;
+              //   selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
+              //   product.text = selectedProducts.join(",");
+              // });
             },
           ),
           const SizedBox(
@@ -352,7 +374,38 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              distributedBy.text = suggestion.toString();
+              if (suggestion != null) {
+                if (suggestion.toString() == "+Add New Client") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddPeopleDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  distributedBy.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
+              }
+              // keyPersonnel.text = suggestion.toString();
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
@@ -364,7 +417,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+Add New Client"];
 
               for (var e in contacts) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
@@ -378,7 +431,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
                 cursorColor: Colors.white,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: distributedBy,
+                controller: keyPersonnel,
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
@@ -394,7 +447,37 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              keyPersonnel.text = suggestion.toString();
+              if (suggestion != null) {
+                if (suggestion.toString() == "+Add New Client") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddPeopleDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  distributedBy.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
+              }
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
@@ -406,7 +489,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+Add New Client"];
 
               for (var e in contacts) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
@@ -420,7 +503,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
                 cursorColor: Colors.white,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: keyPersonnel,
+                controller: distributedBy,
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),

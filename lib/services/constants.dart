@@ -5,7 +5,7 @@ class Constants {
       "373756743234-du2ljnfisg6vnr6pucjcq7vhrruhg4tv.apps.googleusercontent.com";
   // static String baseURL = "http://192.168.54.150:8080";
   // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
-  static String baseURL = "http://172.16.172.90:8080";
+  static String baseURL = "http://192.168.1.2:8080";
   static String login = "/api/login";
 
   static String suppliersDashboard = "/api/getDashboard/suppliers";
@@ -21,7 +21,9 @@ class Constants {
   static String getAllSuppliers = "/api/get/suppliers";
   static String getAllEmployees = "/api/get/employees";
   static String getAllProjects = "/api/get/projects";
+  static String getAllTechnicalRequest = "/api/get/technicalRequest";
   static String getAllDataMining = "/api/get/list/dataMining";
+  static String getProductCategory = "/api/get/list/productCategory";
 
   static String getAllRFP = "/api/get/rfp";
   static String getAllBudgets = "/api/get/budgets";
@@ -50,6 +52,7 @@ class Constants {
   static String getAllProducts = "/api/get/list/product";
   static String getAllTakeoffItems = "/api/get/list/takeoffItems";
   static String getAllInventory = "/api/get/list/inventory";
+  static String getTransactionTypes = "/api/get/list/transactionTypes";
 
   static String addEmployee = "/api/add/employee";
   static String addContact = "/api/add/contact";
@@ -69,6 +72,8 @@ class Constants {
   static String addCompetitor = "/api/add/competitor";
   static String addProduct = "/api/add/product";
   static String addTakeoff = "/api/add/takeoff";
+  static String addInventory = "/api/add/inventory";
+  static String addTechnicalRequest = "/api/add/technicalRequest";
 
   static String updateCustomer = "/api/update/client";
   static String updateCompany = "/api/update/company";
@@ -81,6 +86,8 @@ class Constants {
   static String updateCompetitor = "/api/update/competitor";
   static String updateProduct = "/api/update/product";
   static String updateTakeoff = "/api/update/takeoff";
+  static String updateInventory = "/api/update/inventory";
+  static String updateTechnicalRequest = "/api/update/technicalRequest";
 
   static List<String> cities = <String>[
     "Airdrie",

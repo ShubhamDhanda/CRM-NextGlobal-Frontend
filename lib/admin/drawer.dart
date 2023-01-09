@@ -26,11 +26,11 @@ class NavDrawerWidget extends StatelessWidget {
               iconData: Icons.request_page,
               onClick: () => onItemSelected(context, '/requests')
             ),
-            MenuItem(
-                text: "Pending Requests",
-                iconData: CupertinoIcons.doc_plaintext,
-                onClick: () => onItemSelected(context, '/pendingRequests')
-            ),
+            // MenuItem(
+            //     text: "Pending Requests",
+            //     iconData: CupertinoIcons.doc_plaintext,
+            //     onClick: () => onItemSelected(context, '/pendingRequests')
+            // ),
             MenuItem(
                 text: "Companies",
                 iconData: Icons.workspaces,
@@ -61,11 +61,11 @@ class NavDrawerWidget extends StatelessWidget {
                 iconData: Icons.emoji_people,
                 onClick: () => onItemSelected(context, '/employees')
             ),
-            MenuItem(
-                text: "Assets",
-                iconData: Icons.local_shipping,
-                onClick: () => onItemSelected(context, '/assets')
-            ),
+            // MenuItem(
+            //     text: "Assets",
+            //     iconData: Icons.local_shipping,
+            //     onClick: () => onItemSelected(context, '/assets')
+            // ),
             MenuItem(
                 text: "Competitors",
                 iconData: Icons.local_shipping,
@@ -75,6 +75,11 @@ class NavDrawerWidget extends StatelessWidget {
                 text: "Products",
                 iconData: Icons.local_shipping,
                 onClick: () => onItemSelected(context, '/products')
+            ),
+            MenuItem(
+                text: "Technical Request",
+                iconData: Icons.local_shipping,
+                onClick: () => onItemSelected(context, '/technicalRequest')
             ),
             MenuItem(
                 text: "Data",

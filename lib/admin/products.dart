@@ -64,7 +64,7 @@ class _ProductState extends State<Products>{
         mp["quantityPerUnit"] = e["Quantity_Per_Unit"]==null? "": e["Quantity_Per_Unit"].toString();
         mp["discontinued"] = e["Discontinued"]==null? "": e["Discontinued"]??"";
         mp["minimumReorderQuantity"] = e["Minimum_Reorder_Quantity"]==null? "": e["Minimum_Reorder_Quantity"].toString();
-        mp["category"] = e["Category"]==null? "": e["Category"]??"";
+        mp["category"] = e["Product_Category"]==null? "": e["Product_Category"]??"";
         products.add(mp);
       }
 
@@ -370,6 +370,27 @@ class _ProductState extends State<Products>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
+                    "Category : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["category"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
                     "Standard Cost : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
@@ -448,27 +469,7 @@ class _ProductState extends State<Products>{
               const SizedBox(
                 height: 5,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Category : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["category"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [

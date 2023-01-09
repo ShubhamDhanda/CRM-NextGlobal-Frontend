@@ -45,6 +45,9 @@ class _CompetitorState extends State<Competitor>{
   }
 
   void _getData() async {
+    setState(() {
+      dataLoaded = false;
+    });
     dynamic res = await apiClient.getAllCompetitors();
     competitors.clear();
     search.clear();
@@ -58,8 +61,11 @@ class _CompetitorState extends State<Competitor>{
         Map<String, dynamic> mp = {};
         mp["competitorId"] = e["Competitor_ID"]==null? "": e["Competitor_ID"].toString() ;
         // print(mp["competitorId"]);
-        mp["company"] = e["Company_ID"]==null? "": e["Competitor_ID"].toString();
-        mp["category"] = e["Category"]==null? "": e["Category"].toString();
+
+        mp["companyID"] = e["Company_ID"]==null? "": e["Company_ID"].toString();
+        mp["company"] = e["Name"]==null? "": e["Name"].toString();
+        mp["category"] = e["Product_Category"]==null? "": e["Product_Category"].toString();
+        print(mp["category"]);
         mp["product"] = e["Product"]==null? "": e["Product"].toString();
         mp["approxSales"] = e["Approx_Sales"]==null? "": e["Approx_Sales"].toString();
         mp["geographicalCoverage"] = e["Geographical_Coverage"]==null? "": e["Geographical_Coverage"].toString();

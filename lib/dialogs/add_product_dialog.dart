@@ -57,9 +57,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
   );
 
   var apiClient = RemoteServices();
-  List<String> cities = [], departments = [], categories = [];
-  Map<String, int> cityMap = {}, departmentMap = {}, employeeMap = {},projectsMap={},companyMap = {};
-  Map<String, int> cityIdMap = {}, departmentIdMap = {}, employeeIdMap = {},projectsIdMap={},companyIdMap = {};
+  List<String> categories = [], departments = [];
+  Map<String, int> categoryMap={};
   List<String> projects = [];
   List<String> Status = <String>["Yes","No"];
   bool dataLoaded = false;
@@ -83,20 +82,13 @@ class _AddProductDialogState extends State<AddProductDialog> {
       dataLoaded = false;
     });
 
-    dynamic res2 = await apiClient.getDepartments();
-    dynamic res4 = await apiClient.getAllCompanyNames();
+    dynamic res = await apiClient.getProductCategory();
 
-    if (res2?["success"]==true&& res4?["success"]) {
+    if (res?["success"]==true) {
 
-      for(var e in res2["res"]){
-        departments.add(e["Department"]);
-        departmentMap[e["Department"]] = e["Department_ID"];
-      }
-
-      for(var e in res4["res"]){
-        companies.add(e["Name"]);
-        companyMap[e["Name"]] = e["ID"];
-        // companyIdMap[e["ID"]] = e["Name"];
+      for (var e in res["res"]) {
+        categories.add(e["Product_Category"]);
+        categoryMap[e["Product_Category"]] = e["Category_ID"];
       }
     }else{
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
@@ -120,7 +112,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
       if (validate() == true) {
 
-          dynamic res = await apiClient.addProduct(companyMap[companyName.text],productCode.text, productName.text, description.text, standardCost.text, listPrice.text, reorderLevel.text, targetLevel.text, quantityPerUnit.text, status.toString(), minimumReorderQuantity.text, category.text, attachments.text);
+          dynamic res = await apiClient.addProduct(productCode.text, productName.text, description.text, standardCost.text, listPrice.text, reorderLevel.text, targetLevel.text, quantityPerUnit.text, status??"", minimumReorderQuantity.text, categoryMap[category.text], attachments.text);
         if(res?["success"]==true) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
@@ -143,7 +135,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
 
   bool validate() {
-    if(status==null ){
+    if(productName.text =="" || productCode.text =="" ||standardCost.text ==""||status ==null ){
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
       return false;
     }
@@ -190,7 +182,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Product Code",
+                hintText: "Product Code*",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -207,13 +199,59 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Product Name",
+                hintText: "Product Name*",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
           ),
+          TypeAheadFormField(
+            onSuggestionSelected: (suggestion) {
+              if(suggestion != null) {
+                category.text = suggestion.toString();
+              }
+            },
+            itemBuilder: (context, suggestion) {
+              return ListTile(
+                title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                tileColor: Colors.black,
+              );
+            },
+            transitionBuilder: (context, suggestionsBox, controller) {
+              return suggestionsBox;
+            },
+            suggestionsCallback: (pattern) {
+              var curList = [];
+
+
+              for (var e in categories) {
+                if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                  curList.add(e);
+                }
+              }
+
+              return curList;
+            },
+            textFieldConfiguration: TextFieldConfiguration(
+                cursorColor: Colors.white,
+                style: const TextStyle(color: Colors.white),
+                keyboardType: TextInputType.text,
+                controller: category,
+                decoration: const InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)),
+                    hintText: "Category*",
+                    hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                )
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -241,31 +279,13 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Standard Cost",
+                hintText: "Standard Cost*",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
           const SizedBox(
             height: 20,
           ),
-          TextField(
-            cursorColor: Colors.white,
-            style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.number,
-            controller: listPrice,
-            decoration: const InputDecoration(
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                hintText: "List Price",
-                hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-
           TextField(
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
@@ -310,7 +330,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Quality Per Unit",
+                hintText: "Quantity Per Unit",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
@@ -362,23 +382,6 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 hintText: "Minimum Reorder Quantity",
-                hintStyle:
-                TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextField(
-            cursorColor: Colors.white,
-            style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.text,
-            controller: category,
-            decoration: const InputDecoration(
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                hintText: "Category",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),

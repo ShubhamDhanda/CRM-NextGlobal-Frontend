@@ -33,7 +33,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
   List<TextEditingController>? productCategory = [];
   List<TextEditingController>? productMaterial = [];
   List<TextEditingController>? productSubcategory = [];
-  List<TextEditingController>? itemName = [];
+  List<TextEditingController>? productCode = [];
   List<TextEditingController>? productName = [];
   List<TextEditingController>? specifiedProduct = [];
   List<TextEditingController>? proposedProduct = [];
@@ -82,10 +82,12 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
       jobTitles = [],
       directManagers = [],
       Products = [],
-      selectedProducts = [],deleted = [];
+      selectedProducts = [],deleted = [],selectedItems = [];
   List<String> GeneralContractors = [], Contractors = [], preProducts = [], availableProducts = [];
   List<Map<String, dynamic>> items = [];
   Map<String,int?> availableProductsMap = {};
+  Map<String,Map<String, dynamic>> info = {};
+  Map<String,String> ProductMap = {};
 
   _UpdateTakeoffDialogState({required this.mp}) {
     products.text = mp["productsName"];
@@ -96,8 +98,8 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
     contractors.text = mp["contractor"];
     projectSource.text = mp["projectSource"];
     projectName.text = mp["projectName"];
-    preProducts = products.text.split(",");
-    selectedProducts = preProducts;
+    selectedProducts = mp["productsName"].split(",");
+    print(selectedProducts);
   }
 
   @override
@@ -112,34 +114,33 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
       setState(() {
         loading = true;
       });
-      dynamic res = await apiClient.getAllTakeoffItems(mp["takeoffId"]);
+      dynamic res = await apiClient.getAllProducts();
+      dynamic res1 = await apiClient.getAllTakeoffItems(mp["takeoffId"]);
       var index = 0;
       for (var e in res["res"]) {
         Map<String, dynamic> mp = {};
-        // productCategory!.add(TextEditingController());
-        // productMaterial!.add(TextEditingController());
-        // productSubcategory!.add(TextEditingController());
-        // itemName!.add(TextEditingController());
-        // proposedProduct!.add(TextEditingController());
-        // unit!.add(TextEditingController());
-        // quantity!.add(TextEditingController());
-        // price!.add(TextEditingController());
-        // productName!.add(TextEditingController());
-        // specifiedProduct!.add(TextEditingController());
-        // productCategory![index].text = e["Product_Category"]??"";
-        // productMaterial![index].text = e["Product_Material"]??"";
-        // productSubcategory![index].text = e["Product_Subcategory"]??"";
-        // itemName![index].text = e["Item_Name"]??"";
-        // proposedProduct![index].text = e["Proposed_Product"]??"";
-        // unit![index].text = e["Unit"]??"";
-        // price![index].text = e["Price"]??"";
-        // quantity![index].text = e["Quantity"]??"";
-        // productName![index].text = e["Product_Name"]??"";
-        // specifiedProduct![index].text = e["Specified_Product"]??"";
+        mp["productId"] = e["Product_ID"]==null? "": e["Product_ID"].toString();
+        mp["productCode"] = e["Product_Code"]==null? "": e["Product_Code"].toString();
+        mp["productName"] = e["Product_Name"]==null? "": e["Product_Name"]??"";
+        mp["description"] = e["Description"]== null? "": e["Description"]??"";
+        mp["standardCost"] = e["Standard_Cost"]==null? "": e["Standard_Cost"].toString();
+        mp["reorderLevel"] = e["Reorder_Level"]==null? "": e["Reorder_Level"].toString();
+        mp["targetLevel"] = e["Target_Level"] == null? "" : e["Target_Level"].toString();
+        mp["quantityPerUnit"] = e["Quantity_Per_Unit"]==null? "": e["Quantity_Per_Unit"].toString();
+        mp["discontinued"] = e["Discontinued"]==null? "": e["Discontinued"]??"";
+        mp["minimumReorderQuantity"] = e["Minimum_Reorder_Quantity"]==null? "": e["Minimum_Reorder_Quantity"].toString();
+        mp["category"] = e["Category"]==null? "": e["Category"]??"";
+        String name = e["Product_Name"] + " " + e["Product_Code"].toString();
+        info[e["Product_Name"]] = mp;
+        Products.add(name);
+        ProductMap[name] = e["Product_Name"];
+      }
+      for (var e in res1["res"]) {
+        Map<String, dynamic> mp = {};
         mp["productCategory"] = e["Product_Category"]??"";
         mp["productMaterial"] = e["Product_Material"]??"";
         mp["productSubcategory"] = e["Product_Subcategory"]??"";
-        mp["itemName"] = e["Item_Name"]??"";
+        mp["productCode"] = e["Product_Code"]??"";
         mp["proposedProduct"] = e["Proposed_Product"]??"";
         mp["unit"] = e["Unit"]??"";
         mp["price"] = e["Price"]??"";
@@ -147,22 +148,18 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         mp["productName"] = e["Product_Name"]??"";
         mp["specifiedProduct"] = e["Specified_Product"]??"";
         String name = e["Product_Name"] + " " + e["Product_Code"].toString();
-        availableProducts.add(mp["productName"]);
+        // print(name);
+        selectedItems.add(name);
+        availableProducts.add(name);
         availableProductsMap[mp["productName"]]=index;
         items.add(mp);
         deleted!.add(e["Items_ID"].toString());
         index+=1;
       }
-      print(items);
+      print(selectedItems);
 
-      dynamic res1 = await apiClient.getAllProducts();
 
-      for (var e in res1["res"]) {
-        Products.add(e["Product_Name"]);
-
-      }
     } catch (err) {
-      print(err);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
     } finally {
       setState(() {
@@ -184,10 +181,11 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         List<List<String>> row = [];
         for (var i = 0; i < selectedProducts.length; i++) {
           List<String> data = [];
+          data.add(mp["takeoffId"]);
           data.add(productCategory![i].text);
           data.add(productMaterial![i].text);
           data.add(productSubcategory![i].text);
-          data.add(itemName![i].text);
+          data.add(productCode![i].text);
           data.add(productName![i].text);
           data.add(specifiedProduct![i].text);
           data.add(proposedProduct![i].text);
@@ -235,10 +233,10 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
   }
 
   bool validate() {
-    // if (true) {
-    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    //   return false;
-    // }
+    if (projectName.text==""||action.text==""||generalContractors.text=="") {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      return false;
+    }
     return true;
   }
 
@@ -251,12 +249,13 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         productMaterial![index].text = items[i]["productMaterial"] ?? "";
         productSubcategory![index].text =
             items[i]["productSubcategory"] ?? "";
-        itemName![index].text = items[i]["itemName"] ?? "";
+        productCode![index].text = items[i]["productCode"] ?? "";
         proposedProduct![index].text = items[i]["proposedProduct"] ?? "";
         unit![index].text = items[i]["unit"] ?? "";
         price![index].text = items[i]["price"] ?? "";
         quantity![index].text = items[i]["quantity"] ?? "";
         productName![index].text = items[i]["productName"] ?? "";
+        productCode![index].text = items[i]["productCode"] ?? "";
         specifiedProduct![index].text =
             items[i]["specifiedProduct"] ?? "";
       }
@@ -264,7 +263,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         productCategory![index].text = "";
         productMaterial![index].text =  "";
         productSubcategory![index].text = "";
-        itemName![index].text = "";
+        productCode![index].text = "";
         proposedProduct![index].text = "";
         unit![index].text = "";
         price![index].text = "";
@@ -390,11 +389,27 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         const SizedBox(
           height: 20,
         ),
+        TextField(
+          cursorColor: Colors.white,
+          style: const TextStyle(color: Colors.white),
+          keyboardType: TextInputType.text,
+          controller: projectName,
+          decoration: const InputDecoration(
+              enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
+              hintText: "Project Name*",
+              hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
         DropdownSearch<String>.multiSelection(
           items: Products,
           dropdownButtonProps: const DropdownButtonProps(
               color: Color.fromRGBO(255, 255, 255, 0.5)),
-          selectedItems: preProducts,
+          selectedItems: selectedItems,
           dropdownDecoratorProps: const DropDownDecoratorProps(
               dropdownSearchDecoration: InputDecoration(
                   enabledBorder: UnderlineInputBorder(
@@ -413,9 +428,14 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
                 backgroundColor: Colors.black,
               )),
           onChanged: (value) {
-            selectedProducts = value;
-            selectedProducts
-                .sort((a, b) => a.toString().compareTo(b.toString()));
+            selectedItems = value;
+            selectedItems.sort((a, b) => a.toString().compareTo(b.toString()));
+            selectedProducts.clear();
+            for(int i=0;i<selectedItems.length;i++){
+              String? s = selectedItems[i];
+              selectedProducts.add(ProductMap[s]!);
+            }
+            // selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
             products.text = selectedProducts.join(",");
             _reloadControllers();
           },
@@ -652,7 +672,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
                       borderSide: BorderSide(color: Colors.white)),
                   focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
-                  hintText: "Contractor*",
+                  hintText: "Contractor",
                   hintStyle:
                       TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
         ),
@@ -704,22 +724,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
                   hintStyle:
                       TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)))),
         ),
-        const SizedBox(
-          height: 20,
-        ),
-        TextField(
-          cursorColor: Colors.white,
-          style: const TextStyle(color: Colors.white),
-          keyboardType: TextInputType.text,
-          controller: projectName,
-          decoration: const InputDecoration(
-              enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white)),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white)),
-              hintText: "Project Name*",
-              hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-        ),
+
       ],
     );
   }
@@ -731,28 +736,31 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
         productCategory!.add(TextEditingController());
         productMaterial!.add(TextEditingController());
         productSubcategory!.add(TextEditingController());
-        itemName!.add(TextEditingController());
+        productCode!.add(TextEditingController());
         proposedProduct!.add(TextEditingController());
         unit!.add(TextEditingController());
         quantity!.add(TextEditingController());
         price!.add(TextEditingController());
         productName!.add(TextEditingController());
         specifiedProduct!.add(TextEditingController());
-        int i = availableProducts.indexOf(selectedProducts[index]);
+        int i = availableProducts.indexOf(selectedItems[index]);
         productName![index].text = selectedProducts[index];
+        print(selectedItems);
         if (i!=-1) {
+          print(1);
         // if (int(availableProducts.indexOf(selectedProducts[index]))) {
           int? n = availableProductsMap[selectedProducts[index]];
           productCategory![index].text = items[i]["productCategory"] ?? "";
           productMaterial![index].text = items[i]["productMaterial"] ?? "";
           productSubcategory![index].text =
               items[i]["productSubcategory"] ?? "";
-          itemName![index].text = items[i]["itemName"] ?? "";
+          productCode![index].text = items[i]["productCode"] ?? "";
           proposedProduct![index].text = items[i]["proposedProduct"] ?? "";
           unit![index].text = items[i]["unit"] ?? "";
           price![index].text = items[i]["price"] ?? "";
           quantity![index].text = items[i]["quantity"] ?? "";
-          // productName![index].text = items[i]["productName"] ?? "";
+          productCode![index].text = items[i]["productCode"] ?? "";
+          print(items[i]["productCode"]);
           specifiedProduct![index].text =
               items[i]["specifiedProduct"] ?? "";
         }
@@ -760,7 +768,7 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
           productCategory![index].text = "";  
           productMaterial![index].text =  "";
           productSubcategory![index].text = "";
-          itemName![index].text = "";
+          productCode![index].text = "";
           proposedProduct![index].text = "";
           unit![index].text = "";
           price![index].text = "";
@@ -768,11 +776,15 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
           // productName![index].text =  "";
           specifiedProduct![index].text = "";
         }
+
+        price![index].text = info[selectedProducts[index]]!["standardCost"];
+        productCategory![index].text = info[selectedProducts[index]]!["category"];
+        productCode![index].text = info[selectedProducts[index]]!["productCode"];
         return Column(
           children: [
             const Center(
               child: Text(
-                "Product Name",
+                "Product",
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -884,30 +896,13 @@ class _UpdateTakeoffDialogState extends State<UpdateTakeoffDialog> {
               cursorColor: Colors.white,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.text,
-              controller: productSubcategory![index],
+              controller: productCode![index],
               decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
                   focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
-                  hintText: "Product SubCategory",
-                  hintStyle:
-                      TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            TextField(
-              cursorColor: Colors.white,
-              style: const TextStyle(color: Colors.white),
-              keyboardType: TextInputType.text,
-              controller: itemName![index],
-              decoration: const InputDecoration(
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white)),
-                  hintText: "Item Name",
+                  hintText: "Product Code",
                   hintStyle:
                       TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
             ),

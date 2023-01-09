@@ -7,22 +7,16 @@ import 'package:flutter/material.dart';
 
 import '../dialogs/update_competitor_dialog.dart';
 import '../dialogs/update_inventory_dialog.dart';
+import '../dialogs/update_technical_request.dart';
 
-class Inventory extends StatefulWidget{
-  const Inventory({super.key});
+class TechnicalRequest extends StatefulWidget{
+  const TechnicalRequest({super.key});
 
   @override
-  State<StatefulWidget> createState() => _InventoryState();
+  State<StatefulWidget> createState() => _TechnicalRequestState();
 }
 
-class _InventoryState extends State<Inventory>{
-  TextEditingController companyController = TextEditingController();
-  TextEditingController category = TextEditingController();
-  TextEditingController product = TextEditingController();
-  TextEditingController approxSales = TextEditingController();
-  TextEditingController geographicalCoverage = TextEditingController();
-  TextEditingController distributedBy = TextEditingController();
-  TextEditingController keyPersonnel = TextEditingController();
+class _TechnicalRequestState extends State<TechnicalRequest>{
 
   var apiClient = RemoteServices();
   bool dataLoaded = false;
@@ -31,11 +25,12 @@ class _InventoryState extends State<Inventory>{
     backgroundColor: Colors.red,
   );
 
-  List<Map<String, dynamic>> inventories = [];
+  List<Map<String, dynamic>> requests = [];
   // List<String> inventories = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
-  List<String> cat = [];
+  List<String> cat = [],employees = [];
+  Map<int,String> employeeMap = {};
 
   @override
   void initState() {
@@ -44,63 +39,52 @@ class _InventoryState extends State<Inventory>{
   }
 
   void _getData() async {
-    try {
-      setState(() {
-        dataLoaded = false;
-      });
-      dynamic res = await apiClient.getAllInventory();
-      inventories.clear();
-      search.clear();
-      filtered.clear();
+    setState(() {
+      dataLoaded = false;
+    });
+    dynamic res = await apiClient.getAllTechnicalRequest();
+    dynamic res1 = await apiClient.getAllEmployeeNames();
+    requests.clear();
+    search.clear();
+    filtered.clear();
 
-      if (res?["success"] == true) {
-        for (var i = 0; i < res["res"].length; i++) {
-          var e = res["res"][i];
+    if(res?["success"] == true&&res1?["success"]==true){
+      for(var e in res1["res"]) {
+        employeeMap[e["Employee_ID"]] = e["Full_Name"];
 
-          Map<String, dynamic> mp = {};
-          mp["inventoryId"] =
-          e["Inventory_ID"] == null ? "" : e["Inventory_ID"].toString();
-          mp["transactionType"] =
-          e["Type_Name"] == null ? "" : e["Type_Name"].toString();
-          print(mp["transactionType"]);
-          mp["transactionCreatedDate"] = e["Transaction_Created_Date"] == null
-              ? ""
-              : e["Transaction_Created_Date"];
-          mp["transactionModifiedDate"] = e["Transaction_Modified_Date"] == null
-              ? ""
-              : e["Transaction_Modified_Date"];
-          // print(e["Product_Name"]);
-          // print(e["Product_Code"]);
-          String name = e["Product_Name"] + " " + e["Product_Code"].toString();
-          print(name);
-          mp["productId"] = name;
-          // mp["productId"] = "";
-          mp["quantity"] =
-          e["Quantity"] == null ? "" : e["Quantity"].toString();
-          mp["orderId"] = e["Order_ID"] == null ? "" : e["Order_ID"].toString();
-          mp["comments"] =
-          e["Comments"] == null ? "" : e["Comments"].toString();
-          inventories.add(mp);
-        }
-
-        search.addAll(inventories);
-        filtered.addAll(inventories);
-      } else {
-        throw "Negative";
       }
-    }catch(e) {
-      print(e);
+      for (var i = 0; i < res["res"].length; i++) {
+        var e = res["res"][i];
+
+        Map<String, dynamic> mp = {};
+        mp["trId"] = e["TR_ID"]==null?"":e["TR_ID"].toString();
+        mp["requestedBy"] = e["Full_Name"]==null?"":e["Full_Name"];
+        mp["projectName"] = e["Project_Name"]==null ?"":e["Project_Name"].toString();
+        mp["requestTo"] = e["Department"]==null?"":e["Department"];
+        mp["requestDate"] = e["Request_Date"]==null?"":e["Request_Date"];
+        mp["revision"] = e["Revision"]==null?"":e["Revision"];
+        mp["revisionReason"] = e["Revision_Reason"]==null?"":e["Revision_Reason"];
+        mp["returnBy"] = e["Return_By"]==null?"":e["Return_By"];
+        mp["designReceived"] = e["Design_Received"]==null?"":e["Design_Received"];
+
+
+        requests.add(mp);
+      }
+
+
+
+      search.addAll(requests);
+      filtered.addAll(requests);
+    }else {
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    } finally {
-      setState(() {
-        dataLoaded = true;
-      });
-
-      await Future.delayed(Duration(seconds: 2));
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-  }
+    setState(() {
+      dataLoaded = true;
+    });
 
+    await Future.delayed(Duration(seconds: 2));
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
 
   void _onSearchChanged(String text) async {
     setState(() {
@@ -127,12 +111,12 @@ class _InventoryState extends State<Inventory>{
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Inventory"),
+          title: Text("Technical Request"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         drawer: const NavDrawerWidget(
-          name: '/inventory',
+          name: '/technicalRequest',
         ),
         body: dashboard());
   }
@@ -241,9 +225,9 @@ class _InventoryState extends State<Inventory>{
             filtered.clear();
             cat = value as List<String>;
             if(cat.isEmpty){
-              filtered.addAll(inventories);
+              filtered.addAll(requests);
             }else{
-              inventories.forEach((e) {
+              requests.forEach((e) {
                 if(cat.contains(e["category"])){
                   filtered.add(e);
                 }
@@ -273,7 +257,7 @@ class _InventoryState extends State<Inventory>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 180,
+        height: 235,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -290,14 +274,14 @@ class _InventoryState extends State<Inventory>{
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Inventory ID : ",
+                      "Request ID : ",
                       style: TextStyle(
                           color: Color.fromRGBO(134, 97, 255, 1),
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      mp["inventoryId"].toString(),
+                      mp["trId"].toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -323,7 +307,7 @@ class _InventoryState extends State<Inventory>{
                             );
                           },
                           pageBuilder: (context, animation, secondaryAnimation) =>
-                              updateInventoryDialog(
+                              updateTechnicalRequestDialog(
                                 mp: mp,
                               )).then((value) {
                         if(value! == true){
@@ -343,14 +327,35 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Transaction Type : ",
+                    "Project Name : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["transactionType"],
+                    mp["projectName"],
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),)
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Requested By : ",
+                    style: TextStyle(
+                        color: Color.fromRGBO(134, 97, 255, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Flexible(fit: FlexFit.loose,child: Text(
+                    mp["requestedBy"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -379,18 +384,39 @@ class _InventoryState extends State<Inventory>{
               // const SizedBox(
               //   height: 5,
               // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     const Text(
+              //       "Project : ",
+              //       style: TextStyle(
+              //           color: Color.fromRGBO(134, 97, 255, 1),
+              //           fontSize: 18,
+              //           fontWeight: FontWeight.bold),
+              //     ),
+              //     Flexible(fit: FlexFit.loose,child: Text(
+              //       mp["projectId"],
+              //       style: const TextStyle(color: Colors.white, fontSize: 16),
+              //       softWrap: false,
+              //       overflow: TextOverflow.fade,
+              //     ),)
+              //   ],
+              // ),
+              // const SizedBox(
+              //   height: 5,
+              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Product : ",
+                    "Request To : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["productId"],
+                    mp["requestTo"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -404,14 +430,14 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Quantity : ",
+                    "Revision: ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["quantity"],
+                    mp["revision"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -425,14 +451,14 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Order ID: ",
+                    "Return By : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["orderId"],
+                    mp["returnBy"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -446,14 +472,14 @@ class _InventoryState extends State<Inventory>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Comments : ",
+                    "Design Received : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["comments"],
+                    mp["designReceived"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,

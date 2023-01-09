@@ -11,6 +11,7 @@ import 'package:crm/admin/projects.dart';
 import 'package:crm/admin/proposals.dart';
 import 'package:crm/admin/requests.dart';
 import 'package:crm/admin/rfp.dart';
+import 'package:crm/admin/technical_request.dart';
 import 'package:crm/engineers/engineers_dashboard.dart';
 import 'package:crm/engineers/projects.dart' as engineer_projects;
 import 'package:crm/finances/finances_dashboard.dart';
@@ -73,7 +74,8 @@ class MyApp extends StatelessWidget {
         '/competitor' : (context) => const Competitor(),
         '/products' : (context) => const Products(),
         '/mining' : (context) => const Mining(),
-        '/inventory' : (context) => const Inventory()
+        '/inventory' : (context) => const Inventory(),
+        '/technicalRequest' : (context) => const TechnicalRequest()
       }
     );
   }

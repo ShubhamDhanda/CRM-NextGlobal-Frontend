@@ -19,6 +19,179 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getTransactionTypes() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getTransactionTypes,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getProductCategory() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getProductCategory,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getAllTechnicalRequest() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllTechnicalRequest,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateTechnicalRequest(
+      trId,
+      requestedBy,
+      projectId,
+      requestTo,
+      requestDate,
+      revision,
+      revisionReason,
+      returnBy,
+      designReceived) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateTechnicalRequest,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "trId":trId,
+            "requestedBy": requestedBy,
+            "projectId": projectId,
+            "requestTo": requestTo,
+            "requestDate": requestDate,
+            "revision": revision,
+            "revisionReason": revisionReason,
+            "returnBy": returnBy,
+            "designReceived": designReceived,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> addTechnicalRequest(
+      requestedBy,
+      projectId,
+      requestTo,
+      requestDate,
+      revision,
+      revisionReason,
+      returnBy,
+      designReceived) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addTechnicalRequest,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "requestedBy": requestedBy,
+            "projectId": projectId,
+            "requestTo": requestTo,
+            "requestDate": requestDate,
+            "revision": revision,
+            "revisionReason": revisionReason,
+            "returnBy": returnBy,
+            "designReceived": designReceived,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateInventory(
+      inventoryId,
+      transactionType,
+      transactionCreatedDate,
+      productId,
+      quantity,
+      orderId,
+      comments) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+       print(quantity);
+
+      Response resp = await _dio.post(Constants.updateInventory,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "inventoryId": inventoryId,
+            "transactionType": transactionType,
+            "transactionCreatedDate": transactionCreatedDate,
+            "transactionModifiedDate": DateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(DateTime.now())
+                .toString(),
+            "productId": productId,
+            "orderId": orderId,
+            "quantity": quantity,
+            "comments": comments,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+
+  Future<dynamic> addInventory(
+      transactionType,
+      productId,
+      quantity,
+      orderId,
+      comments) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print(1);
+      Response resp = await _dio.post(Constants.addInventory,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "transactionType": transactionType,
+            "transactionCreatedDate": DateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(DateTime.now())
+                .toString(),
+            "transactionModifiedDate": DateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(DateTime.now())
+                .toString(),
+            "productId": productId,
+            "orderId": orderId,
+            "quantity": quantity,
+            "comments": comments,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
 
   Future<dynamic> getAllInventory() async {
     try {
@@ -166,7 +339,6 @@ class RemoteServices {
 
 
   Future<dynamic> addProduct(
-      companyId,
       productCode,
       productName,
       description,
@@ -186,7 +358,6 @@ class RemoteServices {
           options: Options(
               headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
           data: {
-            "companyId": companyId,
             "productCode": productCode,
             "productName": productName,
             "description": description,

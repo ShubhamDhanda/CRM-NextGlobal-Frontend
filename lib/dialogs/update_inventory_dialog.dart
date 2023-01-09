@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
+import 'add_product_dialog.dart';
+
 class updateInventoryDialog extends StatefulWidget {
   final Map<String, dynamic> mp;
   const updateInventoryDialog({Key? key, required this.mp}) : super(key: key);
@@ -17,12 +19,6 @@ class updateInventoryDialog extends StatefulWidget {
 
 const List<String> Status = <String>["Go", "NoGo", "Review"];
 
-const List<String> type = <String>[
-  'Purchased',
-  'Sold',
-  'On Hold',
-  'Waste'
-];
 class _updateInventoryDialogState extends State<updateInventoryDialog> {
   late Map<String, dynamic> mp;
   TextEditingController transactionType = TextEditingController();
@@ -30,7 +26,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   TextEditingController transactionModifiedDate = TextEditingController();
   TextEditingController product = TextEditingController();
   TextEditingController quantity = TextEditingController();
-  TextEditingController order = TextEditingController();
+  TextEditingController orderId = TextEditingController();
   TextEditingController comments = TextEditingController();
 
 
@@ -40,7 +36,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   );
 
   final snackBar3 = const SnackBar(
-    content: Text('Project Updated Successfully'),
+    content: Text('Inventory Updated Successfully'),
     backgroundColor: Colors.green,
   );
 
@@ -53,17 +49,13 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   List<String> cities = [],
       departments = [],
       categories = [],
-      products = [];
+      products = [],type = [];
   Map<String, int> cityMap = {},
       departmentMap = {},
       employeeMap = {},
       projectsMap = {},
       companyMap = {};
-  Map<String, int> cityIdMap = {},
-      departmentIdMap = {},
-      employeeIdMap = {},
-      productIdMap = {},
-      transactionIdMap = {};
+  Map<String, int> typeMap = {},productIdMap = {};
   List<String> projects = [];
   bool dataLoaded = false;
   var transactionId;
@@ -73,41 +65,17 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   List<String> employees = <String>[];
   List<String> companies = [];
   List<String> contacts = [];
-  var productId;
+  // var productId;
   var ProjectManager;
 
   _updateInventoryDialogState({required this.mp}) {
-    // projectController.text = mp["projectName"];
-    // department.text = mp["department"];
-    // closingDeadline.text = mp["closingDeadline"];
-    // resultDate.text = mp["resultDate"];
-    // projectManager.text = mp["managerName"];
-    // questionDeadline.text = mp["questionDeadline"];
-    // city.text = mp["city"];
-    // province.text = mp["province"];
-    // department.text = mp["department"];
-    // teamMember.text = mp["team"];
-    // designPrice.text = mp["designPrice"];
-    // provisionalItems.text = mp["provisionalItems"];
-    // contractAdminPrice.text = mp["contractAdminPrice"];
-    // subConsultantPrice.text = mp["subConsultantPrice"];
-    // totalBid.text = mp["totalBid"];
-    // planTakers.text = mp["planTakers"];
-    // bidders.text = mp["bidders"];
-    // bidderPrice.text = mp["bidderPrice"];
-    // winnerPrice.text = mp["winningPrice"];
-    // winningBidder.text = mp["winningBidderName"];
-    // if(teamMember.text!="")prevMember = teamMember.text.split(",");
-    // if(planTakers.text!="")prevPlan = planTakers.text.split(",");
-    // if(bidders.text!="")prevBid = bidders.text.split(",");
-
-    // if(mp["status"]!=""){
-    //   status = mp["status"];
-    // }
-    //
-    // if (mp["bidStatus"] != "") {
-    //   bidStatus = mp["bidStatus"];
-    // }
+    transactionType.text = mp["transactionType"];
+    transactionDateCreated.text = mp["transactionCreatedDate"];
+    transactionModifiedDate.text = mp["transactionModifiedDate"];
+    product.text = mp["productId"];
+    quantity.text = mp["quantity"];
+    comments.text = mp["comments"];
+    orderId.text = mp["orderId"];
   }
 
   @override
@@ -122,32 +90,21 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
       setState(() {
         dataLoaded = false;
       });
-      dynamic res1 = await apiClient.getCities();
-      dynamic res2 = await apiClient.getDepartments();
-      dynamic res3 = await apiClient.getAllEmployeeNames();
-      dynamic res4 = await apiClient.getAllCompanyNames();
+      dynamic res = await apiClient.getAllProducts();
+      dynamic res1 = await apiClient.getTransactionTypes();
 
-      for (var e in res1["res"]) {
-        cities.add(e["City"]);
-        cityMap[e["City"]] = e["City_ID"];
-      }
+      // if (res?["success"]==true&&res1?["success"]==true) {
 
-      for (var e in res2["res"]) {
-        departments.add(e["Department"]);
-        departmentMap[e["Department"]] = e["Department_ID"];
-      }
-
-      for (var e in res3["res"]) {
-        employees.add(e["Full_Name"].toString());
-        employeeMap[e["Full_Name"].toString()] = e["Employee_ID"];
-        print(e["Full_Name"]);
-        print(e["Employee_ID"]);
-      }
-      for (var e in res4["res"]) {
-        companies.add(e["Name"]);
-        companyMap[e["Name"]] = e["ID"];
-      }
-      print(employees);
+        for(var e in res["res"]){
+          String name = e["Product_Name"] + " " + e["Product_Code"].toString();
+          products.add(name);
+          productIdMap[name] = e["Product_ID"];
+        }
+        for(var e in res1["res"]){
+          type.add(e["Type_Name"]);
+          typeMap[e["Type_Name"]] = e["Transaction_ID"];
+        }
+      // }
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
@@ -168,11 +125,10 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
       });
 
       if (validate() == true) {
-        // dynamic res = await apiClient.updateProposal(mp["id"],cityMap[city.text], departmentMap[department.text], projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  employeeMap[projectManager.text],  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus ?? "", winnerPrice.text, companyMap[winningBidder.text]);
+        dynamic res = await apiClient.updateInventory(mp["inventoryId"],typeMap[transactionType.text],transactionDateCreated.text, productIdMap[product.text],quantity.text, orderId.text, comments.text);
 
-        // if(res["success"] == true){
-        if (true) {
-          Navigator.pop(context);
+        if(res["success"] == true){
+          Navigator.pop(context,true);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
         } else {
           throw "Negative";
@@ -192,10 +148,10 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
   }
 
   bool validate() {
-    // if(projectController.text=="" || city.text=="" || department.text=="" || status=="" || projectManager.text == "" ){
-    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    //   return false;
-    // }
+    if(transactionType.text=="" || product.text=="" ){
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      return false;
+    }
 
     return true;
   }
@@ -208,7 +164,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
           child: Icon(Icons.close),
           onTap: () => Navigator.pop(context),
         ),
-        title: Text("Update Proposal"),
+        title: Text("Update Inventory"),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
         backgroundColor: Colors.black,
       ),
@@ -234,7 +190,6 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
             onSuggestionSelected: (suggestion) {
               transactionType.text =
               suggestion == null ? "" : suggestion.toString();
-              transactionId = transactionIdMap[transactionType.text];
             },
 
             itemBuilder: (context, suggestion) {
@@ -275,59 +230,41 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
             ),
           ),
           const SizedBox(height: 20,),
-          // TextField(
-          //   cursorColor: Colors.white,
-          //   style: const TextStyle(color: Colors.white),
-          //   keyboardType: TextInputType.datetime,
-          //   readOnly: true,
-          //   onTap: () async {
-          //     showDatePicker(
-          //         context: context,
-          //         initialDate: transactionModifiedDate.text == ""
-          //             ? DateTime.now()
-          //             : DateTime.parse(transactionModifiedDate.text),
-          //         firstDate: DateTime(
-          //             2000), //DateTime.now() - not to allow to choose before today.
-          //         lastDate: DateTime(2101),
-          //         builder: (context, child) {
-          //           return Theme(
-          //             data: ThemeData.dark().copyWith(
-          //               colorScheme: const ColorScheme.dark(
-          //                 // primary: Colors.black,
-          //                 onPrimary: Colors.white,
-          //                 surface: Colors.black,
-          //                 onSurface: Colors.white,
-          //               ),
-          //               dialogBackgroundColor:
-          //               const Color.fromRGBO(41, 41, 41, 1),
-          //             ),
-          //             child: child!,
-          //           );
-          //         }).then((value) {
-          //       setState(() {
-          //         transactionModifiedDate.text = value != null
-          //             ? DateFormat('yyyy-MM-dd').format(value)
-          //             : transactionModifiedDate.text;
-          //       });
-          //     });
-          //   },
-          //   controller: transactionModifiedDate,
-          //   decoration: const InputDecoration(
-          //       enabledBorder: UnderlineInputBorder(
-          //           borderSide: BorderSide(color: Colors.white)),
-          //       focusedBorder: UnderlineInputBorder(
-          //           borderSide: BorderSide(color: Colors.white)),
-          //       hintText: "Transaction Created Date",
-          //       hintStyle:
-          //       TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-          // ),
-          // const SizedBox(
-          //   height: 20,
-          // ),
+
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              product.text = suggestion == null ? "" : suggestion.toString();
-              productId = productIdMap[product.text];
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add Product") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddProductDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  product.text = suggestion.toString();
+                }
+              }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
 
             itemBuilder: (context, suggestion) {
@@ -341,7 +278,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add Product"];
 
               for (var e in products) {
                 if (e.toString().toLowerCase().startsWith(
@@ -355,7 +292,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
                 cursorColor: Colors.white,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: transactionType,
+                controller: product,
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
@@ -389,7 +326,7 @@ class _updateInventoryDialogState extends State<updateInventoryDialog> {
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.text,
-            controller: order,
+            controller: orderId,
             decoration: const InputDecoration(
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),

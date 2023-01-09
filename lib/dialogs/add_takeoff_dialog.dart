@@ -24,27 +24,14 @@ const List<String> depts = <String>[
   'Supplier',
   'IT'
 ];
-const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"],
-    sports = [
-      "Soccer",
-      "Hockey",
-      "Basketball",
-      "Baseball",
-      "Boxing",
-      "MMA",
-      "Others"
-    ],
-    activities = ["Running", "Walking", "Travelling"],
-    beverages = ["Coffee", "Tea", "Ice Cap"],
-    alcohols = ["Vodka", "Scotch", "Beer", "Tequila", "Rum", "Cocktail"],
-projectManagers = [];
+const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"], projectManagers = [];
 
 class _AddTakeoffDialogState extends State {
 
   List<TextEditingController>? productCategory = [];
   List<TextEditingController>? productMaterial = [];
   List<TextEditingController>? productSubcategory = [];
-  List<TextEditingController>? itemName = [];
+  List<TextEditingController>? productCode = [];
   List<TextEditingController>? productName = [];
   List<TextEditingController>? specifiedProduct = [];
   List<TextEditingController>? proposedProduct = [];
@@ -118,7 +105,6 @@ class _AddTakeoffDialogState extends State {
 
       dynamic res = await apiClient.getAllProducts();
       dynamic res1 = await apiClient.getAllCompanyNames();
-      // dynamic res4 = await apiClient.getAllCompanyNames();
       //
       for (var e in res["res"]) {
         Map<String, dynamic> mp = {};
@@ -127,7 +113,6 @@ class _AddTakeoffDialogState extends State {
         mp["productName"] = e["Product_Name"]==null? "": e["Product_Name"]??"";
         mp["description"] = e["Description"]== null? "": e["Description"]??"";
         mp["standardCost"] = e["Standard_Cost"]==null? "": e["Standard_Cost"].toString();
-        mp["listPrice"] = e["List_Price"]==null? "": e["List_Price"].toString();
         mp["reorderLevel"] = e["Reorder_Level"]==null? "": e["Reorder_Level"].toString();
         mp["targetLevel"] = e["Target_Level"] == null? "" : e["Target_Level"].toString();
         mp["quantityPerUnit"] = e["Quantity_Per_Unit"]==null? "": e["Quantity_Per_Unit"].toString();
@@ -136,7 +121,6 @@ class _AddTakeoffDialogState extends State {
         mp["category"] = e["Category"]==null? "": e["Category"]??"";
         String name = e["Product_Name"] + " " + e["Product_Code"].toString();
         info[e["Product_Name"]] = mp;
-        print(name);
         Products.add(name);
         ProductMap[name] = e["Product_Name"];
         // directManagerMap[e["Full_Name"]] = e["Employee_ID"];
@@ -178,7 +162,7 @@ class _AddTakeoffDialogState extends State {
           data.add(productCategory![i].text);
           data.add(productMaterial![i].text);
           data.add(productSubcategory![i].text);
-          data.add(itemName![i].text);
+          data.add(productCode![i].text);
           data.add(productName![i].text);
           data.add(specifiedProduct![i].text);
           data.add(proposedProduct![i].text);
@@ -211,10 +195,10 @@ class _AddTakeoffDialogState extends State {
   }
 
   bool validate() {
-    // if (true) {
-    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    //   return false;
-    // }
+    if (projectName.text==""||action.text==""||generalContractors.text=="") {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      return false;
+    }
     return true;
   }
 
@@ -374,13 +358,14 @@ class _AddTakeoffDialogState extends State {
           ),
           onChanged: (value) {
             selectedItems = value;
-            print(selectedItems);
+            selectedItems.sort((a, b) => a.toString().compareTo(b.toString()));
             selectedProducts.clear();
             for(int i=0;i<selectedItems.length;i++){
               String? s = selectedItems[i];
               selectedProducts.add(ProductMap[s]!);
             }
             selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
+
             products.text = selectedProducts.join(",");
           },
         ),
@@ -584,7 +569,7 @@ class _AddTakeoffDialogState extends State {
                       borderSide: BorderSide(color: Colors.white)),
                   focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white)),
-                  hintText: "Contractor*",
+                  hintText: "Contractor",
                   hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
               )
           ),
@@ -643,7 +628,7 @@ class _AddTakeoffDialogState extends State {
             productCategory!.add(TextEditingController());
             productMaterial!.add(TextEditingController());
             productSubcategory!.add(TextEditingController());
-            itemName!.add(TextEditingController());
+            productCode!.add(TextEditingController());
             proposedProduct!.add(TextEditingController());
             unit!.add(TextEditingController());
             quantity!.add(TextEditingController());
@@ -651,8 +636,9 @@ class _AddTakeoffDialogState extends State {
             productName!.add(TextEditingController());
             specifiedProduct!.add(TextEditingController());
             productName![index].text = selectedProducts[index];
-            price![index].text = info[selectedProducts[index]]!["listPrice"];
+            price![index].text = info[selectedProducts[index]]!["standardCost"];
             productCategory![index].text = info[selectedProducts[index]]!["category"];
+            productCode![index].text = info[selectedProducts[index]]!["productCode"];
             return Column(
               children: [
                 const Center(
@@ -759,24 +745,11 @@ class _AddTakeoffDialogState extends State {
                   cursorColor: Colors.white,
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.text,
-                  controller: productSubcategory![index],
+                  controller: productCode![index],
                   decoration: const InputDecoration(
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                       focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Product SubCategory",
-                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                  ),
-                ),
-                const SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.white,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.text,
-                  controller: itemName![index],
-                  decoration: const InputDecoration(
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Item Name",
+                      hintText: "Product Code",
                       hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
                   ),
                 ),

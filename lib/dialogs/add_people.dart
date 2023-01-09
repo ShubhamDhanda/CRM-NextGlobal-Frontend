@@ -17,6 +17,7 @@ const List<String> sals = ["Mr.", "Mrs.", "Ms", "None"],
       "Hockey",
       "Basketball",
       "Baseball",
+      "Baseball",
       "Boxing",
       "MMA",
       "Others"

@@ -1,4 +1,5 @@
 import 'package:crm/dialogs/add_company_dialog.dart';
+import 'package:crm/dialogs/add_product_dialog.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -17,12 +18,7 @@ const List<String> Status = <String>["Go", "NoGo","Review"];
 
 
 
-const List<String> type = <String>[
-  'Purchased',
-  'Sold',
-  'On Hold',
-  'Waste'
-];
+
 
 
 class _AddInventoryDialogState extends State<AddInventoryDialog> {
@@ -31,7 +27,7 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
   TextEditingController transactionModifiedDate = TextEditingController();
   TextEditingController product = TextEditingController();
   TextEditingController quantity = TextEditingController();
-  TextEditingController order = TextEditingController();
+  TextEditingController orderId = TextEditingController();
   TextEditingController comments = TextEditingController();
 
   final snackBar1 = const SnackBar(
@@ -41,7 +37,7 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
 
   final snackBar3 = const SnackBar(
     // content: Text('Competitor Added Successfully'),
-    content: Text('Table not found in database'),
+    content: Text('Inventory added successfully'),
     backgroundColor: Colors.green,
   );
 
@@ -53,18 +49,15 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
   var apiClient = RemoteServices();
   List<String> cities = [], departments = [], categories = [],products=[];
   Map<String, int> cityMap = {}, departmentMap = {}, employeeMap = {},projectsMap={},companyMap = {};
-  Map<String, int> cityIdMap = {}, departmentIdMap = {}, employeeIdMap = {},productIdMap={},transactionIdMap = {};
-  List<String> projects = [];
+  Map<String, int> productIdMap={},typeMap = {};
+  List<String> type = [];
   bool dataLoaded = false;
   var transactionId;
   List<String> provinces = Constants.provinces;
   List<String> countries = Constants.countries;
-  var status,bidStatus,Team;
   List<String> employees = <String>[];
   List<String> companies = [];
   List<String> contacts = [];
-  var productId;
-  var ProjectManager;
 
   @override
   void initState() {
@@ -73,80 +66,37 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
   }
 
   void _getData() async {
-    setState(() {
-      dataLoaded = false;
-    });
+    try {
+      setState(() {
+        dataLoaded = false;
+      });
+      dynamic res = await apiClient.getAllProducts();
+      dynamic res1 = await apiClient.getTransactionTypes();
 
-    dynamic res1 = await apiClient.getCities();
-    dynamic res2 = await apiClient.getDepartments();
-    dynamic res3 = await apiClient.getAllEmployeeNames();
-    dynamic res4 = await apiClient.getAllCompanyNames();
+      if (res?["success"]==true&&res1?["success"]==true) {
 
-    if (res3?["success"] == true&&res1?["success"]==true && res2?["success"]==true&& res4?["success"]) {
-
-      for(var e in res1["res"]){
-        cities.add(e["City"]);
-        cityMap[e["City"]] = e["City_ID"];
-        // cityIdMap[e["City_ID"]] = e["City"];
+        for(var e in res["res"]){
+          String name = e["Product_Name"] + " " + e["Product_Code"].toString();
+          products.add(name);
+          productIdMap[name] = e["Product_ID"];
+        }
+        for(var e in res1["res"]){
+          type.add(e["Type_Name"]);
+          typeMap[e["Type_Name"]] = e["Transaction_ID"];
+        }
       }
-
-      for(var e in res2["res"]){
-        departments.add(e["Department"]);
-        departmentMap[e["Department"]] = e["Department_ID"];
-      }
-
-      for(var e in res3["res"]){
-        employees.add(e["Full_Name"]);
-        employeeMap[e["Full_Name"]] = e["Employee_ID"];
-        print(e["Full_Name"]);
-        print(e["Employee_ID"]);
-
-      }
-      for(var e in res4["res"]){
-        companies.add(e["Name"]);
-        companyMap[e["Name"]] = e["ID"];
-        // companyIdMap[e["ID"]] = e["Name"];
-      }
-      // for(var e in res5["res"]){
-      //   projects.add(e["Project_Name"]);
-      //   projectsMap[e["Project_Name"]] = e["RFP_ID"];
-      // }
-    }else{
+    } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
+    } finally {
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
-
-    setState(() {
-      dataLoaded = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
-
-
-  // void _getBudgetData() async {
-  //   try{
-  //     setState(() {
-  //       dataLoaded = false;
-  //     });
-  //
-  //     dynamic res = await apiClient.getRFPById(RFPId);
-  //
-  //     department.text = res["res"][0]["Department"];
-  //     projectManager.text = res["res"][0]["Manager_Name"];
-  //     city.text = res["res"][0]["City"];
-  //
-  //   } catch(e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-  //   } finally{
-  //     setState(() {
-  //       dataLoaded = true;
-  //     });
-  //
-  //     await Future.delayed(const Duration(seconds: 2));
-  //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  //   }
-  // }
 
   void postData() async {
     try{
@@ -156,10 +106,8 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
 
       if (validate() == true) {
 
-        // dynamic res = await apiClient.addProposal(companyMap[companyController.text], departmentMap[category.text], product.text,status.toString(),approxSales.text, geographicalCoverage.text,distributedBy.text,keyPersonnel.text);
-        // dynamic res = await apiClient.addProposal(city.text, department.text, projectController.text, questionDeadline.text, closingDeadline.text, resultDate.text,status.toString(),  projectManager.text,  teamMember.text, designPrice.text, provisionalItems.text, contractAdminPrice.text,subConsultantPrice.text, totalBid.text,planTakers.text, bidders.text, bidderPrice.text, bidStatus.toString(), winnerPrice.text, winningBidder.text);
-        // if(res?["success"]==true) {
-        if(true) {
+        dynamic res = await apiClient.addInventory(typeMap[transactionType.text],productIdMap[product.text],quantity.text, orderId.text, comments.text);
+        if(res?["success"]==true) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(snackBar3);
         }else{
@@ -181,10 +129,10 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
 
 
   bool validate() {
-    // if(companyController.text=="" || category.text=="" || approxSales.text=="" ){
-    //   ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    //   return false;
-    // }
+    if(transactionType.text=="" || product.text=="" ){
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      return false;
+    }
     return true;
   }
 
@@ -221,7 +169,6 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
               transactionType.text = suggestion==null ? "" : suggestion.toString();
-              transactionId = transactionIdMap[transactionType.text];
             },
 
             itemBuilder: (context, suggestion) {
@@ -259,59 +206,40 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
             ),
           ),
           const SizedBox(height: 20,),
-          // TextField(
-          //   cursorColor: Colors.white,
-          //   style: const TextStyle(color: Colors.white),
-          //   keyboardType: TextInputType.datetime,
-          //   readOnly: true,
-          //   onTap: () async {
-          //     showDatePicker(
-          //         context: context,
-          //         initialDate: transactionModifiedDate.text == ""
-          //             ? DateTime.now()
-          //             : DateTime.parse(transactionModifiedDate.text),
-          //         firstDate: DateTime(
-          //             2000), //DateTime.now() - not to allow to choose before today.
-          //         lastDate: DateTime(2101),
-          //         builder: (context, child) {
-          //           return Theme(
-          //             data: ThemeData.dark().copyWith(
-          //               colorScheme: const ColorScheme.dark(
-          //                 // primary: Colors.black,
-          //                 onPrimary: Colors.white,
-          //                 surface: Colors.black,
-          //                 onSurface: Colors.white,
-          //               ),
-          //               dialogBackgroundColor:
-          //               const Color.fromRGBO(41, 41, 41, 1),
-          //             ),
-          //             child: child!,
-          //           );
-          //         }).then((value) {
-          //       setState(() {
-          //         transactionModifiedDate.text = value != null
-          //             ? DateFormat('yyyy-MM-dd').format(value)
-          //             : transactionModifiedDate.text;
-          //       });
-          //     });
-          //   },
-          //   controller: transactionModifiedDate,
-          //   decoration: const InputDecoration(
-          //       enabledBorder: UnderlineInputBorder(
-          //           borderSide: BorderSide(color: Colors.white)),
-          //       focusedBorder: UnderlineInputBorder(
-          //           borderSide: BorderSide(color: Colors.white)),
-          //       hintText: "Transaction Created Date",
-          //       hintStyle:
-          //       TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
-          // ),
-          // const SizedBox(
-          //   height: 20,
-          // ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              product.text = suggestion==null ? "" : suggestion.toString();
-              productId = productIdMap[product.text];
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add Product") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddProductDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  product.text = suggestion.toString();
+                }
+              }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
 
             itemBuilder: (context, suggestion) {
@@ -324,7 +252,7 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add Product"];
 
               for (var e in products) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
@@ -337,7 +265,7 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
                 cursorColor: Colors.white,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.text,
-                controller: transactionType,
+                controller: product,
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white)),
@@ -370,13 +298,13 @@ class _AddInventoryDialogState extends State<AddInventoryDialog> {
             cursorColor: Colors.white,
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.text,
-            controller: order,
+            controller: orderId,
             decoration: const InputDecoration(
                 enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white)),
-                hintText: "Order Id*",
+                hintText: "Order Id",
                 hintStyle:
                 TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))),
           ),
