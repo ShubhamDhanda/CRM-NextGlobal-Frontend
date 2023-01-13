@@ -1,5 +1,7 @@
+
 import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
+import 'package:crm/dialogs/add_product_category.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -57,11 +59,11 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
   var projectStageVal, dept;
   List<String> provinces = Constants.provinces;
   List<String> employees = <String>[];
-  List<String> prevCat = [];
+  List<String> prevCat = [],distributors = [];
   List<String> prevDep = [];
   var companyId;
   List<String> prevMember = [], prevPlan = [], prevBid = [];
-  List<String> selectedProducts = [],val=[];
+  List<String> selectedProducts = [],val=[],selected = [];
   Map<String, String> empMap = {}, clientMap = {};
   Map<String, int> projectManagerMap = {};
   var stringList, empId, Team;
@@ -69,8 +71,8 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
   List<Map<String, dynamic>> customers = [];
   List<String> products = [];
   List<String> cities = [], departments = [], companies = [],contacts = [];
-  List<String>  categories = [];
-  Map<String, int>  categoryMap = {} ,companyMap = {},productMap = {};
+  List<String>  categories = [],personnel = [];
+  Map<String, int>  categoryMap = {} ,companyMap = {},productMap = {},distributorMap = {},personnelMap = {};
   Map<int,String> productIdMap = {};
   Map<String, int> cityMap = {},
       departmentMap = {},
@@ -87,7 +89,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
     product.text = mp["product"];
     selectedProducts = product.text.split(",");
     selectedProducts.sort((a, b) => a.toString().compareTo(b.toString()));
-
+    if(product.text=="")selectedProducts.clear();
   }
 
   @override
@@ -105,6 +107,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
       dynamic res = await apiClient.getAllProducts();
       dynamic res1 = await apiClient.getProductCategory();
       dynamic res2 = await apiClient.getAllCompanyNames();
+      dynamic res3 = await apiClient.getAllDistributors();
 
       if (res?["success"] == true && res1?["success"] == true &&
           res2?["success"]) {
@@ -123,7 +126,22 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
         for (var e in res2["res"]) {
           companies.add(e["Name"]);
           companyMap[e["Name"]] = e["ID"];
+          if(e["Name"]==companyController.text){
+            dynamic res5 = await apiClient.getAllKeyPersonnel(companyMap[companyController.text]);
+            personnel.clear();
+            for (var e in res5["res"]) {
+              personnel.add(e["Full_Name"]);
+              personnelMap[e["Full_Name"]] = e["ID"];
+
+            }
+          }
         }
+        for(var e in res3["res"]){
+          print(1);
+          distributors.add(e["Full_Name"]);
+          distributorMap[e["Full_Name"]] = e["ID"];
+        }
+        print(personnel);
         // for(var i in val){
         //   int num = int.parse(i);
         //   print(num);
@@ -154,7 +172,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
       });
 
       if (validate() == true) {
-        dynamic res = await apiClient.updateCompetitor(mp["competitorId"],companyMap[companyController.text], categoryMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributedBy.text,keyPersonnel.text);
+        dynamic res = await apiClient.updateCompetitor(mp["competitorId"],companyMap[companyController.text], categoryMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributorMap[distributedBy.text],personnelMap[keyPersonnel.text]);
 
         if(res["success"] == true){
           Navigator.pop(context,true);
@@ -177,6 +195,35 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
+
+  void _getCompanyData() async {
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
+      double price = 0;
+      dynamic res1 = await apiClient.getAllKeyPersonnel(companyMap[companyController.text]);
+      personnel.clear();
+      for (var e in res1["res"]) {
+        personnel.add(e["Full_Name"]);
+        personnelMap[e["Full_Name"]] = e["ID"];
+
+      }
+
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
+
+
+
 
   bool validate() {
 
@@ -248,6 +295,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
                   });
                 } else {
                   companyController.text = suggestion.toString();
+                  _getCompanyData();
                   // companyId = companyMap[companyName.text];
                 }
               }
@@ -292,9 +340,39 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
           const SizedBox(height: 20,),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion != null) {
-                category.text = suggestion.toString();
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add New Category") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddCategoryDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  category.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
               }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
@@ -306,7 +384,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add New Category"];
 
 
               for (var e in categories) {
@@ -362,12 +440,22 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
             // },
             popupProps: const PopupPropsMultiSelection.menu(
                 showSelectedItems: true,
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                    decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Products",
+                        hintStyle: TextStyle(color: Color.fromRGBO(0, 0, 0, 0.3))
+                    )
+                ),
                 menuProps: MenuProps(
                   backgroundColor: Colors.white,
                 )
             ),
             onChanged: (value) {
               selectedProducts = value;
+              print(selectedProducts);
               // List<int> val = [];
               // val.clear();
               // for(var i in selectedProducts){
@@ -451,7 +539,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
                     }
                   });
                 } else {
-                  distributedBy.text = suggestion.toString();
+                  keyPersonnel.text = suggestion.toString();
                   // companyId = companyMap[companyName.text];
                 }
               }
@@ -469,7 +557,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
             suggestionsCallback: (pattern) {
               var curList = ["+Add New Client"];
 
-              for (var e in contacts) {
+              for (var e in personnel) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                   curList.add(e);
                 }
@@ -541,7 +629,7 @@ class _updateCompetitorDialogState extends State<updateCompetitorDialog> {
             suggestionsCallback: (pattern) {
               var curList = ["+Add New Client"];
 
-              for (var e in contacts) {
+              for (var e in distributors) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                   curList.add(e);
                 }

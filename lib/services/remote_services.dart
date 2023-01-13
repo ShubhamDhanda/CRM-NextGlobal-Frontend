@@ -19,6 +19,118 @@ class RemoteServices {
     }
   }
 
+  Future<dynamic> getAllKeyPersonnel(
+      companyId
+      ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getAllKeyPersonnel,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}",
+            "sagar": companyId
+          }));
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> updateQuote(
+      quoteId,
+      projectId,
+      client,
+      clientEmail,
+      total) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.updateQuote,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "quoteId": quoteId,
+            "projectId": projectId,
+            "client": client,
+            "clientEmail": clientEmail,
+            "total": total,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> getQuotes() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.get(Constants.getQuotes,
+          options: Options(headers: {
+            "auth": "Rose ${prefs.getString("auth-token") ?? ""}"
+          }));
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+  Future<dynamic> addQuote(
+      projectId,
+      client,
+      clientEmail,
+      total) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addQuote,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "projectId": projectId,
+            "client": client,
+            "clientEmail": clientEmail,
+            "total": total,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+  Future<dynamic> addEmployeeDepartment(
+      department) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addEmployeeDepartment,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "department": department,
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
+
+
+  Future<dynamic> addProductCategory(
+      category,
+      ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      Response resp = await _dio.post(Constants.addProductCategory,
+          options: Options(
+              headers: {"auth": "Rose ${prefs.getString("auth-token") ?? ""}"}),
+          data: {
+            "category": category
+          });
+
+      return resp.data;
+    } on DioError catch (e) {
+      return e.response;
+    }
+  }
   Future<dynamic> getTransactionTypes() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -422,7 +534,7 @@ class RemoteServices {
 
 
   Future<dynamic> addCompetitor(companyId, category, product,
-      approxSales, geographicalCoverage, keyPersonnel, distributedBy) async {
+      approxSales, geographicalCoverage,distributedBy, keyPersonnel) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.addCompetitor,
@@ -445,7 +557,7 @@ class RemoteServices {
   }
 
   Future<dynamic> updateCompetitor(competitorId,companyId, category, product,
-      approxSales, geographicalCoverage, keyPersonnel, distributedBy) async {
+      approxSales, geographicalCoverage,distributedBy, keyPersonnel) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       Response resp = await _dio.post(Constants.updateCompetitor,

@@ -5,6 +5,7 @@ import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
+import '../dialogs/filter_competitor_dialog.dart';
 import '../dialogs/update_competitor_dialog.dart';
 
 class Competitor extends StatefulWidget{
@@ -26,7 +27,7 @@ class _CompetitorState extends State<Competitor>{
   TextEditingController searchController = TextEditingController();
 
   var apiClient = RemoteServices();
-  bool dataLoaded = false;
+  bool dataLoaded = false,filtersLoaded = false;
   final snackBar1 = const SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
@@ -36,12 +37,13 @@ class _CompetitorState extends State<Competitor>{
   // List<String> companies = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
-  List<String> cat = [];
+  List<String> cat = [],selectedCat = [];
 
   @override
   void initState() {
     super.initState();
     _getData();
+    _getFilters();
   }
 
   void _getData() async {
@@ -54,7 +56,6 @@ class _CompetitorState extends State<Competitor>{
     filtered.clear();
 
     if(res?["success"] == true){
-      print(1);
       for (var i = 0; i < res["res"].length; i++) {
         var e = res["res"][i];
 
@@ -65,19 +66,18 @@ class _CompetitorState extends State<Competitor>{
         mp["companyID"] = e["Company_ID"]==null? "": e["Company_ID"].toString();
         mp["company"] = e["Name"]==null? "": e["Name"].toString();
         mp["category"] = e["Product_Category"]==null? "": e["Product_Category"].toString();
-        print(mp["category"]);
+        // print(mp["category"]);
         mp["product"] = e["Product"]==null? "": e["Product"].toString();
         mp["approxSales"] = e["Approx_Sales"]==null? "": e["Approx_Sales"].toString();
         mp["geographicalCoverage"] = e["Geographical_Coverage"]==null? "": e["Geographical_Coverage"].toString();
-        mp["keyPersonnel"] = e["Key_Personnel"]==null? "": e["Key_Personnel"].toString();
-        mp["distributedBy"] = e["Distributed_By"]==null? "": e["Distributed_By"].toString();
+        mp["keyPersonnel"] = e["Personnel"]==null? "": e["Personnel"].toString();
+        mp["distributedBy"] = e["Distributor"]==null? "": e["Distributor"].toString();
         competitors.add(mp);
       }
 
       search.addAll(competitors);
       filtered.addAll(competitors);
     }else {
-      print(0);
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
     }
     setState(() {
@@ -87,6 +87,32 @@ class _CompetitorState extends State<Competitor>{
     await Future.delayed(Duration(seconds: 2));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
+
+  void _getFilters() async {
+    try{
+      setState(() {
+        filtersLoaded = false;
+      });
+
+      dynamic res = await apiClient.getProductCategory();
+
+      for(var e in res["res"]){
+        cat.add(e["Product_Category"]);
+      }
+
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        filtersLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
+
+
 
   void _onSearchChanged(String text) async {
     setState(() {
@@ -98,7 +124,7 @@ class _CompetitorState extends State<Competitor>{
       search.addAll(filtered);
     }else{
       filtered.forEach((e) {
-        if(e["name"].toString().toLowerCase().startsWith(text.toLowerCase())){
+        if(e["company"].toString().toLowerCase().startsWith(text.toLowerCase())){
           search.add(e);
         }
       });
@@ -221,16 +247,16 @@ class _CompetitorState extends State<Competitor>{
                   child: child,
                 );
               },
-              pageBuilder: (context, animation, secondaryAnimation) => FilterCompanyDialog(cat: cat)
+              pageBuilder: (context, animation, secondaryAnimation) => FilterCompetitorDialog(cat: cat,prevCat:selectedCat)
           ).then((value) {
-
+            Map<String, List<String>> mp = value as Map<String, List<String>>;
+            selectedCat = mp["Categories"]??[];
             filtered.clear();
-            cat = value as List<String>;
-            if(cat.isEmpty){
+            if(selectedCat.isEmpty){
               filtered.addAll(competitors);
             }else{
               competitors.forEach((e) {
-                if(cat.contains(e["category"])){
+                if(selectedCat.contains(e["category"])){
                   filtered.add(e);
                 }
               });

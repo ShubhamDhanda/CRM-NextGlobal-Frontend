@@ -63,15 +63,15 @@ class _MiningState extends State<Mining>{
           mp["productsName"] =
           e["Products_ID"] == null ? "" : e["Products_ID"] ?? "";
           mp["salesPerson"] =
-          e["Sales_Person"] = e["Sales_Person"] ?? "";
+          e["Sales"] = e["Sales"] ?? "";
           mp["action"] =
           e["Action"] = e["Action"] ?? "";
           mp["manager"] =
-          e["Manager"] == null ? "" : e["Manager"] ?? "";
+          e["Manage"] == null ? "" : e["Manage"] ?? "";
           mp["generalContractor"] =
-          e["General_Contractor"] == null ? "" : e["General_Contractor"] ?? "";
+          e["Gen_Contractor"] == null ? "" : e["Gen_Contractor"] ?? "";
           mp["contractor"] =
-          e["Contractor"] == null ? "" : e["Contractor"] ?? "";
+          e["Contract"] == null ? "" : e["Contract"] ?? "";
           mp["projectSource"] =
           e["Project_Source"] == null ? "" : e["Project_Source"] ?? "";
           mp["projectName"] =
@@ -109,7 +109,7 @@ class _MiningState extends State<Mining>{
       search.addAll(filtered);
     }else{
       filtered.forEach((e) {
-        if(e["name"].toString().toLowerCase().startsWith(text.toLowerCase())){
+        if(e["projectName"].toString().toLowerCase().startsWith(text.toLowerCase())){
           search.add(e);
         }
       });
@@ -270,7 +270,7 @@ class _MiningState extends State<Mining>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 180,
+        height: 155,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -508,27 +508,27 @@ class _MiningState extends State<Mining>{
               // const SizedBox(
               //   height: 5,
               // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Project Value : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["projectValue"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     const Text(
+              //       "Project Value : ",
+              //       style: TextStyle(
+              //           color: Color.fromRGBO(134, 97, 255, 1),
+              //           fontSize: 18,
+              //           fontWeight: FontWeight.bold),
+              //     ),
+              //     Flexible(fit: FlexFit.loose,child: Text(
+              //       mp["projectValue"],
+              //       style: const TextStyle(color: Colors.white, fontSize: 16),
+              //       softWrap: false,
+              //       overflow: TextOverflow.fade,
+              //     ),)
+              //   ],
+              // ),
+              // const SizedBox(
+              //   height: 5,
+              // ),
 
 
             ],

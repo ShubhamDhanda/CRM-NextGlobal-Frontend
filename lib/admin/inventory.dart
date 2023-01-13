@@ -5,6 +5,7 @@ import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
+import '../dialogs/filter_competitor_dialog.dart';
 import '../dialogs/update_competitor_dialog.dart';
 import '../dialogs/update_inventory_dialog.dart';
 
@@ -23,9 +24,10 @@ class _InventoryState extends State<Inventory>{
   TextEditingController geographicalCoverage = TextEditingController();
   TextEditingController distributedBy = TextEditingController();
   TextEditingController keyPersonnel = TextEditingController();
+  TextEditingController searchController = TextEditingController();
 
   var apiClient = RemoteServices();
-  bool dataLoaded = false;
+  bool dataLoaded = false,filtersLoaded= false;
   final snackBar1 = const SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
@@ -35,12 +37,13 @@ class _InventoryState extends State<Inventory>{
   // List<String> inventories = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
-  List<String> cat = [];
+  List<String> cat = [],selectedCat = [];
 
   @override
   void initState() {
     super.initState();
     _getData();
+    _getFilters();
   }
 
   void _getData() async {
@@ -101,6 +104,30 @@ class _InventoryState extends State<Inventory>{
     }
   }
 
+  void _getFilters() async {
+    try{
+      setState(() {
+        filtersLoaded = false;
+      });
+
+      dynamic res = await apiClient.getTransactionTypes();
+
+      for(var e in res["res"]){
+        cat.add(e["Type_Name"]);
+      }
+
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        filtersLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
+
 
   void _onSearchChanged(String text) async {
     setState(() {
@@ -112,7 +139,7 @@ class _InventoryState extends State<Inventory>{
       search.addAll(filtered);
     }else{
       filtered.forEach((e) {
-        if(e["name"].toString().toLowerCase().startsWith(text.toLowerCase())){
+        if(e["productId"].toString().toLowerCase().startsWith(text.toLowerCase())){
           search.add(e);
         }
       });
@@ -190,7 +217,7 @@ class _InventoryState extends State<Inventory>{
       width: 300,
       child: TextField(
           cursorColor: Colors.white,
-          // controller: searchController,
+          controller: searchController,
           onChanged: _onSearchChanged,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
@@ -235,22 +262,22 @@ class _InventoryState extends State<Inventory>{
                   child: child,
                 );
               },
-              pageBuilder: (context, animation, secondaryAnimation) => FilterCompanyDialog(cat: cat)
+              pageBuilder: (context, animation, secondaryAnimation) => FilterCompetitorDialog(cat: cat,prevCat: selectedCat)
           ).then((value) {
-
+            Map<String, List<String>> mp = value as Map<String, List<String>>;
+            selectedCat = mp["Categories"]??[];
             filtered.clear();
-            cat = value as List<String>;
-            if(cat.isEmpty){
+            if(selectedCat.isEmpty){
               filtered.addAll(inventories);
             }else{
               inventories.forEach((e) {
-                if(cat.contains(e["category"])){
+                if(selectedCat.contains(e["transactionType"])){
                   filtered.add(e);
                 }
               });
             }
 
-            // _onSearchChanged(searchController.text);
+            _onSearchChanged(searchController.text);
           });
         },
         style: ButtonStyle(

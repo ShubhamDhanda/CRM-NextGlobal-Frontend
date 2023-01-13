@@ -14,6 +14,7 @@ class _FilterEmployeeDialogState extends State<FilterEmployeeDialog>{
 
   _FilterEmployeeDialogState({required this.cat}) {
     prev.addAll(cat);
+    print(prev);
   }
 
   @override

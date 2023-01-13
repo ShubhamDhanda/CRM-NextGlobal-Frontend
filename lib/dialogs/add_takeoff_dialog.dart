@@ -82,12 +82,13 @@ class _AddTakeoffDialogState extends State {
       jobTitles = [],
       directManagers = [],
       Products = [],
-      selectedProducts = [],companies = [],selectedItems = [];
+      selectedProducts = [],companies = [],selectedItems = [],employees = [];
   Map<String, int> jobTitleMap = {},
-      directManagerMap = {},companyMap = {};
+      directManagerMap = {},companyMap = {},categoryMap = {},employeeMap = {},generalContractorsMap = {};
   Map<String,String> ProductMap = {};
-  List<String> GeneralContractors =[],Contractors = [];
+  List<String> generalContractor =[],Contractors = [],categories = [];
   Map<String,Map<String, dynamic>> info = {};
+  Map <int,String> categoryIdMap = {};
 
 
   @override
@@ -105,6 +106,9 @@ class _AddTakeoffDialogState extends State {
 
       dynamic res = await apiClient.getAllProducts();
       dynamic res1 = await apiClient.getAllCompanyNames();
+      dynamic res2 = await apiClient.getProductCategory();
+      dynamic res3 = await apiClient.getAllEmployeeNames();
+      dynamic res4 = await apiClient.getAllContractors();
       //
       for (var e in res["res"]) {
         Map<String, dynamic> mp = {};
@@ -123,6 +127,7 @@ class _AddTakeoffDialogState extends State {
         info[e["Product_Name"]] = mp;
         Products.add(name);
         ProductMap[name] = e["Product_Name"];
+
         // directManagerMap[e["Full_Name"]] = e["Employee_ID"];
       }
       for(var e in res1["res"]){
@@ -130,11 +135,22 @@ class _AddTakeoffDialogState extends State {
         companyMap[e["Name"]] = e["ID"];
         // companyIdMap[e["ID"]] = e["Name"];
       }
-      // for (var e in res4["res"]) {
-      //   products.add(e["Name"]);
-      //   // companyMap[e["Name"]] = e["ID"];
-      //   // companyIdMap[e["ID"]] = e["Name"];
-      // }
+      for (var e in res2["res"]) {
+        categories.add(e["Product_Category"]);
+        categoryMap[e["Product_Category"]] = e["Category_ID"];
+        categoryIdMap[e["Category_ID"]] = e["Product_Category"];
+        // print(e["Category_ID"].toString());
+        // print(e["Product_Category"]);
+      }
+      for(var e in res3["res"]){
+        employees.add(e["Full_Name"]);
+        employeeMap[e["Full_Name"]] = e["Employee_ID"];
+      }
+      // print(res4);
+      for(var e in res4["res"]){
+        generalContractor.add(e["Full_Name"]);
+        generalContractorsMap[e["Full_Name"]] = e["ID"];
+      }
     } catch (err) {
       print(err);
       ScaffoldMessenger.of(context).showSnackBar(snackBar4);
@@ -159,7 +175,7 @@ class _AddTakeoffDialogState extends State {
         List<List<String>> row = [];
         for(var i=0;i<selectedProducts.length;i++){
           List<String> data = [];
-          data.add(productCategory![i].text);
+          data.add(categoryMap[productCategory![i].text].toString());
           data.add(productMaterial![i].text);
           data.add(productSubcategory![i].text);
           data.add(productCode![i].text);
@@ -172,7 +188,7 @@ class _AddTakeoffDialogState extends State {
           row.add(data);
         }
         String jsonString = json.encode(row);
-        dynamic res = await apiClient.addTakeoff(products.text, action.text, salesPerson.text, manager.text, generalContractors.text, contractors.text, projectSource.text,projectName.text,projectValue.text, jsonString);
+        dynamic res = await apiClient.addTakeoff(products.text, action.text, employeeMap[salesPerson.text].toString(), employeeMap[manager.text].toString(), generalContractorsMap[generalContractors.text].toString(), generalContractorsMap[contractors.text].toString(), projectSource.text,projectName.text,projectValue.text, jsonString);
 
         if (res["success"] == true) {
           Navigator.pop(context, true);
@@ -339,6 +355,7 @@ class _AddTakeoffDialogState extends State {
           ),
           selectedItems: selectedItems,
           dropdownDecoratorProps: const DropDownDecoratorProps(
+              baseStyle :TextStyle(color: Colors.black),
               dropdownSearchDecoration: InputDecoration(
 
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
@@ -352,9 +369,18 @@ class _AddTakeoffDialogState extends State {
           // },
           popupProps: const PopupPropsMultiSelection.menu(
               showSelectedItems: true,
-              menuProps: MenuProps(
-                backgroundColor: Colors.black,
-              )
+              showSearchBox: true,
+              searchFieldProps: TextFieldProps(
+                  decoration: InputDecoration(
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                      hintText: "Products",
+                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.3))
+                  )
+              ),
+              // menuProps: MenuProps(
+              //   backgroundColor: Colors.white,
+              // )
           ),
           onChanged: (value) {
             selectedItems = value;
@@ -430,7 +456,7 @@ class _AddTakeoffDialogState extends State {
           suggestionsCallback: (pattern) {
             var curList = [];
 
-            for (var e in projectManagers) {
+            for (var e in employees) {
               if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                 curList.add(e);
               }
@@ -470,7 +496,7 @@ class _AddTakeoffDialogState extends State {
           suggestionsCallback: (pattern) {
             var curList = [];
 
-            for (var e in projectManagers) {
+            for (var e in employees) {
               if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                 curList.add(e);
               }
@@ -510,7 +536,7 @@ class _AddTakeoffDialogState extends State {
           suggestionsCallback: (pattern) {
             var curList = [];
 
-            for (var e in projectManagers) {
+            for (var e in generalContractor) {
               if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                 curList.add(e);
               }
@@ -551,7 +577,7 @@ class _AddTakeoffDialogState extends State {
           suggestionsCallback: (pattern) {
             var curList = [];
 
-            for (var e in projectManagers) {
+            for (var e in generalContractor) {
               if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                 curList.add(e);
               }
@@ -622,285 +648,290 @@ class _AddTakeoffDialogState extends State {
 
   Widget step2() {
     return (
-        ListView.builder(
-          shrinkWrap: true,
-          itemBuilder: (buider, index) {
-            productCategory!.add(TextEditingController());
-            productMaterial!.add(TextEditingController());
-            productSubcategory!.add(TextEditingController());
-            productCode!.add(TextEditingController());
-            proposedProduct!.add(TextEditingController());
-            unit!.add(TextEditingController());
-            quantity!.add(TextEditingController());
-            price!.add(TextEditingController());
-            productName!.add(TextEditingController());
-            specifiedProduct!.add(TextEditingController());
-            productName![index].text = selectedProducts[index];
-            price![index].text = info[selectedProducts[index]]!["standardCost"];
-            productCategory![index].text = info[selectedProducts[index]]!["category"];
-            productCode![index].text = info[selectedProducts[index]]!["productCode"];
-            return Column(
-              children: [
-                const Center(
-                  child: Text(
-                    "Product Name",
-                    style: TextStyle(color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
+        SingleChildScrollView(
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            controller: ScrollController(),
+            shrinkWrap: true,
+            itemBuilder: (buider, index) {
+              productCategory!.add(TextEditingController());
+              productMaterial!.add(TextEditingController());
+              productSubcategory!.add(TextEditingController());
+              productCode!.add(TextEditingController());
+              proposedProduct!.add(TextEditingController());
+              unit!.add(TextEditingController());
+              quantity!.add(TextEditingController());
+              price!.add(TextEditingController());
+              productName!.add(TextEditingController());
+              specifiedProduct!.add(TextEditingController());
+              productName![index].text = selectedProducts[index];
+              price![index].text = info[selectedProducts[index]]!["standardCost"];
+              String cat = info[selectedProducts[index]]!["category"];
+              productCategory![index].text = categoryIdMap[int.parse(cat)]!;
+              productCode![index].text = info[selectedProducts[index]]!["productCode"];
+              return Column(
+                children: [
+                  const Center(
+                    child: Text(
+                      "Product Name",
+                      style: TextStyle(color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                TypeAheadFormField(
-                  onSuggestionSelected: (suggestion) {
-                    productCategory?[index].text = suggestion==null ? "" : suggestion.toString();
-                  },
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TypeAheadFormField(
+                    onSuggestionSelected: (suggestion) {
+                      productCategory?[index].text = suggestion==null ? "" : suggestion.toString();
+                    },
 
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                      tileColor: Colors.black,
-                    );
-                  },
-                  transitionBuilder: (context, suggestionsBox, controller) {
-                    return suggestionsBox;
-                  },
-                  suggestionsCallback: (pattern) {
-                    var curListed = [];
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                        tileColor: Colors.black,
+                      );
+                    },
+                    transitionBuilder: (context, suggestionsBox, controller) {
+                      return suggestionsBox;
+                    },
+                    suggestionsCallback: (pattern) {
+                      var curListed = [];
 
-                    for (var e in companies) {
-                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                        curListed.add(e);
+                      for (var e in categories) {
+                        if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                          curListed.add(e);
+                        }
                       }
-                    }
 
-                    return curListed;
-                  },
-                  textFieldConfiguration: TextFieldConfiguration(
-                      cursorColor: Colors.white,
-                      onChanged: (text){
+                      return curListed;
+                    },
+                    textFieldConfiguration: TextFieldConfiguration(
+                        cursorColor: Colors.white,
+                        onChanged: (text){
 
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.text,
-                      controller: productCategory?[index],
-                      decoration: const InputDecoration(
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          hintText: "Product Category",
-                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                      )
+                        },
+                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.text,
+                        controller: productCategory?[index],
+                        decoration: const InputDecoration(
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            hintText: "Product Category",
+                            hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                        )
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20,),
-                TypeAheadFormField(
-                  onSuggestionSelected: (suggestion) {
-                    productMaterial?[index].text = suggestion==null ? "" : suggestion.toString();
-                  },
+                  const SizedBox(height: 20,),
+                  TypeAheadFormField(
+                    onSuggestionSelected: (suggestion) {
+                      productMaterial?[index].text = suggestion==null ? "" : suggestion.toString();
+                    },
 
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                      tileColor: Colors.black,
-                    );
-                  },
-                  transitionBuilder: (context, suggestionsBox, controller) {
-                    return suggestionsBox;
-                  },
-                  suggestionsCallback: (pattern) {
-                    var curListed = [];
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                        tileColor: Colors.black,
+                      );
+                    },
+                    transitionBuilder: (context, suggestionsBox, controller) {
+                      return suggestionsBox;
+                    },
+                    suggestionsCallback: (pattern) {
+                      var curListed = [];
 
-                    for (var e in companies) {
-                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                        curListed.add(e);
+                      for (var e in companies) {
+                        if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                          curListed.add(e);
+                        }
                       }
-                    }
 
-                    return curListed;
-                  },
-                  textFieldConfiguration: TextFieldConfiguration(
-                      cursorColor: Colors.white,
-                      onChanged: (text){
+                      return curListed;
+                    },
+                    textFieldConfiguration: TextFieldConfiguration(
+                        cursorColor: Colors.white,
+                        onChanged: (text){
 
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.text,
-                      controller: productMaterial?[index],
-                      decoration: const InputDecoration(
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          hintText: "Product Material",
-                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                      )
+                        },
+                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.text,
+                        controller: productMaterial?[index],
+                        decoration: const InputDecoration(
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            hintText: "Product Material",
+                            hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                        )
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.white,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.text,
-                  controller: productCode![index],
-                  decoration: const InputDecoration(
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Product Code",
-                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  const SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.text,
+                    controller: productCode![index],
+                    decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Product Code",
+                        hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20,),
-                TypeAheadFormField(
-                  onSuggestionSelected: (suggestion) {
-                    productName?[index].text = suggestion==null ? "" : suggestion.toString();
-                  },
+                  const SizedBox(height: 20,),
+                  TypeAheadFormField(
+                    onSuggestionSelected: (suggestion) {
+                      productName?[index].text = suggestion==null ? "" : suggestion.toString();
+                    },
 
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                      tileColor: Colors.black,
-                    );
-                  },
-                  transitionBuilder: (context, suggestionsBox, controller) {
-                    return suggestionsBox;
-                  },
-                  suggestionsCallback: (pattern) {
-                    var curListed = [];
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                        tileColor: Colors.black,
+                      );
+                    },
+                    transitionBuilder: (context, suggestionsBox, controller) {
+                      return suggestionsBox;
+                    },
+                    suggestionsCallback: (pattern) {
+                      var curListed = [];
 
-                    for (var e in companies) {
-                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                        curListed.add(e);
+                      for (var e in companies) {
+                        if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                          curListed.add(e);
+                        }
                       }
-                    }
 
-                    return curListed;
-                  },
-                  textFieldConfiguration: TextFieldConfiguration(
-                      cursorColor: Colors.white,
-                      onChanged: (text){
+                      return curListed;
+                    },
+                    textFieldConfiguration: TextFieldConfiguration(
+                        cursorColor: Colors.white,
+                        onChanged: (text){
 
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.text,
-                      controller: productName?[index],
-                      decoration: const InputDecoration(
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          hintText: "Product Name",
-                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                      )
+                        },
+                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.text,
+                        controller: productName?[index],
+                        decoration: const InputDecoration(
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            hintText: "Product Name",
+                            hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                        )
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 20,),
-                TypeAheadFormField(
-                  onSuggestionSelected: (suggestion) {
-                    specifiedProduct?[index].text = suggestion==null ? "" : suggestion.toString();
-                  },
+                  const SizedBox(height: 20,),
+                  TypeAheadFormField(
+                    onSuggestionSelected: (suggestion) {
+                      specifiedProduct?[index].text = suggestion==null ? "" : suggestion.toString();
+                    },
 
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
-                      tileColor: Colors.black,
-                    );
-                  },
-                  transitionBuilder: (context, suggestionsBox, controller) {
-                    return suggestionsBox;
-                  },
-                  suggestionsCallback: (pattern) {
-                    var curListed = [];
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion==null ? "" : suggestion.toString(), style: const TextStyle(color: Colors.white),),
+                        tileColor: Colors.black,
+                      );
+                    },
+                    transitionBuilder: (context, suggestionsBox, controller) {
+                      return suggestionsBox;
+                    },
+                    suggestionsCallback: (pattern) {
+                      var curListed = [];
 
-                    for (var e in companies) {
-                      if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
-                        curListed.add(e);
+                      for (var e in companies) {
+                        if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
+                          curListed.add(e);
+                        }
                       }
-                    }
 
-                    return curListed;
-                  },
-                  textFieldConfiguration: TextFieldConfiguration(
-                      cursorColor: Colors.white,
-                      onChanged: (text){
+                      return curListed;
+                    },
+                    textFieldConfiguration: TextFieldConfiguration(
+                        cursorColor: Colors.white,
+                        onChanged: (text){
 
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.text,
-                      controller: specifiedProduct?[index],
-                      decoration: const InputDecoration(
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          hintText: "Specified Product",
-                          hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
-                      )
+                        },
+                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.text,
+                        controller: specifiedProduct?[index],
+                        decoration: const InputDecoration(
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            hintText: "Specified Product",
+                            hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                        )
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.white,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.text,
-                  controller: proposedProduct![index],
-                  decoration: const InputDecoration(
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Proposed Product",
-                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  const SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.text,
+                    controller: proposedProduct![index],
+                    decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Proposed Product",
+                        hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.white,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.text,
-                  controller: unit![index],
-                  decoration: const InputDecoration(
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Unit",
-                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  const SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.text,
+                    controller: unit![index],
+                    decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Unit",
+                        hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.white,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.text,
-                  controller: quantity![index],
-                  decoration: const InputDecoration(
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Quantity",
-                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  const SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.text,
+                    controller: quantity![index],
+                    decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Quantity",
+                        hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.white,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.text,
-                  controller: price![index],
-                  decoration: const InputDecoration(
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      hintText: "Price",
-                      hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                  const SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.text,
+                    controller: price![index],
+                    decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Price",
+                        hintStyle: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5))
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20,),
+                  const SizedBox(height: 20,),
 
-              ],
-            );
-          },
-          itemCount: selectedProducts!.length,
+                ],
+              );
+            },
+            itemCount: selectedProducts!.length,
+          )
         )
     );
   }

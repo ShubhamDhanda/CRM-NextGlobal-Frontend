@@ -21,31 +21,36 @@ class NavDrawerWidget extends StatelessWidget {
                 iconData: Icons.dashboard,
                 onClick: () => onItemSelected(context, '/admin')
             ),
-            MenuItem(
-              text: "All Requests",
-              iconData: Icons.request_page,
-              onClick: () => onItemSelected(context, '/requests')
-            ),
+            // MenuItem(
+            //   text: "All Requests",
+            //   iconData: Icons.request_page,
+            //   onClick: () => onItemSelected(context, '/requests')
+            // ),
             // MenuItem(
             //     text: "Pending Requests",
             //     iconData: CupertinoIcons.doc_plaintext,
             //     onClick: () => onItemSelected(context, '/pendingRequests')
             // ),
             MenuItem(
+                text: "Employees",
+                iconData: Icons.emoji_people,
+                onClick: () => onItemSelected(context, '/employees')
+            ),
+            MenuItem(
                 text: "Companies",
                 iconData: Icons.workspaces,
                 onClick: () => onItemSelected(context, '/companies')
             ),
             MenuItem(
-                text: "Clients",
+                text: "Contacts",
                 iconData: Icons.people,
                 onClick: () => onItemSelected(context, '/customers')
             ),
-            MenuItem(
-                text: "Budgets",
-                iconData: Icons.work,
-                onClick: () => onItemSelected(context, '/budgets')
-            ),
+            // MenuItem(
+            //     text: "Budgets",
+            //     iconData: Icons.work,
+            //     onClick: () => onItemSelected(context, '/budgets')
+            // ),
             MenuItem(
                 text: "Data Mining",
                 iconData: Icons.local_shipping,
@@ -56,11 +61,7 @@ class NavDrawerWidget extends StatelessWidget {
                 iconData: Icons.account_balance,
                 onClick: () => onItemSelected(context, '/inventory')
             ),
-            MenuItem(
-                text: "Employees",
-                iconData: Icons.emoji_people,
-                onClick: () => onItemSelected(context, '/employees')
-            ),
+
             // MenuItem(
             //     text: "Assets",
             //     iconData: Icons.local_shipping,
@@ -80,6 +81,11 @@ class NavDrawerWidget extends StatelessWidget {
                 text: "Technical Request",
                 iconData: Icons.local_shipping,
                 onClick: () => onItemSelected(context, '/technicalRequest')
+            ),
+            MenuItem(
+                text: "Quotes",
+                iconData: Icons.local_shipping,
+                onClick: () => onItemSelected(context, '/quotes')
             ),
             MenuItem(
                 text: "Data",

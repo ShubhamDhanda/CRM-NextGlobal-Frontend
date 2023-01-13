@@ -7,6 +7,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
 import 'add_people.dart';
+import 'add_product_category.dart';
 
 class AddCompetitorDialog extends StatefulWidget {
   const AddCompetitorDialog({Key? key}) : super(key: key);
@@ -46,11 +47,11 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
 
   var apiClient = RemoteServices();
   List<String> cities = [], categories = [];
-  Map<String, int>  categoryMap = {} ,companyMap = {},productMap = {};
+  Map<String, int>  categoryMap = {} ,companyMap = {},productMap = {},distributorMap = {},personnelMap = {};
   bool dataLoaded = false;
-  List<String> companies = [];
+  List<String> companies = [],distributors = [];
   List<String> contacts = [],products = [],
-  selectedProducts = [];
+  selectedProducts = [] ,personnel = [];
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
       dynamic res = await apiClient.getAllProducts();
       dynamic res1 = await apiClient.getProductCategory();
       dynamic res2 = await apiClient.getAllCompanyNames();
+      dynamic res3 = await apiClient.getAllDistributors();
 
       if (res?["success"]==true&&res1?["success"]==true&& res2?["success"]) {
         for (var e in res["res"]) {
@@ -80,7 +82,13 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
 
         for(var e in res2["res"]){
           companies.add(e["Name"]);
+
           companyMap[e["Name"]] = e["ID"];
+        }
+        for(var e in res3["res"]){
+          print(1);
+          distributors.add(e["Full_Name"]);
+          distributorMap[e["Full_Name"]] = e["ID"];
         }
       } else {
         throw "Negative";
@@ -107,7 +115,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
 
       if (validate() == true) {
 
-        dynamic res = await apiClient.addCompetitor(companyMap[companyController.text], categoryMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributedBy.text,keyPersonnel.text);
+        dynamic res = await apiClient.addCompetitor(companyMap[companyController.text], categoryMap[category.text], product.text,approxSales.text, geographicalCoverage.text,distributorMap[distributedBy.text],personnelMap[keyPersonnel.text]);
         if(res?["success"]==true) {
         // if(true) {
           Navigator.pop(context);
@@ -129,6 +137,32 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
     }
   }
 
+
+  void _getCompanyData() async {
+    try{
+      setState(() {
+        dataLoaded = false;
+      });
+      double price = 0;
+      dynamic res1 = await apiClient.getAllKeyPersonnel(companyMap[companyController.text]);
+      personnel.clear();
+      for (var e in res1["res"]) {
+        personnel.add(e["Full_Name"]);
+        personnelMap[e["Full_Name"]] = e["ID"];
+
+      }
+
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    } finally{
+      setState(() {
+        dataLoaded = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+  }
 
   bool validate() {
     if(companyController.text=="" || category.text=="" || approxSales.text=="" ){
@@ -199,6 +233,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
                 } else {
                   companyController.text = suggestion.toString();
                   // companyId = companyMap[companyName.text];
+                  _getCompanyData();
                 }
               }
               // companyController.text = suggestion==null ? "" : suggestion.toString();
@@ -242,9 +277,39 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
           const SizedBox(height: 20,),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion != null) {
-                category.text = suggestion.toString();
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add New Category") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddCategoryDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  category.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
               }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
@@ -256,7 +321,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add New Category"];
 
 
               for (var e in categories) {
@@ -313,6 +378,15 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
             // },
             popupProps: const PopupPropsMultiSelection.menu(
                 showSelectedItems: true,
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                    decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                        hintText: "Products",
+                        hintStyle: TextStyle(color: Color.fromRGBO(0, 0, 0, 0.3))
+                    )
+                ),
                 menuProps: MenuProps(
                   backgroundColor: Colors.white,
                 )
@@ -397,11 +471,10 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
                       pageBuilder: (context, animation, secondaryAnimation) =>
                       const AddPeopleDialog()).then((value){
                     if(value! == true){
-                      _getData();
                     }
                   });
                 } else {
-                  distributedBy.text = suggestion.toString();
+                  keyPersonnel.text = suggestion.toString();
                   // companyId = companyMap[companyName.text];
                 }
               }
@@ -419,7 +492,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
             suggestionsCallback: (pattern) {
               var curList = ["+Add New Client"];
 
-              for (var e in contacts) {
+              for (var e in personnel) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                   curList.add(e);
                 }
@@ -491,7 +564,7 @@ class _AddCompetitorDialogState extends State<AddCompetitorDialog> {
             suggestionsCallback: (pattern) {
               var curList = ["+Add New Client"];
 
-              for (var e in contacts) {
+              for (var e in distributors) {
                 if(e.toString().toLowerCase().startsWith(pattern.toLowerCase())){
                   curList.add(e);
                 }

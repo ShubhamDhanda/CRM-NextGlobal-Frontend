@@ -5,7 +5,9 @@ class Constants {
       "373756743234-du2ljnfisg6vnr6pucjcq7vhrruhg4tv.apps.googleusercontent.com";
   // static String baseURL = "http://192.168.54.150:8080";
   // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
-  static String baseURL = "http://192.168.1.2:8080";
+  // static String baseURL = "http://conceptdashcrm-env.eba-bjgvjq2h.ca-central-1.elasticbeanstalk.com/";
+  // static String baseURL = "http://192.168.1.2:8080";
+  static String baseURL = "https://ng-api.conceptdash.ca";
   static String login = "/api/login";
 
   static String suppliersDashboard = "/api/getDashboard/suppliers";
@@ -24,6 +26,7 @@ class Constants {
   static String getAllTechnicalRequest = "/api/get/technicalRequest";
   static String getAllDataMining = "/api/get/list/dataMining";
   static String getProductCategory = "/api/get/list/productCategory";
+  static String getAllKeyPersonnel = "/api/get/list/keyPersonnel";
 
   static String getAllRFP = "/api/get/rfp";
   static String getAllBudgets = "/api/get/budgets";
@@ -53,6 +56,7 @@ class Constants {
   static String getAllTakeoffItems = "/api/get/list/takeoffItems";
   static String getAllInventory = "/api/get/list/inventory";
   static String getTransactionTypes = "/api/get/list/transactionTypes";
+  static String getQuotes = "/api/get/list/quote";
 
   static String addEmployee = "/api/add/employee";
   static String addContact = "/api/add/contact";
@@ -74,6 +78,9 @@ class Constants {
   static String addTakeoff = "/api/add/takeoff";
   static String addInventory = "/api/add/inventory";
   static String addTechnicalRequest = "/api/add/technicalRequest";
+  static String addProductCategory = "/api/add/productCategory";
+  static String addEmployeeDepartment = "/api/add/employeeDepartment";
+  static String addQuote = "/api/add/quote";
 
   static String updateCustomer = "/api/update/client";
   static String updateCompany = "/api/update/company";
@@ -88,6 +95,7 @@ class Constants {
   static String updateTakeoff = "/api/update/takeoff";
   static String updateInventory = "/api/update/inventory";
   static String updateTechnicalRequest = "/api/update/technicalRequest";
+  static String updateQuote = "/api/update/quote";
 
   static List<String> cities = <String>[
     "Airdrie",

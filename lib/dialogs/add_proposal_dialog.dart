@@ -321,6 +321,7 @@ class _AddProposalDialogState extends State<AddProposalDialog> {
             onSuggestionSelected: (suggestion) {
               projectController.text = suggestion==null ? "" : suggestion.toString();
               RFPId = projectsMap[projectController.text];
+
               _getBudgetData();
             },
 

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
+import 'add_product_category.dart';
+
 class AddProductDialog extends StatefulWidget {
   const AddProductDialog({Key? key}) : super(key: key);
 
@@ -208,9 +210,39 @@ class _AddProductDialogState extends State<AddProductDialog> {
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion != null) {
-                category.text = suggestion.toString();
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add New Category") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddCategoryDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  category.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
               }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
@@ -222,7 +254,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add New Category"];
 
 
               for (var e in categories) {

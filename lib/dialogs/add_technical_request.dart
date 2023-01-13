@@ -1,3 +1,4 @@
+import 'package:crm/dialogs/add_employee_department.dart';
 import 'package:crm/services/constants.dart';
 import 'package:crm/services/remote_services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
+import 'add_product_category.dart';
 import 'add_takeoff_dialog.dart';
 
 class AddTechnicalRequestDialog extends StatefulWidget {
@@ -327,9 +329,39 @@ class _AddTechnicalRequestDialogState extends State<AddTechnicalRequestDialog> {
           ),
           TypeAheadFormField(
             onSuggestionSelected: (suggestion) {
-              if(suggestion != null) {
-                requestTo.text = suggestion.toString();
+              if (suggestion != null) {
+                if (suggestion.toString() == "+ Add Employee Department") {
+                  showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration(milliseconds: 500),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AddDepartmentDialog()).then((value){
+                    if(value! == true){
+                      _getData();
+                    }
+                  });
+                } else {
+                  requestTo.text = suggestion.toString();
+                  // companyId = companyMap[companyName.text];
+                }
               }
+              // companyController.text = suggestion==null ? "" : suggestion.toString();
+              // companyId = employeeMap[companyController.text];
             },
             itemBuilder: (context, suggestion) {
               return ListTile(
@@ -341,7 +373,7 @@ class _AddTechnicalRequestDialogState extends State<AddTechnicalRequestDialog> {
               return suggestionsBox;
             },
             suggestionsCallback: (pattern) {
-              var curList = [];
+              var curList = ["+ Add Employee Department"];
 
 
               for (var e in departments) {

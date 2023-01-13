@@ -8,25 +8,27 @@ import 'package:flutter/material.dart';
 import '../dialogs/filter_competitor_dialog.dart';
 import '../dialogs/update_competitor_dialog.dart';
 import '../dialogs/update_inventory_dialog.dart';
+import '../dialogs/update_quote_dialog.dart';
 import '../dialogs/update_technical_request.dart';
 
-class TechnicalRequest extends StatefulWidget{
-  const TechnicalRequest({super.key});
+class Quotes extends StatefulWidget{
+  const Quotes({super.key});
 
   @override
-  State<StatefulWidget> createState() => _TechnicalRequestState();
+  State<StatefulWidget> createState() => _QuotesState();
 }
 
-class _TechnicalRequestState extends State<TechnicalRequest>{
+class _QuotesState extends State<Quotes>{
   TextEditingController searchController = TextEditingController();
   var apiClient = RemoteServices();
-  bool dataLoaded = false,filtersLoaded = false;
+  bool dataLoaded = false,filtersLoaded =
+  false;
   final snackBar1 = const SnackBar(
     content: Text('Something Went Wrong'),
     backgroundColor: Colors.red,
   );
 
-  List<Map<String, dynamic>> requests = [];
+  List<Map<String, dynamic>> quotes = [];
   // List<String> inventories = [];
   List<Map<String, dynamic>> filtered = [];
   List<Map<String, dynamic>> search = [];
@@ -41,52 +43,44 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
   }
 
   void _getData() async {
+    try{
     setState(() {
       dataLoaded = false;
     });
-    dynamic res = await apiClient.getAllTechnicalRequest();
-    dynamic res1 = await apiClient.getAllEmployeeNames();
-    requests.clear();
+    dynamic res = await apiClient.getQuotes();
+    // dynamic res1 = await apiClient.getAllEmployeeNames();
+    quotes.clear();
     search.clear();
     filtered.clear();
+      // for(var e in res1["res"]) {
+      //   employeeMap[e["Employee_ID"]] = e["Full_Name"];
+      //
+      // }
+    for (var i = 0; i < res["res"].length; i++) {
+      var e = res["res"][i];
 
-    if(res?["success"] == true&&res1?["success"]==true){
-      for(var e in res1["res"]) {
-        employeeMap[e["Employee_ID"]] = e["Full_Name"];
-
-      }
-      for (var i = 0; i < res["res"].length; i++) {
-        var e = res["res"][i];
-
-        Map<String, dynamic> mp = {};
-        mp["trId"] = e["TR_ID"]==null?"":e["TR_ID"].toString();
-        mp["requestedBy"] = e["Full_Name"]==null?"":e["Full_Name"];
-        mp["projectName"] = e["Project_Name"]==null ?"":e["Project_Name"].toString();
-        mp["requestTo"] = e["Department"]==null?"":e["Department"];
-        mp["requestDate"] = e["Request_Date"]==null?"":e["Request_Date"];
-        mp["revision"] = e["Revision"]==null?"":e["Revision"];
-        mp["revisionReason"] = e["Revision_Reason"]==null?"":e["Revision_Reason"];
-        mp["returnBy"] = e["Return_By"]==null?"":e["Return_By"];
-        mp["designReceived"] = e["Design_Received"]==null?"":e["Design_Received"];
-
-
-        requests.add(mp);
-      }
-
-
-
-      search.addAll(requests);
-      filtered.addAll(requests);
-    }else {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+      Map<String, dynamic> mp = {};
+      mp["quoteId"] = e["Quote_ID"]==null?"":e["Quote_ID"].toString();
+      mp["projectName"] = e["Project_Name"]==null?"":e["Project_Name"];
+      mp["client"] = e["Clients"]==null?"":e["Clients"];
+      mp["total"] = e["Total_Price"]==null?"":e["Total_Price"].toString();
+      quotes.add(mp);
     }
-    setState(() {
-      dataLoaded = true;
-    });
+    search.addAll(quotes);
+    filtered.addAll(quotes);
+    }catch(e) {
+  print(e);
+  ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+  }finally{
+  setState(() {
+  dataLoaded = true;
+  });
 
-    await Future.delayed(Duration(seconds: 2));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  await Future.delayed(Duration(seconds: 2));
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
+}
+
   void _getFilters() async {
     try{
       setState(() {
@@ -138,12 +132,12 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
   Widget build(context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Technical Request"),
+          title: Text("Quotes"),
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
           backgroundColor: Colors.black,
         ),
         drawer: const NavDrawerWidget(
-          name: '/technicalRequest',
+          name: '/quotes',
         ),
         body: dashboard());
   }
@@ -177,7 +171,7 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
                     child: search.isEmpty
                         ? const Center(
                       child: Text(
-                        "No Inventory Found",
+                        "No Quotes Found",
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -256,9 +250,9 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
             // cat = value as List<String>;
             // print(cat);
             if(selectedCat.isEmpty){
-              filtered.addAll(requests);
+              filtered.addAll(quotes);
             }else{
-              requests.forEach((e) {
+              quotes.forEach((e) {
                 if(selectedCat.contains(e["requestTo"])){
                   filtered.add(e);
                 }
@@ -288,7 +282,7 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
     return Card(
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: Container(
-        height: 235,
+        height: 130,
         width: MediaQuery.of(context).size.width - 20,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -305,14 +299,14 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Request ID : ",
+                      "Quote ID : ",
                       style: TextStyle(
                           color: Color.fromRGBO(134, 97, 255, 1),
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      mp["trId"].toString(),
+                      mp["quoteId"].toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -338,7 +332,7 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
                             );
                           },
                           pageBuilder: (context, animation, secondaryAnimation) =>
-                              updateTechnicalRequestDialog(
+                              updateQuoteDialog(
                                 mp: mp,
                               )).then((value) {
                         if(value! == true){
@@ -379,75 +373,14 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Requested By : ",
+                    "Clients : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["requestedBy"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     const Text(
-              //       "Transaction Created Date : ",
-              //       style: TextStyle(
-              //           color: Color.fromRGBO(134, 97, 255, 1),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold),
-              //     ),
-              //     Text(
-              //       mp["transactionCreatedDate"],
-              //       style: const TextStyle(color: Colors.white, fontSize: 18),
-              //     ),
-              //   ],
-              // ),
-              // const SizedBox(
-              //   height: 5,
-              // ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     const Text(
-              //       "Project : ",
-              //       style: TextStyle(
-              //           color: Color.fromRGBO(134, 97, 255, 1),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.bold),
-              //     ),
-              //     Flexible(fit: FlexFit.loose,child: Text(
-              //       mp["projectId"],
-              //       style: const TextStyle(color: Colors.white, fontSize: 16),
-              //       softWrap: false,
-              //       overflow: TextOverflow.fade,
-              //     ),)
-              //   ],
-              // ),
-              // const SizedBox(
-              //   height: 5,
-              // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Request To : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["requestTo"],
+                    mp["client"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -461,14 +394,14 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Text(
-                    "Revision: ",
+                    "Total Price : ",
                     style: TextStyle(
                         color: Color.fromRGBO(134, 97, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Flexible(fit: FlexFit.loose,child: Text(
-                    mp["revision"],
+                    mp["total"],
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     softWrap: false,
                     overflow: TextOverflow.fade,
@@ -478,48 +411,7 @@ class _TechnicalRequestState extends State<TechnicalRequest>{
               const SizedBox(
                 height: 5,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Return By : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["returnBy"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Design Received : ",
-                    style: TextStyle(
-                        color: Color.fromRGBO(134, 97, 255, 1),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Flexible(fit: FlexFit.loose,child: Text(
-                    mp["designReceived"],
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                  ),)
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
+
             ],
           ),
         ),

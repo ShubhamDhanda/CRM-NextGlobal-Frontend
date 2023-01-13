@@ -6,6 +6,7 @@ import 'package:crm/dialogs/add_competitor_dialog.dart';
 import 'package:crm/dialogs/add_employee_dialog.dart';
 import 'package:crm/dialogs/add_people.dart';
 import 'package:crm/dialogs/add_project_dialog.dart';
+import 'package:crm/dialogs/add_quote_dialog.dart';
 import 'package:crm/dialogs/add_rfp_dialog.dart';
 import 'package:crm/dialogs/add_technical_request.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +104,7 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
         ),
         SizedBox(
           width: double.maxFinite,
-          height: 582,
+          height: 472,
           child: TabBarView(
             controller: tabController,
             children: [requests(), forms()],
@@ -131,17 +132,18 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
             children: [
               requestCard(text: "Add Company", onClick: () => onRequest(0)),
               requestCard(text: "Add Employee", onClick: () => onRequest(1)),
-              requestCard(text: "Add Project", onClick: () => onRequest(2)),
+              // requestCard(text: "Add Project", onClick: () => onRequest(2)),
               requestCard(text: "Add Budget", onClick: () => onRequest(3)),
-              requestCard(text: "Add RFP", onClick: () => onRequest(4)),
+              // requestCard(text: "Add RFP", onClick: () => onRequest(4)),
               requestCard(text: "Add Client", onClick: () => onRequest(5)),
               requestCard(text: "Add Order", onClick: () => onRequest(6)),
-              requestCard(text: "Add Proposal", onClick: () => onRequest(7)),
+              // requestCard(text: "Add Proposal", onClick: () => onRequest(7)),
               requestCard(text: "Add Competitor", onClick: () => onRequest(8)),
               requestCard(text: "Add Product", onClick: () => onRequest(9)),
               requestCard(text: "Add TakeOff", onClick: () => onRequest(10)),
               requestCard(text: "Add Inventory", onClick: () => onRequest(11)),
               requestCard(text: "Add Technical Request", onClick: () => onRequest(12)),
+              requestCard(text: "Add Quote ", onClick: () => onRequest(13)),
 
               // requestCard(text: "Track Shipment", onClick: () => onRequest(11)),
               // requestCard(text: "New Design request", onClick: () => onRequest(12)),
@@ -524,6 +526,27 @@ class _AddDataState extends State<AddData> with TickerProviderStateMixin {
             },
             pageBuilder: (context, animation, secondaryAnimation) =>
             const AddTechnicalRequestDialog());
+        break;
+      case 13:
+        showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            const AddQuoteDialog());
         break;
     }
   }
